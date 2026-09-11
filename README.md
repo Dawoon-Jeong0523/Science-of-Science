@@ -29,11 +29,9 @@ MAG/SciSciNet. The pipelines below supersede them.
 
 Tracked: notebooks, the `*_common.py` data layers, SLURM job scripts under
 `jobs/`, per-pipeline `Readme.txt` files, validation figures, the metrics
-dashboard, the OpenAlex schema CSVs at the root, and a handful of tiny summary
-parquets (`*_feg_disruption_trend`, `*_disruption_trend_summary`,
-`*_disruption_compare`).
+dashboard, and the OpenAlex schema CSVs at the root.
 
-Not tracked (see `.gitignore`): every metric output parquet, every cache
+Not tracked (see `.gitignore`): every parquet file, every cache
 (`cache/`, `*.npz`), the raw-data mirrors (`PatentView/Granted`,
 `PatentView/Pregranted`, `PATSTAT/raw`), the large CSV and GML inputs, SLURM
 logs, and the `Atypicality/` analysis folder. The full tree on Midway is about

@@ -1,9 +1,9 @@
 # ------------------------------------------------------------------------------
 # Science of Science -- what stays out of git
 #
-# The repository tracks CODE and small reference tables: notebooks, *_common.py
-# modules, SLURM job scripts, per-pipeline Readme.txt files, validation figures.
-# Bulk data lives on Midway only (/project/jevans/Dawoon/Science of Science).
+# The repository tracks CODE only: notebooks, *_common.py modules, SLURM job
+# scripts, per-pipeline Readme.txt files, validation figures. No parquet file
+# is ever committed. Data lives on Midway only (/project/jevans/Dawoon/Science of Science).
 # Everything under the headings below is rebuildable from the notebooks or is a
 # raw-data mirror, and most of it is far above GitHub's 100 MB per-file limit.
 # ------------------------------------------------------------------------------
@@ -41,11 +41,6 @@ PatentView/Pregranted/
 *.csv
 !openalex_2026_*.csv
 !OpenAlex/Abstract data/*.csv
-
-# --- Small summary tables that ARE committed (all under ~1 MB) ----------------
-!**/output/*_feg_disruption_trend.parquet
-!**/output/*_disruption_trend_summary.parquet
-!**/output/*_disruption_compare.parquet
 
 # --- SLURM logs and run artefacts --------------------------------------------
 **/logs/
