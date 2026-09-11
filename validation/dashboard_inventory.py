@@ -33,6 +33,23 @@ CANONICAL_TABLES = {
             "z_score_pair.parquet",
         ),
     ),
+    # The same paper metrics on the Dimensions June 2025 index. Atypicality has been
+    # written for the 1990-2000 partition only, so that partition is the canonical file
+    # here (there is no merged paper_z_score.parquet to represent it).
+    "Dimensions": (
+        "dimension",
+        (
+            "paper_author.parquet",
+            "paper_citation.parquet",
+            "paper_citation_trend.parquet",
+            "paper_disruption.parquet",
+            "paper_hit_probability.parquet",
+            "paper_metadata.parquet",
+            "paper_sb.parquet",
+            "paper_z_score_1990_2000.parquet",
+            "z_score_pair_1990_2000.parquet",
+        ),
+    ),
     "PatentView": (
         "patent",
         (
@@ -78,6 +95,13 @@ GRAINS = {
         "One work_id with ordered, deduplicated author IDs and team_size."
     ),
     "paper_team_size.parquet": "One paper_id with a legacy team_size value.",
+    "paper_z_score_1990_2000.parquet": (
+        "One publication with journal-pair atypicality scores; 1990-2000 partition "
+        "only, no merged corpus-wide file yet."
+    ),
+    "z_score_pair_1990_2000.parquet": (
+        "One journal pair per cohort year; 1990-2000 partition only."
+    ),
     "patent_reference.parquet": (
         "One distinct (citing_id, cited_id, type) reference; grant_id identifies "
         "the granted cited endpoint."
@@ -240,7 +264,7 @@ def _ppp_provenance(root: Path, files: list[dict]) -> dict:
 
 
 def build_inventory(source_root: Path) -> dict:
-    """Return JSON-serializable metadata for the 34 canonical derived tables.
+    """Return JSON-serializable metadata for the canonical derived tables (43 as of 2026-09-11).
 
     Raises FileNotFoundError for a missing canonical file and RuntimeError if a
     file changes during its footer read. Rows are stored records, not unique

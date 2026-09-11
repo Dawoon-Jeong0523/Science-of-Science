@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "source_project": "Science of Science",
-  "generated_utc": "2026-09-07T02:45:27.131191Z",
+  "generated_utc": "2026-09-11T23:05:18.104774Z",
   "method": "Parquet footers and filesystem metadata only for table inventories; small provenance JSON and run logs for provenance. No table data pages or large raw inputs are scanned.",
   "count_unit": "Stored rows across derived tables; not unique documents.",
   "files": [
@@ -628,6 +628,652 @@
         1980,
         2020
       ]
+    },
+    {
+      "path": "Dimensions/output/paper_author.parquet",
+      "family": "dimension",
+      "rows": 142431518,
+      "bytes": 4817487393,
+      "columns": [
+        "paper_id",
+        "author_list",
+        "team_size",
+        "n_resolved",
+        "first_author",
+        "last_author",
+        "corresponding_author",
+        "countries",
+        "n_countries"
+      ],
+      "schema": [
+        {
+          "name": "paper_id",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "author_list",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "team_size",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "n_resolved",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "first_author",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "last_author",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "corresponding_author",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "countries",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "n_countries",
+          "type": "int32",
+          "nullable": true
+        }
+      ],
+      "row_groups": 143,
+      "modified_utc": "2026-09-07T17:08:58.593994Z",
+      "grain": "One work_id with ordered, deduplicated author IDs and team_size.",
+      "provenance": "OpenAlex/notebook/paper_author.ipynb"
+    },
+    {
+      "path": "Dimensions/output/paper_citation.parquet",
+      "family": "dimension",
+      "rows": 155441856,
+      "bytes": 1293135646,
+      "columns": [
+        "paper_id",
+        "C_3",
+        "C_5",
+        "C_10",
+        "C_all"
+      ],
+      "schema": [
+        {
+          "name": "paper_id",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "C_3",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_5",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_10",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_all",
+          "type": "int64",
+          "nullable": true
+        }
+      ],
+      "row_groups": 149,
+      "modified_utc": "2026-09-07T19:27:21.664388Z",
+      "grain": "One document."
+    },
+    {
+      "path": "Dimensions/output/paper_citation_trend.parquet",
+      "family": "dimension",
+      "rows": 577326798,
+      "bytes": 1991703815,
+      "columns": [
+        "paper_id",
+        "pub_year",
+        "cite_year",
+        "yrs_since_pub",
+        "p2p",
+        "pat2p",
+        "pat2p_us"
+      ],
+      "schema": [
+        {
+          "name": "paper_id",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "pub_year",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "cite_year",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "yrs_since_pub",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "p2p",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "pat2p",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "pat2p_us",
+          "type": "int64",
+          "nullable": true
+        }
+      ],
+      "row_groups": 551,
+      "modified_utc": "2026-09-09T03:51:23.562566Z",
+      "grain": "One document per citing year."
+    },
+    {
+      "path": "Dimensions/output/paper_disruption.parquet",
+      "family": "dimension",
+      "rows": 155441856,
+      "bytes": 5021613369,
+      "columns": [
+        "paper_id",
+        "CD_3",
+        "F_3",
+        "E_3",
+        "G_3",
+        "ni_3",
+        "nj_3",
+        "nk_3",
+        "CD_5",
+        "F_5",
+        "E_5",
+        "G_5",
+        "ni_5",
+        "nj_5",
+        "nk_5",
+        "CD_10",
+        "F_10",
+        "E_10",
+        "G_10",
+        "ni_10",
+        "nj_10",
+        "nk_10",
+        "CD_all",
+        "F_all",
+        "E_all",
+        "G_all",
+        "ni_all",
+        "nj_all",
+        "nk_all"
+      ],
+      "schema": [
+        {
+          "name": "paper_id",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "CD_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "F_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "E_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "G_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "ni_3",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "nj_3",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "nk_3",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "CD_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "F_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "E_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "G_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "ni_5",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "nj_5",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "nk_5",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "CD_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "F_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "E_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "G_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "ni_10",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "nj_10",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "nk_10",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "CD_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "F_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "E_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "G_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "ni_all",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "nj_all",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "nk_all",
+          "type": "int32",
+          "nullable": true
+        }
+      ],
+      "row_groups": 149,
+      "modified_utc": "2026-09-08T14:27:33.780810Z",
+      "grain": "One document."
+    },
+    {
+      "path": "Dimensions/output/paper_hit_probability.parquet",
+      "family": "dimension",
+      "rows": 119043976,
+      "bytes": 1369793971,
+      "columns": [
+        "paper_id",
+        "FoS",
+        "year",
+        "pctl_c3",
+        "pctl_c5",
+        "pctl_c10",
+        "pctl_call"
+      ],
+      "schema": [
+        {
+          "name": "paper_id",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "FoS",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "year",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "pctl_c3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_c5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_c10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_call",
+          "type": "float",
+          "nullable": true
+        }
+      ],
+      "row_groups": 114,
+      "modified_utc": "2026-09-07T20:07:28.197842Z",
+      "grain": "One document."
+    },
+    {
+      "path": "Dimensions/output/paper_metadata.parquet",
+      "family": "dimension",
+      "rows": 155507994,
+      "bytes": 5215749612,
+      "columns": [
+        "paper_id",
+        "year",
+        "doctype",
+        "doc_class",
+        "is_citable",
+        "ref_count",
+        "journal",
+        "is_journal",
+        "source_id",
+        "author_list",
+        "team_size",
+        "FoS_0",
+        "FoS_rep",
+        "for_division_codes",
+        "for_group_codes",
+        "cited_by_count",
+        "citations_count",
+        "doi"
+      ],
+      "schema": [
+        {
+          "name": "paper_id",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "year",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "doctype",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "doc_class",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "is_citable",
+          "type": "bool",
+          "nullable": true
+        },
+        {
+          "name": "ref_count",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "journal",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "is_journal",
+          "type": "bool",
+          "nullable": true
+        },
+        {
+          "name": "source_id",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "author_list",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "team_size",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "FoS_0",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "FoS_rep",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "for_division_codes",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "for_group_codes",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "cited_by_count",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "citations_count",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "doi",
+          "type": "string",
+          "nullable": true
+        }
+      ],
+      "row_groups": 156,
+      "modified_utc": "2026-09-07T17:16:31.731452Z",
+      "grain": "One document."
+    },
+    {
+      "path": "Dimensions/output/paper_sb.parquet",
+      "family": "dimension",
+      "rows": 83849678,
+      "bytes": 747674919,
+      "columns": [
+        "paper_id",
+        "SB_B",
+        "SB_T",
+        "n_cite"
+      ],
+      "schema": [
+        {
+          "name": "paper_id",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "SB_B",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "SB_T",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "n_cite",
+          "type": "int64",
+          "nullable": true
+        }
+      ],
+      "row_groups": 80,
+      "modified_utc": "2026-09-09T03:33:28.071214Z",
+      "grain": "One document."
+    },
+    {
+      "path": "Dimensions/output/paper_z_score_1990_2000.parquet",
+      "family": "dimension",
+      "rows": 6193175,
+      "bytes": 184582361,
+      "columns": [
+        "paper_id",
+        "Z_median",
+        "Z_10pct",
+        "Z_min",
+        "n_pairs"
+      ],
+      "schema": [
+        {
+          "name": "paper_id",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "Z_median",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "Z_10pct",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "Z_min",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "n_pairs",
+          "type": "int64",
+          "nullable": true
+        }
+      ],
+      "row_groups": 6,
+      "modified_utc": "2026-09-09T10:15:06.744524Z",
+      "grain": "One publication with journal-pair atypicality scores; 1990-2000 partition only, no merged corpus-wide file yet."
+    },
+    {
+      "path": "Dimensions/output/z_score_pair_1990_2000.parquet",
+      "family": "dimension",
+      "rows": 34061836,
+      "bytes": 297519947,
+      "columns": [
+        "code_1",
+        "code_2",
+        "year",
+        "Z_score"
+      ],
+      "schema": [
+        {
+          "name": "code_1",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "code_2",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "year",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "Z_score",
+          "type": "double",
+          "nullable": true
+        }
+      ],
+      "row_groups": 33,
+      "modified_utc": "2026-09-09T10:15:09.225492Z",
+      "grain": "One journal pair per cohort year; 1990-2000 partition only."
     },
     {
       "path": "PatentView/output/patent_citation.parquet",
@@ -3278,10 +3924,12 @@
       "grain": "One document."
     }
   ],
-  "total_files": 34,
-  "total_rows": 3336548060,
-  "total_bytes": 39726570504,
+  "total_files": 43,
+  "total_rows": 4765846747,
+  "total_bytes": 60665831537,
   "excluded_files": [
+    "OpenAlex/output/paper_disruption_trend.parquet",
+    "OpenAlex/output/paper_disruption_trend_summary.parquet",
     "OpenAlex/output/paper_z_score_1980_1984.parquet",
     "OpenAlex/output/paper_z_score_1985_1989.parquet",
     "OpenAlex/output/paper_z_score_1990_2000.parquet",
@@ -3319,7 +3967,10 @@
     "PatentView/output/patent_citation.parquet.partial-granted-only",
     "PatentView/output/patent_citation_trend_old.parquet",
     "PatentView/output/patent_disruption.parquet.pre-dedup",
-    "PatentView/output/patent_hit_probability_old.parquet"
+    "PatentView/output/patent_disruption_trend.parquet",
+    "PatentView/output/patent_disruption_trend_summary.parquet",
+    "PatentView/output/patent_hit_probability_old.parquet",
+    "PatentView/output/patent_uniqueC_trend.parquet"
   ],
   "excluded_datasets": [
     {
