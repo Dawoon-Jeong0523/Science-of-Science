@@ -1,0 +1,405 @@
+"""Data layer for the paper-metric notebooks, on renli's OpenAlex snapshot.
+
+The notebooks were written against MAG + SciSciNet on a Windows drive: a single
+`PaperReferences.txt`, a `paper_metadata.sqlite`, `Journals.txt`, and integer MAG paper ids.
+None of that exists here. This module supplies the same four things from
+`/project/jevans/renli_shared/OpenAlex_2026_Jan_16_Renly_parquet/`, so the metric kernels in
+the notebooks — the numba disruption engine, the SB kernel, the Uzzi shuffle, the vectorised
+citation counts — run **unchanged**.
+
+The one idea that makes that possible: an OpenAlex work id is `W` followed by digits, and the
+largest in this snapshot is ~7.1e9. `int(id[1:])` therefore round-trips through int64, and the
+notebooks' whole code-space machinery (a sorted `uni_mag`, `searchsorted` to map id -> code,
+`'W' + str(code)` to map back) keeps working with the accession number standing in for the MAG
+integer. Nothing about the algorithms changes; only where the numbers come from.
+
+    import oa_common as oa
+    oa.build_graph()      # referenced_works -> edges + years, cached as .npz
+    oa.build_csr()        # -> out/in adjacency, cached
+"""
+from __future__ import annotations
+
+import gc
+import glob
+import gzip
+import os
+import time
+
+import numpy as np
+import pandas as pd
+import pyarrow.parquet as pq
+
+# ── Where everything lives ────────────────────────────────────────────────────────────────
+ROOT   = "/project/jevans/renli_shared/OpenAlex_2026_Jan_16_Renly_parquet"   # read-only
+WORKS  = f"{ROOT}/works"
+BASE   = "/project/jevans/Dawoon/Science of Science/OpenAlex"
+CACHE  = f"{BASE}/cache"                       # our derived artefacts; renli's tree is read-only
+OUT    = f"{BASE}/output"          # every notebook writes its parquet here
+for _d in (CACHE, OUT):
+    os.makedirs(_d, exist_ok=True)
+
+GRAPH_NPZ = f"{CACHE}/paper_graph.npz"         # was E:/…/paper_disruption_graph.npz
+CSR_NPZ   = f"{CACHE}/paper_csr.npz"           # was E:/…/paper_disruption_csr.npz
+JOURNAL_PQ = f"{CACHE}/paper_journal.parquet"  # was Journals.txt + sqlite
+FOS_PQ     = f"{CACHE}/paper_fos.parquet"      # was sciscinet_papers_fos.parquet
+
+# ── The consolidated edge table ───────────────────────────────────────────────────────────
+# notebook/referenced_works_w_year.ipynb writes these two, and everything below prefers them
+# to walking renli's tree again:
+#   MAP_NPZ  one row per work: code, year, source     (396M works, ~7 GB)
+#   REF_PQ   one row per edge: both ids, both years, both source ids  (~1.78B edges)
+# The map carries what four separate passes over works/, primary_locations/ and locations/
+# used to produce, and the edge table carries the join that used to be redone per notebook.
+MAP_NPZ = f"{CACHE}/work_year_source_map.npz"
+REF_PQ  = f"{OUT}/referenced_works_w_year"
+
+
+def have_consolidated() -> bool:
+    return os.path.exists(MAP_NPZ) and bool(glob.glob(f"{REF_PQ}/part_*.parquet"))
+
+
+def load_map():
+    """code (sorted int64), year (int16, -1 = unknown), source (int64, -1 = none).
+
+    Built by referenced_works_w_year.ipynb. This is the authoritative per-work table: every
+    work in the snapshot, whether or not it has an edge."""
+    if not os.path.exists(MAP_NPZ):
+        raise SystemExit(
+            f"{MAP_NPZ} is missing.\n"
+            f"        Run notebook/referenced_works_w_year.ipynb first — it builds the map "
+            f"and the edge table that everything else now reads.")
+    z = np.load(MAP_NPZ)
+    return z["code"], z["year"], z["source"]
+
+
+def ref_parts():
+    return sorted(glob.glob(f"{REF_PQ}/part_*.parquet"))
+
+# Patent->paper citations, for paper_citation_trend. Unchanged in kind, moved on disk.
+PCS     = "/project/jevans/Dawoon/Drug_Data/Data/_pcs_oa.csv"
+GPATENT = "/project/jevans/Dawoon/PatentView/Granted/g_patent.tsv.zip"
+
+# Scope. The full snapshot is ~396M works and ~2.2B reference edges; the graph arrays alone
+# are ~30 GB, so the default keeps every work but the cache build needs a big-memory node.
+# Narrowing YEAR_RANGE is the knob that makes this run somewhere smaller — it is applied when
+# the graph is built, so everything downstream inherits it.
+YEAR_MIN, YEAR_MAX = 1800, 2026
+YEAR_RANGE = None          # e.g. (1950, 2026); None = no filter beyond YEAR_MIN/MAX
+
+
+# ── Ids ───────────────────────────────────────────────────────────────────────────────────
+def norm_id(s: pd.Series) -> pd.Series:
+    """Bare accession from either form.
+
+    `works_semantic`, `works_au_affs_fixed` and `works_authorships` store the full URL
+    (`https://openalex.org/W…`); every other table stores `W…`. Joining the two forms returns
+    zero rows and raises nothing, so normalise on the way in, always."""
+    return s.astype(str).str.rsplit("/", n=1).str[-1]
+
+
+def id_to_code(s: pd.Series) -> np.ndarray:
+    """`W3002427681` -> 3002427681 as int64. Invalid ids become -1."""
+    t = norm_id(s).str.extract(r"^W(\d+)$", expand=False)
+    return pd.to_numeric(t, errors="coerce").fillna(-1).astype(np.int64).to_numpy()
+
+
+def code_to_id(a: np.ndarray) -> np.ndarray:
+    """3002427681 -> `W3002427681`. The notebooks' `np.char.add('W', …)` idiom, kept."""
+    return np.char.add("W", a.astype(np.int64).astype(str))
+
+
+def parts(dataset: str) -> list[str]:
+    return sorted(glob.glob(f"{WORKS}/{dataset}/part_*.parquet"))
+
+
+# ── The citation graph ────────────────────────────────────────────────────────────────────
+def build_graph(force: bool = False, verbose: bool = True) -> str:
+    """Years + reference edges, in the code space the notebooks expect.
+
+    Saves c_from / c_to / year / uni_mag with exactly the names the notebooks load. `uni_mag`
+    keeps its name deliberately: it is the sorted array of accession numbers, the same role
+    the sorted MAG ids played, and the notebooks index it by position.
+
+    Two sources, in order of preference:
+      1. the consolidated table from referenced_works_w_year.ipynb — years are already
+         attached to both endpoints there, so this is one pass over a columnar file;
+      2. failing that, the original two passes over works/ and referenced_works/.
+    Both produce the same arrays. The first is faster and is the one to keep current."""
+    if os.path.exists(GRAPH_NPZ) and not force:
+        if verbose:
+            print(f"graph cache present: {GRAPH_NPZ}")
+        return GRAPH_NPZ
+
+    if have_consolidated():
+        return _build_graph_from_parquet(verbose=verbose)
+
+    if verbose:
+        print("[note] no consolidated edge table; falling back to a full pass over works/.\n"
+              "       Run notebook/referenced_works_w_year.ipynb to build it once.")
+    t0 = time.time()
+    wp = parts("works")
+    if verbose:
+        print(f"[1/2] years from {len(wp)} partitions of works/works …", flush=True)
+    codes, years = [], []
+    for i, f in enumerate(wp):
+        d = pq.read_table(f, columns=["id", "publication_year"]).to_pandas()
+        d = d.dropna(subset=["publication_year"])
+        y = d["publication_year"].astype(np.int64)
+        keep = (y >= YEAR_MIN) & (y <= YEAR_MAX)
+        if YEAR_RANGE is not None:
+            keep &= (y >= YEAR_RANGE[0]) & (y <= YEAR_RANGE[1])
+        d, y = d[keep.to_numpy()], y[keep]
+        c = id_to_code(d["id"])
+        ok = c >= 0
+        codes.append(c[ok]); years.append(y.to_numpy()[ok])
+        del d, y, c
+        if verbose and (i + 1) % 200 == 0:
+            print(f"      {i+1}/{len(wp)}  {sum(map(len, codes)):,} works  "
+                  f"[{time.time()-t0:.0f}s]", flush=True)
+        gc.collect()
+    code = np.concatenate(codes); yr = np.concatenate(years).astype(np.int32)
+    del codes, years; gc.collect()
+
+    order = np.argsort(code, kind="stable")
+    uni_mag = code[order]
+    year = yr[order]
+    keep = np.concatenate(([True], uni_mag[1:] != uni_mag[:-1]))   # de-duplicate
+    uni_mag, year = uni_mag[keep], year[keep]
+    del code, yr, order, keep; gc.collect()
+    n = len(uni_mag)
+    if verbose:
+        print(f"      {n:,} works with a usable year  [{time.time()-t0:.0f}s]", flush=True)
+
+    def to_code(a):
+        i = np.clip(np.searchsorted(uni_mag, a), 0, n - 1)
+        return np.where(uni_mag[i] == a, i, -1).astype(np.int32)
+
+    rp = parts("referenced_works")
+    if verbose:
+        print(f"[2/2] edges from {len(rp)} partitions of works/referenced_works …", flush=True)
+    cf, ct = [], []
+    for i, f in enumerate(rp):
+        d = pq.read_table(f, columns=["work_id", "referenced_work_id"]).to_pandas()
+        u = to_code(id_to_code(d["work_id"]))
+        v = to_code(id_to_code(d["referenced_work_id"]))
+        m = (u >= 0) & (v >= 0)
+        if m.any():
+            cf.append(u[m]); ct.append(v[m])
+        del d, u, v, m
+        if verbose and (i + 1) % 200 == 0:
+            print(f"      {i+1}/{len(rp)}  {sum(map(len, cf)):,} edges kept  "
+                  f"[{time.time()-t0:.0f}s]", flush=True)
+        gc.collect()
+    c_from = np.concatenate(cf).astype(np.int32)
+    c_to = np.concatenate(ct).astype(np.int32)
+    del cf, ct; gc.collect()
+
+    np.savez(GRAPH_NPZ, c_from=c_from, c_to=c_to, year=year, uni_mag=uni_mag)
+    if verbose:
+        print(f"[{time.time()-t0:.0f}s] {len(c_from):,} edges, {n:,} works -> {GRAPH_NPZ}"
+              f"  ({os.path.getsize(GRAPH_NPZ)/1e9:.1f} GB)")
+    return GRAPH_NPZ
+
+
+def _build_graph_from_parquet(verbose: bool = True) -> str:
+    """The same arrays, read off the consolidated edge table."""
+    t0 = time.time()
+    uni_mag, year_full, _src = load_map()
+    keep = year_full >= 0                       # a work with no usable year cannot be dated
+    uni_mag, year = uni_mag[keep], year_full[keep].astype(np.int32)
+    del year_full, _src, keep
+    gc.collect()
+    n = len(uni_mag)
+    if verbose:
+        print(f"[1/2] {n:,} works with a year, from {os.path.basename(MAP_NPZ)}", flush=True)
+
+    def to_code(a):
+        i = np.clip(np.searchsorted(uni_mag, a), 0, n - 1)
+        return np.where(uni_mag[i] == a, i, -1).astype(np.int32)
+
+    parts = ref_parts()
+    if verbose:
+        print(f"[2/2] edges from {len(parts)} partitions of {REF_PQ} …", flush=True)
+    cf, ct = [], []
+    for i, f in enumerate(parts):
+        d = pq.read_table(f, columns=["work_id", "referenced_work_id"]).to_pandas()
+        u = to_code(id_to_code(d["work_id"]))
+        v = to_code(id_to_code(d["referenced_work_id"]))
+        m = (u >= 0) & (v >= 0)
+        if m.any():
+            cf.append(u[m]); ct.append(v[m])
+        del d, u, v, m
+        if verbose and (i + 1) % 200 == 0:
+            print(f"      {i+1}/{len(parts)}  {sum(map(len, cf)):,} edges  "
+                  f"[{time.time()-t0:.0f}s]", flush=True)
+        gc.collect()
+    c_from = np.concatenate(cf).astype(np.int32)
+    c_to = np.concatenate(ct).astype(np.int32)
+    del cf, ct
+    gc.collect()
+    np.savez(GRAPH_NPZ, c_from=c_from, c_to=c_to, year=year, uni_mag=uni_mag)
+    if verbose:
+        print(f"[{time.time()-t0:.0f}s] {len(c_from):,} edges, {n:,} works -> {GRAPH_NPZ}"
+              f"  ({os.path.getsize(GRAPH_NPZ)/1e9:.1f} GB)")
+    return GRAPH_NPZ
+
+
+def build_csr(force: bool = False, verbose: bool = True) -> str:
+    """out/in adjacency in CSR form — byte-identical in shape to the old cache."""
+    if os.path.exists(CSR_NPZ) and not force:
+        if verbose:
+            print(f"CSR cache present: {CSR_NPZ}")
+        return CSR_NPZ
+    build_graph(verbose=verbose)
+    t0 = time.time()
+    z = np.load(GRAPH_NPZ)
+    c_from = np.ascontiguousarray(z["c_from"]); c_to = np.ascontiguousarray(z["c_to"])
+    year = np.ascontiguousarray(z["year"]).astype(np.int32)
+    uni_mag = np.ascontiguousarray(z["uni_mag"])
+    del z; gc.collect()
+    n = len(year)
+
+    def csr(src, dst):
+        order = np.argsort(src, kind="stable")
+        idx = dst[order].astype(np.int32); del order; gc.collect()
+        ptr = np.zeros(n + 1, np.int64)
+        np.add.at(ptr, src.astype(np.int64) + 1, 1)
+        np.cumsum(ptr, out=ptr)
+        return ptr, idx
+
+    out_ptr, out_idx = csr(c_from, c_to)     # references (out-edges)
+    in_ptr, in_idx = csr(c_to, c_from)       # citers (in-edges)
+    del c_from, c_to; gc.collect()
+    np.savez(CSR_NPZ, out_ptr=out_ptr, out_idx=out_idx, in_ptr=in_ptr, in_idx=in_idx,
+             year=year, uni_mag=uni_mag)
+    if verbose:
+        print(f"[{time.time()-t0:.0f}s] CSR: {n:,} works, {len(out_idx):,} edges -> {CSR_NPZ}")
+    return CSR_NPZ
+
+
+def load_graph():
+    build_graph()
+    z = np.load(GRAPH_NPZ)
+    return z["c_from"], z["c_to"], z["year"].astype(np.int32), z["uni_mag"]
+
+
+def load_csr():
+    build_csr()
+    z = np.load(CSR_NPZ)
+    return (z["out_ptr"], z["out_idx"], z["in_ptr"], z["in_idx"],
+            z["year"].astype(np.int32), z["uni_mag"])
+
+
+# ── Journal and field, the two lookups that used to come from MAG ─────────────────────────
+def read_sources() -> pd.DataFrame:
+    """sources.csv.gz -> source_id, journal (display_name), source_type.
+
+    Replaces `Journals.txt`. `source_type == 'journal'` is the analogue of MAG's
+    `DocType == 'Journal'`, which paper_z_score uses to pick focal papers."""
+    d = pd.read_csv(f"{ROOT}/sources.csv.gz",
+                    usecols=["id", "display_name", "type", "issn_l"], dtype=str)
+    d["source_id"] = norm_id(d["id"])
+    return d.rename(columns={"display_name": "journal", "type": "source_type"})[
+        ["source_id", "journal", "source_type", "issn_l"]]
+
+
+def build_journal(force: bool = False, verbose: bool = True) -> str:
+    """work -> journal name + is_journal.
+
+    Prefers the consolidated map, whose `source` column already holds the primary-location
+    source (with the locations/ gap filled) for every work. Falls back to re-walking
+    primary_locations/ when that map has not been built."""
+    if os.path.exists(JOURNAL_PQ) and not force:
+        if verbose:
+            print(f"journal cache present: {JOURNAL_PQ}")
+        return JOURNAL_PQ
+
+    if os.path.exists(MAP_NPZ):
+        code_, _year, source_ = load_map()
+        m = source_ >= 0
+        src = read_sources().set_index("source_id")
+        out = pd.DataFrame({
+            "work_id": code_to_id(code_[m]),
+            "source_id": np.char.add("S", source_[m].astype(np.int64).astype(str)),
+        })
+        out["journal"] = out["source_id"].map(src["journal"])
+        out["is_journal"] = out["source_id"].map(src["source_type"] == "journal").fillna(False)
+        out.to_parquet(JOURNAL_PQ, index=False)
+        if verbose:
+            print(f"journal map from {os.path.basename(MAP_NPZ)}: {len(out):,} works "
+                  f"-> {JOURNAL_PQ}")
+        return JOURNAL_PQ
+
+    src = read_sources().set_index("source_id")
+    jmap = src["journal"].to_dict()
+    tmap = (src["source_type"] == "journal").to_dict()
+    frames = []
+    pl = parts("primary_locations")
+    for i, f in enumerate(pl):
+        d = pq.read_table(f, columns=["work_id", "source_id"]).to_pandas().dropna(
+            subset=["source_id"])
+        d["work_id"] = norm_id(d["work_id"])
+        d["source_id"] = norm_id(d["source_id"])
+        d["journal"] = d["source_id"].map(jmap)
+        d["is_journal"] = d["source_id"].map(tmap).fillna(False)
+        frames.append(d[["work_id", "source_id", "journal", "is_journal"]])
+        if verbose and (i + 1) % 300 == 0:
+            print(f"  primary_locations {i+1}/{len(pl)}", flush=True)
+    out = pd.concat(frames, ignore_index=True)
+    out.to_parquet(JOURNAL_PQ, index=False)
+    if verbose:
+        print(f"journal map: {len(out):,} works -> {JOURNAL_PQ}")
+    return JOURNAL_PQ
+
+
+def build_fos(force: bool = False, verbose: bool = True) -> str:
+    """work -> field of study, from works/topics x topics.csv.gz.
+
+    MAG's level-0 Field of Study has no exact OpenAlex twin. The closest is the topic
+    hierarchy's **field** (26 of them, one level under domain), so `FoS_rep` becomes the field
+    of the work's highest-scoring topic and `FoS_0` the `;`-joined set of its distinct fields.
+    Names differ from MAG's; the cohorting they drive is equivalent."""
+    if os.path.exists(FOS_PQ) and not force:
+        if verbose:
+            print(f"FoS cache present: {FOS_PQ}")
+        return FOS_PQ
+    tp = pd.read_csv(f"{ROOT}/topics.csv.gz",
+                     usecols=["id", "field_display_name", "domain_display_name"], dtype=str)
+    tp["topic_id"] = norm_id(tp["id"])
+    fmap = dict(zip(tp["topic_id"], tp["field_display_name"]))
+    dmap = dict(zip(tp["topic_id"], tp["domain_display_name"]))
+    frames = []
+    tps = parts("topics")
+    for i, f in enumerate(tps):
+        d = pq.read_table(f, columns=["work_id", "topic_id", "score"]).to_pandas()
+        d["work_id"] = norm_id(d["work_id"])
+        d["topic_id"] = norm_id(d["topic_id"])
+        d["field"] = d["topic_id"].map(fmap)
+        d["domain"] = d["topic_id"].map(dmap)
+        d = d.dropna(subset=["field"])
+        d = d.sort_values(["work_id", "score"], ascending=[True, False])
+        rep = d.groupby("work_id", sort=False).first()[["field", "domain"]]
+        allf = d.groupby("work_id", sort=False)["field"].apply(
+            lambda s: ";".join(pd.unique(s)))
+        frames.append(rep.assign(FoS_0=allf).reset_index())
+        if verbose and (i + 1) % 300 == 0:
+            print(f"  topics {i+1}/{len(tps)}", flush=True)
+    out = (pd.concat(frames, ignore_index=True)
+             .rename(columns={"field": "FoS_rep", "domain": "domain"}))
+    out.to_parquet(FOS_PQ, index=False)
+    if verbose:
+        print(f"FoS map: {len(out):,} works -> {FOS_PQ}")
+    return FOS_PQ
+
+
+def summary():
+    print(f"snapshot : {ROOT}")
+    print(f"cache    : {CACHE}")
+    print(f"output   : {OUT}")
+    print(f"  consolidated edge table: "
+          + ("present" if have_consolidated() else "NOT BUILT "
+             "(run notebook/referenced_works_w_year.ipynb)"))
+    for name, p in (("map", MAP_NPZ), ("graph", GRAPH_NPZ), ("csr", CSR_NPZ),
+                    ("journal", JOURNAL_PQ), ("fos", FOS_PQ)):
+        s = f"{os.path.getsize(p)/1e9:.2f} GB" if os.path.exists(p) else "not built"
+        print(f"  {name:<9} {s:>12}  {p}")

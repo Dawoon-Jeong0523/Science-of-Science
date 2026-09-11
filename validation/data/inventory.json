@@ -1,0 +1,3377 @@
+{
+  "schema_version": 1,
+  "source_project": "Science of Science",
+  "generated_utc": "2026-09-07T02:45:27.131191Z",
+  "method": "Parquet footers and filesystem metadata only for table inventories; small provenance JSON and run logs for provenance. No table data pages or large raw inputs are scanned.",
+  "count_unit": "Stored rows across derived tables; not unique documents.",
+  "files": [
+    {
+      "path": "OpenAlex/output/paper_author.parquet",
+      "family": "paper",
+      "rows": 251654553,
+      "bytes": 7118734604,
+      "columns": [
+        "work_id",
+        "author_list",
+        "team_size",
+        "first_author",
+        "last_author"
+      ],
+      "schema": [
+        {
+          "name": "work_id",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "author_list",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "team_size",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "first_author",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "last_author",
+          "type": "string",
+          "nullable": true
+        }
+      ],
+      "row_groups": 252,
+      "modified_utc": "2026-09-03T13:35:43.610014Z",
+      "grain": "One work_id with ordered, deduplicated author IDs and team_size.",
+      "provenance": "OpenAlex/notebook/paper_author.ipynb"
+    },
+    {
+      "path": "OpenAlex/output/paper_citation.parquet",
+      "family": "paper",
+      "rows": 348939837,
+      "bytes": 2379289066,
+      "columns": [
+        "paper_id",
+        "C_3",
+        "C_5",
+        "C_10",
+        "C_all"
+      ],
+      "schema": [
+        {
+          "name": "paper_id",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "C_3",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_5",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_10",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_all",
+          "type": "int64",
+          "nullable": true
+        }
+      ],
+      "row_groups": 333,
+      "modified_utc": "2026-08-29T09:52:56.534508Z",
+      "grain": "One document."
+    },
+    {
+      "path": "OpenAlex/output/paper_citation_trend.parquet",
+      "family": "paper",
+      "rows": 584136859,
+      "bytes": 2218980207,
+      "columns": [
+        "paper_id",
+        "pub_year",
+        "cite_year",
+        "yrs_since_pub",
+        "p2p",
+        "pat2p_examiner",
+        "pat2p_non_examiner"
+      ],
+      "schema": [
+        {
+          "name": "paper_id",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "pub_year",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "cite_year",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "yrs_since_pub",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "p2p",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "pat2p_examiner",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "pat2p_non_examiner",
+          "type": "int64",
+          "nullable": true
+        }
+      ],
+      "row_groups": 558,
+      "modified_utc": "2026-08-31T16:07:53.796203Z",
+      "grain": "One document per citing year."
+    },
+    {
+      "path": "OpenAlex/output/paper_disruption.parquet",
+      "family": "paper",
+      "rows": 348939837,
+      "bytes": 6608130905,
+      "columns": [
+        "paper_id",
+        "CD_3",
+        "F_3",
+        "E_3",
+        "G_3",
+        "ni_3",
+        "nj_3",
+        "nk_3",
+        "CD_5",
+        "F_5",
+        "E_5",
+        "G_5",
+        "ni_5",
+        "nj_5",
+        "nk_5",
+        "CD_10",
+        "F_10",
+        "E_10",
+        "G_10",
+        "ni_10",
+        "nj_10",
+        "nk_10",
+        "CD_all",
+        "F_all",
+        "E_all",
+        "G_all",
+        "ni_all",
+        "nj_all",
+        "nk_all"
+      ],
+      "schema": [
+        {
+          "name": "paper_id",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "CD_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "F_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "E_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "G_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "ni_3",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "nj_3",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "nk_3",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "CD_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "F_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "E_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "G_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "ni_5",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "nj_5",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "nk_5",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "CD_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "F_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "E_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "G_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "ni_10",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "nj_10",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "nk_10",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "CD_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "F_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "E_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "G_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "ni_all",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "nj_all",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "nk_all",
+          "type": "int32",
+          "nullable": true
+        }
+      ],
+      "row_groups": 333,
+      "modified_utc": "2026-08-29T17:20:31.357330Z",
+      "grain": "One document."
+    },
+    {
+      "path": "OpenAlex/output/paper_hit_probability.parquet",
+      "family": "paper",
+      "rows": 262469628,
+      "bytes": 3192603800,
+      "columns": [
+        "paper_id",
+        "FoS",
+        "year",
+        "pctl_c3",
+        "pctl_c5",
+        "pctl_c10",
+        "pctl_call"
+      ],
+      "schema": [
+        {
+          "name": "paper_id",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "FoS",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "year",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "pctl_c3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_c5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_c10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_call",
+          "type": "float",
+          "nullable": true
+        }
+      ],
+      "row_groups": 251,
+      "modified_utc": "2026-08-31T16:10:01.767198Z",
+      "grain": "One document."
+    },
+    {
+      "path": "OpenAlex/output/paper_metadata.parquet",
+      "family": "paper",
+      "rows": 372655605,
+      "bytes": 8440201269,
+      "columns": [
+        "paper_id",
+        "year",
+        "doctype",
+        "ref_count",
+        "journal",
+        "is_journal",
+        "author_list",
+        "FoS_0",
+        "FoS_rep",
+        "domain",
+        "cited_by_count",
+        "is_retracted"
+      ],
+      "schema": [
+        {
+          "name": "paper_id",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "year",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "doctype",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "ref_count",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "journal",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "is_journal",
+          "type": "bool",
+          "nullable": true
+        },
+        {
+          "name": "author_list",
+          "type": "null",
+          "nullable": true
+        },
+        {
+          "name": "FoS_0",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "FoS_rep",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "domain",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "cited_by_count",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "is_retracted",
+          "type": "bool",
+          "nullable": true
+        }
+      ],
+      "row_groups": 356,
+      "modified_utc": "2026-08-29T10:51:04.418669Z",
+      "grain": "One document."
+    },
+    {
+      "path": "OpenAlex/output/paper_sb.parquet",
+      "family": "paper",
+      "rows": 88314669,
+      "bytes": 820726678,
+      "columns": [
+        "paper_id",
+        "SB_B",
+        "SB_T",
+        "n_cite"
+      ],
+      "schema": [
+        {
+          "name": "paper_id",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "SB_B",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "SB_T",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "n_cite",
+          "type": "int64",
+          "nullable": true
+        }
+      ],
+      "row_groups": 85,
+      "modified_utc": "2026-08-29T17:24:15.265882Z",
+      "grain": "One document."
+    },
+    {
+      "path": "OpenAlex/output/paper_team_size.parquet",
+      "family": "paper",
+      "rows": 251654553,
+      "bytes": 1447442911,
+      "columns": [
+        "paper_id",
+        "team_size"
+      ],
+      "schema": [
+        {
+          "name": "paper_id",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "team_size",
+          "type": "int32",
+          "nullable": true
+        }
+      ],
+      "row_groups": 2047,
+      "modified_utc": "2026-09-01T16:07:38.128752Z",
+      "grain": "One paper_id with a legacy team_size value.",
+      "status": "legacy",
+      "note": "The current project has no producer for this legacy file. Native team-size validation uses the reproducible paper_author.parquet output, whose team_size counts distinct authors rather than affiliation rows.",
+      "provenance": "OpenAlex/notebook/paper_author.ipynb"
+    },
+    {
+      "path": "OpenAlex/output/paper_z_score.parquet",
+      "family": "paper",
+      "rows": 41425041,
+      "bytes": 1066979964,
+      "columns": [
+        "paper_id",
+        "Z_median",
+        "Z_10pct",
+        "Z_min",
+        "n_pairs"
+      ],
+      "schema": [
+        {
+          "name": "paper_id",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "Z_median",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "Z_10pct",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "Z_min",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "n_pairs",
+          "type": "int64",
+          "nullable": true
+        }
+      ],
+      "row_groups": 42,
+      "modified_utc": "2026-09-04T14:17:34.614565Z",
+      "grain": "One document.",
+      "provenance": "OpenAlex/output/paper_z_score_provenance.json",
+      "coverage_years": [
+        1980,
+        2020
+      ]
+    },
+    {
+      "path": "OpenAlex/output/z_score_pair.parquet",
+      "family": "paper",
+      "rows": 430010933,
+      "bytes": 2529290969,
+      "columns": [
+        "code_1",
+        "code_2",
+        "year",
+        "Z_score"
+      ],
+      "schema": [
+        {
+          "name": "code_1",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "code_2",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "year",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "Z_score",
+          "type": "double",
+          "nullable": true
+        }
+      ],
+      "row_groups": 430,
+      "modified_utc": "2026-09-04T14:18:50.172884Z",
+      "grain": "One journal pair per cohort year.",
+      "provenance": "OpenAlex/output/paper_z_score_provenance.json",
+      "coverage_years": [
+        1980,
+        2020
+      ]
+    },
+    {
+      "path": "PatentView/output/patent_citation.parquet",
+      "family": "patent",
+      "rows": 7160531,
+      "bytes": 229024377,
+      "columns": [
+        "patent_id",
+        "C_3",
+        "C_5",
+        "C_10",
+        "C_all",
+        "C_examiner_3",
+        "C_non_examiner_3",
+        "C_unknown_3",
+        "C_examiner_5",
+        "C_non_examiner_5",
+        "C_unknown_5",
+        "C_examiner_10",
+        "C_non_examiner_10",
+        "C_unknown_10",
+        "C_examiner_all",
+        "C_non_examiner_all",
+        "C_unknown_all",
+        "appC_3",
+        "appC_5",
+        "appC_10",
+        "appC_all",
+        "appC_examiner_3",
+        "appC_non_examiner_3",
+        "appC_examiner_5",
+        "appC_non_examiner_5",
+        "appC_examiner_10",
+        "appC_non_examiner_10",
+        "appC_examiner_all",
+        "appC_non_examiner_all",
+        "uniqueC_3",
+        "uniqueC_5",
+        "uniqueC_10",
+        "uniqueC_all",
+        "uniqueC_examiner_3",
+        "uniqueC_examiner_5",
+        "uniqueC_examiner_10",
+        "uniqueC_examiner_all",
+        "uniqueC_non_examiner_3",
+        "uniqueC_non_examiner_5",
+        "uniqueC_non_examiner_10",
+        "uniqueC_non_examiner_all",
+        "uniqueC_unknown_3",
+        "uniqueC_unknown_5",
+        "uniqueC_unknown_10",
+        "uniqueC_unknown_all"
+      ],
+      "schema": [
+        {
+          "name": "patent_id",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "C_3",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_5",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_10",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_all",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_examiner_3",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_non_examiner_3",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_unknown_3",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_examiner_5",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_non_examiner_5",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_unknown_5",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_examiner_10",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_non_examiner_10",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_unknown_10",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_examiner_all",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_non_examiner_all",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_unknown_all",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "appC_3",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "appC_5",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "appC_10",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "appC_all",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "appC_examiner_3",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "appC_non_examiner_3",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "appC_examiner_5",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "appC_non_examiner_5",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "appC_examiner_10",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "appC_non_examiner_10",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "appC_examiner_all",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "appC_non_examiner_all",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_3",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_5",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_10",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_all",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_examiner_3",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_examiner_5",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_examiner_10",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_examiner_all",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_non_examiner_3",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_non_examiner_5",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_non_examiner_10",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_non_examiner_all",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_unknown_3",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_unknown_5",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_unknown_10",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_unknown_all",
+          "type": "int64",
+          "nullable": true
+        }
+      ],
+      "row_groups": 7,
+      "modified_utc": "2026-09-01T16:25:25.458476Z",
+      "grain": "One document."
+    },
+    {
+      "path": "PatentView/output/patent_citation_trend.parquet",
+      "family": "patent",
+      "rows": 50546229,
+      "bytes": 209930010,
+      "columns": [
+        "patent_id",
+        "grant_year",
+        "cite_year",
+        "yrs_since_grant",
+        "C",
+        "C_examiner",
+        "C_non_examiner",
+        "C_unknown",
+        "appC",
+        "appC_examiner",
+        "appC_non_examiner",
+        "pat2pat_examiner",
+        "pat2pat_non_examiner",
+        "app2pat_examiner",
+        "app2pat_non_examiner"
+      ],
+      "schema": [
+        {
+          "name": "patent_id",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "grant_year",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "cite_year",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "yrs_since_grant",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_examiner",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_non_examiner",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_unknown",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "appC",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "appC_examiner",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "appC_non_examiner",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "pat2pat_examiner",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "pat2pat_non_examiner",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "app2pat_examiner",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "app2pat_non_examiner",
+          "type": "int64",
+          "nullable": true
+        }
+      ],
+      "row_groups": 49,
+      "modified_utc": "2026-08-31T21:48:45.809727Z",
+      "grain": "One document per citing year."
+    },
+    {
+      "path": "PatentView/output/patent_disruption.parquet",
+      "family": "patent",
+      "rows": 8062166,
+      "bytes": 245446812,
+      "columns": [
+        "patent_id",
+        "CD_3",
+        "F_3",
+        "E_3",
+        "G_3",
+        "ni_3",
+        "nj_3",
+        "nk_3",
+        "CD_5",
+        "F_5",
+        "E_5",
+        "G_5",
+        "ni_5",
+        "nj_5",
+        "nk_5",
+        "CD_10",
+        "F_10",
+        "E_10",
+        "G_10",
+        "ni_10",
+        "nj_10",
+        "nk_10",
+        "CD_all",
+        "F_all",
+        "E_all",
+        "G_all",
+        "ni_all",
+        "nj_all",
+        "nk_all"
+      ],
+      "schema": [
+        {
+          "name": "patent_id",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "CD_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "F_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "E_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "G_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "ni_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "nj_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "nk_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "CD_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "F_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "E_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "G_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "ni_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "nj_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "nk_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "CD_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "F_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "E_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "G_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "ni_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "nj_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "nk_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "CD_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "F_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "E_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "G_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "ni_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "nj_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "nk_all",
+          "type": "float",
+          "nullable": true
+        }
+      ],
+      "row_groups": 8,
+      "modified_utc": "2026-09-02T19:09:38.482439Z",
+      "grain": "One document."
+    },
+    {
+      "path": "PatentView/output/patent_disruption_app.parquet",
+      "family": "patent",
+      "rows": 8460168,
+      "bytes": 319240718,
+      "columns": [
+        "patent_id",
+        "CD_3",
+        "F_3",
+        "E_3",
+        "G_3",
+        "ni_3",
+        "nj_3",
+        "nk_3",
+        "CD_5",
+        "F_5",
+        "E_5",
+        "G_5",
+        "ni_5",
+        "nj_5",
+        "nk_5",
+        "CD_10",
+        "F_10",
+        "E_10",
+        "G_10",
+        "ni_10",
+        "nj_10",
+        "nk_10",
+        "CD_all",
+        "F_all",
+        "E_all",
+        "G_all",
+        "ni_all",
+        "nj_all",
+        "nk_all"
+      ],
+      "schema": [
+        {
+          "name": "patent_id",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "CD_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "F_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "E_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "G_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "ni_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "nj_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "nk_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "CD_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "F_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "E_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "G_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "ni_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "nj_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "nk_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "CD_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "F_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "E_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "G_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "ni_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "nj_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "nk_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "CD_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "F_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "E_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "G_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "ni_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "nj_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "nk_all",
+          "type": "float",
+          "nullable": true
+        }
+      ],
+      "row_groups": 9,
+      "modified_utc": "2026-08-31T18:20:11.760896Z",
+      "grain": "One document."
+    },
+    {
+      "path": "PatentView/output/patent_disruption_compare.parquet",
+      "family": "patent",
+      "rows": 4,
+      "bytes": 9594,
+      "columns": [
+        "window",
+        "n_base_rows",
+        "n_app_rows",
+        "n_app_only",
+        "n_paired",
+        "base_mean",
+        "app_mean",
+        "delta",
+        "pearson",
+        "spearman",
+        "pct_down",
+        "pct_up",
+        "pct_same",
+        "d_ni",
+        "d_nj",
+        "d_nk"
+      ],
+      "schema": [
+        {
+          "name": "window",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "n_base_rows",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "n_app_rows",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "n_app_only",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "n_paired",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "base_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "app_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "delta",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pearson",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "spearman",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "pct_down",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "pct_up",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "pct_same",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "d_ni",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "d_nj",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "d_nk",
+          "type": "float",
+          "nullable": true
+        }
+      ],
+      "row_groups": 1,
+      "modified_utc": "2026-09-02T14:09:23.396409Z",
+      "grain": "One citation window (3, 5, 10, or all) with paired comparison statistics."
+    },
+    {
+      "path": "PatentView/output/patent_feg_disruption_trend.parquet",
+      "family": "patent",
+      "rows": 49,
+      "bytes": 27267,
+      "columns": [
+        "year",
+        "n",
+        "CD_3_mean",
+        "F_3_mean",
+        "E_3_mean",
+        "G_3_mean",
+        "ni_3_mean",
+        "nj_3_mean",
+        "nk_3_mean",
+        "njfrac_3_mean",
+        "CD_5_mean",
+        "F_5_mean",
+        "E_5_mean",
+        "G_5_mean",
+        "ni_5_mean",
+        "nj_5_mean",
+        "nk_5_mean",
+        "njfrac_5_mean",
+        "CD_10_mean",
+        "F_10_mean",
+        "E_10_mean",
+        "G_10_mean",
+        "ni_10_mean",
+        "nj_10_mean",
+        "nk_10_mean",
+        "njfrac_10_mean",
+        "CD_all_mean",
+        "F_all_mean",
+        "E_all_mean",
+        "G_all_mean",
+        "ni_all_mean",
+        "nj_all_mean",
+        "nk_all_mean",
+        "njfrac_all_mean"
+      ],
+      "schema": [
+        {
+          "name": "year",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "n",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "CD_3_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "F_3_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "E_3_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "G_3_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "ni_3_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "nj_3_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "nk_3_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "njfrac_3_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "CD_5_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "F_5_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "E_5_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "G_5_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "ni_5_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "nj_5_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "nk_5_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "njfrac_5_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "CD_10_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "F_10_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "E_10_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "G_10_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "ni_10_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "nj_10_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "nk_10_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "njfrac_10_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "CD_all_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "F_all_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "E_all_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "G_all_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "ni_all_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "nj_all_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "nk_all_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "njfrac_all_mean",
+          "type": "float",
+          "nullable": true
+        }
+      ],
+      "row_groups": 1,
+      "modified_utc": "2026-08-31T17:22:49.785904Z",
+      "grain": "One grant cohort year with aggregate metrics."
+    },
+    {
+      "path": "PatentView/output/patent_hit_probability.parquet",
+      "family": "patent",
+      "rows": 8512715,
+      "bytes": 339605391,
+      "columns": [
+        "patent_id",
+        "wipo_sector",
+        "grant_year",
+        "pctl_C_3",
+        "pctl_C_5",
+        "pctl_C_10",
+        "pctl_C_all",
+        "pctl_C_examiner_3",
+        "pctl_C_non_examiner_3",
+        "pctl_C_unknown_3",
+        "pctl_C_examiner_5",
+        "pctl_C_non_examiner_5",
+        "pctl_C_unknown_5",
+        "pctl_C_examiner_10",
+        "pctl_C_non_examiner_10",
+        "pctl_C_unknown_10",
+        "pctl_C_examiner_all",
+        "pctl_C_non_examiner_all",
+        "pctl_C_unknown_all",
+        "pctl_appC_3",
+        "pctl_appC_5",
+        "pctl_appC_10",
+        "pctl_appC_all",
+        "pctl_appC_examiner_3",
+        "pctl_appC_non_examiner_3",
+        "pctl_appC_examiner_5",
+        "pctl_appC_non_examiner_5",
+        "pctl_appC_examiner_10",
+        "pctl_appC_non_examiner_10",
+        "pctl_appC_examiner_all",
+        "pctl_appC_non_examiner_all",
+        "pctl_uniqueC_3",
+        "pctl_uniqueC_5",
+        "pctl_uniqueC_10",
+        "pctl_uniqueC_all",
+        "pctl_uniqueC_examiner_3",
+        "pctl_uniqueC_examiner_5",
+        "pctl_uniqueC_examiner_10",
+        "pctl_uniqueC_examiner_all",
+        "pctl_uniqueC_non_examiner_3",
+        "pctl_uniqueC_non_examiner_5",
+        "pctl_uniqueC_non_examiner_10",
+        "pctl_uniqueC_non_examiner_all",
+        "pctl_uniqueC_unknown_3",
+        "pctl_uniqueC_unknown_5",
+        "pctl_uniqueC_unknown_10",
+        "pctl_uniqueC_unknown_all",
+        "pctl_c3",
+        "pctl_c5",
+        "pctl_c10",
+        "pctl_call"
+      ],
+      "schema": [
+        {
+          "name": "patent_id",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "wipo_sector",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "grant_year",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_examiner_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_non_examiner_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_unknown_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_examiner_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_non_examiner_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_unknown_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_examiner_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_non_examiner_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_unknown_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_examiner_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_non_examiner_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_unknown_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_appC_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_appC_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_appC_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_appC_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_appC_examiner_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_appC_non_examiner_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_appC_examiner_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_appC_non_examiner_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_appC_examiner_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_appC_non_examiner_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_appC_examiner_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_appC_non_examiner_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_examiner_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_examiner_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_examiner_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_examiner_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_non_examiner_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_non_examiner_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_non_examiner_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_non_examiner_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_unknown_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_unknown_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_unknown_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_unknown_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_c3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_c5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_c10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_call",
+          "type": "float",
+          "nullable": true
+        }
+      ],
+      "row_groups": 9,
+      "modified_utc": "2026-08-31T22:05:39.793551Z",
+      "grain": "One document."
+    },
+    {
+      "path": "PatentView/output/patent_metadata.parquet",
+      "family": "patent",
+      "rows": 8531961,
+      "bytes": 868260271,
+      "columns": [
+        "patent_id",
+        "grant_year",
+        "filing_year",
+        "ref_count",
+        "cpc_code",
+        "cpc_code_list",
+        "inventor_list",
+        "assignee_list"
+      ],
+      "schema": [
+        {
+          "name": "patent_id",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "grant_year",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "filing_year",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "ref_count",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "cpc_code",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "cpc_code_list",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "inventor_list",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "assignee_list",
+          "type": "string",
+          "nullable": true
+        }
+      ],
+      "row_groups": 9,
+      "modified_utc": "2026-08-28T23:23:11.097853Z",
+      "grain": "One document."
+    },
+    {
+      "path": "PatentView/output/patent_reference.parquet",
+      "family": "patent",
+      "rows": 171532249,
+      "bytes": 778192708,
+      "columns": [
+        "citing_id",
+        "cited_id",
+        "type",
+        "grant_id"
+      ],
+      "schema": [
+        {
+          "name": "citing_id",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "cited_id",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "type",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "grant_id",
+          "type": "string",
+          "nullable": true
+        }
+      ],
+      "row_groups": 172,
+      "modified_utc": "2026-09-02T21:16:43.752474Z",
+      "grain": "One distinct (citing_id, cited_id, type) reference; grant_id identifies the granted cited endpoint.",
+      "provenance": "PatentView/notebook/patent_reference.ipynb",
+      "note": "Granted and application references may share a grant_id. Deduplicate (citing_id, grant_id) when unique patent edges are required; cited_id preserves the original cited identifier."
+    },
+    {
+      "path": "PatentView/output/patent_sb.parquet",
+      "family": "patent",
+      "rows": 6803034,
+      "bytes": 59768124,
+      "columns": [
+        "patent_id",
+        "SB_B",
+        "SB_T",
+        "n_cite"
+      ],
+      "schema": [
+        {
+          "name": "patent_id",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "SB_B",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "SB_T",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "n_cite",
+          "type": "int64",
+          "nullable": true
+        }
+      ],
+      "row_groups": 7,
+      "modified_utc": "2026-08-28T23:14:31.649446Z",
+      "grain": "One document."
+    },
+    {
+      "path": "PatentView/output/patent_z_score.parquet",
+      "family": "patent",
+      "rows": 4160856,
+      "bytes": 77603414,
+      "columns": [
+        "patent_id",
+        "Z_median",
+        "Z_10pct",
+        "Z_min",
+        "n_pairs"
+      ],
+      "schema": [
+        {
+          "name": "patent_id",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "Z_median",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "Z_10pct",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "Z_min",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "n_pairs",
+          "type": "int64",
+          "nullable": true
+        }
+      ],
+      "row_groups": 4,
+      "modified_utc": "2026-08-31T15:41:20.969937Z",
+      "grain": "One document."
+    },
+    {
+      "path": "PatentView/output/z_score_pair.parquet",
+      "family": "patent",
+      "rows": 981662,
+      "bytes": 10604427,
+      "columns": [
+        "code_1",
+        "code_2",
+        "year",
+        "Z_score"
+      ],
+      "schema": [
+        {
+          "name": "code_1",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "code_2",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "year",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "Z_score",
+          "type": "double",
+          "nullable": true
+        }
+      ],
+      "row_groups": 1,
+      "modified_utc": "2026-08-31T15:41:21.212190Z",
+      "grain": "One CPC-subclass pair per cohort year."
+    },
+    {
+      "path": "pcs/output/pcs_citation.parquet",
+      "family": "pcs",
+      "rows": 5106527,
+      "bytes": 62568852,
+      "columns": [
+        "paper_id",
+        "C_3",
+        "C_5",
+        "C_10",
+        "C_all",
+        "C_examiner_3",
+        "C_non_examiner_3",
+        "C_examiner_5",
+        "C_non_examiner_5",
+        "C_examiner_10",
+        "C_non_examiner_10",
+        "C_examiner_all",
+        "C_non_examiner_all",
+        "C_total",
+        "C_examiner_total",
+        "C_non_examiner_total"
+      ],
+      "schema": [
+        {
+          "name": "paper_id",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "C_3",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_5",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_10",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_all",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_examiner_3",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_non_examiner_3",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_examiner_5",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_non_examiner_5",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_examiner_10",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_non_examiner_10",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_examiner_all",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_non_examiner_all",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_total",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_examiner_total",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_non_examiner_total",
+          "type": "int64",
+          "nullable": true
+        }
+      ],
+      "row_groups": 5,
+      "modified_utc": "2026-09-01T17:35:43.162610Z",
+      "grain": "One document."
+    },
+    {
+      "path": "pcs/output/pcs_citation_trend.parquet",
+      "family": "pcs",
+      "rows": 12992507,
+      "bytes": 51586412,
+      "columns": [
+        "paper_id",
+        "pub_year",
+        "cite_year",
+        "yrs_since_pub",
+        "pcs",
+        "pcs_examiner",
+        "pcs_non_examiner"
+      ],
+      "schema": [
+        {
+          "name": "paper_id",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "pub_year",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "cite_year",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "yrs_since_pub",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "pcs",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "pcs_examiner",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "pcs_non_examiner",
+          "type": "double",
+          "nullable": true
+        }
+      ],
+      "row_groups": 13,
+      "modified_utc": "2026-08-31T20:57:27.332275Z",
+      "grain": "One document per citing year."
+    },
+    {
+      "path": "pcs/output/pcs_hit_probability.parquet",
+      "family": "pcs",
+      "rows": 4480434,
+      "bytes": 79467524,
+      "columns": [
+        "paper_id",
+        "FoS",
+        "year",
+        "pctl_c3",
+        "pctl_c5",
+        "pctl_c10",
+        "pctl_call"
+      ],
+      "schema": [
+        {
+          "name": "paper_id",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "FoS",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "year",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "pctl_c3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_c5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_c10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_call",
+          "type": "float",
+          "nullable": true
+        }
+      ],
+      "row_groups": 5,
+      "modified_utc": "2026-08-31T16:55:40.431635Z",
+      "grain": "One document."
+    },
+    {
+      "path": "PPP/output/ppp_paper_trend.parquet",
+      "family": "ppp",
+      "rows": 5788073,
+      "bytes": 21100536,
+      "columns": [
+        "paperid",
+        "patent",
+        "pub_year",
+        "cite_year",
+        "yrs_since_pub",
+        "p2p",
+        "pat2p_examiner",
+        "pat2p_non_examiner"
+      ],
+      "schema": [
+        {
+          "name": "paperid",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "patent",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "pub_year",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "cite_year",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "yrs_since_pub",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "p2p",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "pat2p_examiner",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "pat2p_non_examiner",
+          "type": "int64",
+          "nullable": true
+        }
+      ],
+      "row_groups": 6,
+      "modified_utc": "2026-09-01T16:19:33.502439Z",
+      "grain": "One paper-patent linkage pair per citing year with paper-side counts."
+    },
+    {
+      "path": "PPP/output/ppp_patent_trend.parquet",
+      "family": "ppp",
+      "rows": 2906165,
+      "bytes": 12552771,
+      "columns": [
+        "paperid",
+        "patent",
+        "grant_year",
+        "cite_year",
+        "yrs_since_grant",
+        "pat2pat_examiner",
+        "pat2pat_non_examiner"
+      ],
+      "schema": [
+        {
+          "name": "paperid",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "patent",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "grant_year",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "cite_year",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "yrs_since_grant",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "pat2pat_examiner",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "pat2pat_non_examiner",
+          "type": "int64",
+          "nullable": true
+        }
+      ],
+      "row_groups": 3,
+      "modified_utc": "2026-09-01T16:19:35.861542Z",
+      "grain": "One paper-patent linkage pair per citing year with patent-side counts."
+    },
+    {
+      "path": "Case law/output/case_citation.parquet",
+      "family": "caselaw",
+      "rows": 5179698,
+      "bytes": 40561209,
+      "columns": [
+        "case_id",
+        "C_3",
+        "C_5",
+        "C_10",
+        "C_all"
+      ],
+      "schema": [
+        {
+          "name": "case_id",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_3",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "C_5",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "C_10",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "C_all",
+          "type": "int32",
+          "nullable": true
+        }
+      ],
+      "row_groups": 5,
+      "modified_utc": "2026-09-03T15:20:08.330353Z",
+      "grain": "One document."
+    },
+    {
+      "path": "Case law/output/case_citation_trend.parquet",
+      "family": "caselaw",
+      "rows": 25816136,
+      "bytes": 100625835,
+      "columns": [
+        "case_id",
+        "decision_year",
+        "cite_year",
+        "yrs_since_decision",
+        "C"
+      ],
+      "schema": [
+        {
+          "name": "case_id",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "decision_year",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "cite_year",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "yrs_since_decision",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "C",
+          "type": "int32",
+          "nullable": true
+        }
+      ],
+      "row_groups": 25,
+      "modified_utc": "2026-09-03T15:20:15.012168Z",
+      "grain": "One document per citing year."
+    },
+    {
+      "path": "Case law/output/case_disruption.parquet",
+      "family": "caselaw",
+      "rows": 5179698,
+      "bytes": 169933345,
+      "columns": [
+        "case_id",
+        "CD_3",
+        "F_3",
+        "E_3",
+        "G_3",
+        "ni_3",
+        "nj_3",
+        "nk_3",
+        "CD_5",
+        "F_5",
+        "E_5",
+        "G_5",
+        "ni_5",
+        "nj_5",
+        "nk_5",
+        "CD_10",
+        "F_10",
+        "E_10",
+        "G_10",
+        "ni_10",
+        "nj_10",
+        "nk_10",
+        "CD_all",
+        "F_all",
+        "E_all",
+        "G_all",
+        "ni_all",
+        "nj_all",
+        "nk_all"
+      ],
+      "schema": [
+        {
+          "name": "case_id",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "CD_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "F_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "E_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "G_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "ni_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "nj_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "nk_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "CD_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "F_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "E_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "G_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "ni_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "nj_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "nk_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "CD_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "F_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "E_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "G_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "ni_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "nj_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "nk_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "CD_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "F_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "E_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "G_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "ni_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "nj_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "nk_all",
+          "type": "float",
+          "nullable": true
+        }
+      ],
+      "row_groups": 5,
+      "modified_utc": "2026-09-03T15:37:13.733446Z",
+      "grain": "One document."
+    },
+    {
+      "path": "Case law/output/case_feg_disruption_trend.parquet",
+      "family": "caselaw",
+      "rows": 221,
+      "bytes": 64485,
+      "columns": [
+        "year",
+        "n",
+        "CD_3_mean",
+        "F_3_mean",
+        "E_3_mean",
+        "G_3_mean",
+        "ni_3_mean",
+        "nj_3_mean",
+        "nk_3_mean",
+        "njfrac_3_mean",
+        "CD_5_mean",
+        "F_5_mean",
+        "E_5_mean",
+        "G_5_mean",
+        "ni_5_mean",
+        "nj_5_mean",
+        "nk_5_mean",
+        "njfrac_5_mean",
+        "CD_10_mean",
+        "F_10_mean",
+        "E_10_mean",
+        "G_10_mean",
+        "ni_10_mean",
+        "nj_10_mean",
+        "nk_10_mean",
+        "njfrac_10_mean",
+        "CD_all_mean",
+        "F_all_mean",
+        "E_all_mean",
+        "G_all_mean",
+        "ni_all_mean",
+        "nj_all_mean",
+        "nk_all_mean",
+        "njfrac_all_mean",
+        "n_3_defined",
+        "n_5_defined",
+        "n_10_defined",
+        "n_all_defined"
+      ],
+      "schema": [
+        {
+          "name": "year",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "n",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "CD_3_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "F_3_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "E_3_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "G_3_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "ni_3_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "nj_3_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "nk_3_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "njfrac_3_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "CD_5_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "F_5_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "E_5_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "G_5_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "ni_5_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "nj_5_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "nk_5_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "njfrac_5_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "CD_10_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "F_10_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "E_10_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "G_10_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "ni_10_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "nj_10_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "nk_10_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "njfrac_10_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "CD_all_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "F_all_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "E_all_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "G_all_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "ni_all_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "nj_all_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "nk_all_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "njfrac_all_mean",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "n_3_defined",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "n_5_defined",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "n_10_defined",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "n_all_defined",
+          "type": "int64",
+          "nullable": true
+        }
+      ],
+      "row_groups": 1,
+      "modified_utc": "2026-09-03T16:13:49.181149Z",
+      "grain": "One decision cohort year with aggregate metrics."
+    },
+    {
+      "path": "Case law/output/case_hit_probability.parquet",
+      "family": "caselaw",
+      "rows": 5177903,
+      "bytes": 46166780,
+      "columns": [
+        "case_id",
+        "jurisdiction",
+        "decision_year",
+        "cohort_n",
+        "pctl_C_3",
+        "pctl_C_5",
+        "pctl_C_10",
+        "pctl_C_all"
+      ],
+      "schema": [
+        {
+          "name": "case_id",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "jurisdiction",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "decision_year",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "cohort_n",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_3",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_5",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_10",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_all",
+          "type": "double",
+          "nullable": true
+        }
+      ],
+      "row_groups": 6,
+      "modified_utc": "2026-09-03T16:05:36.806285Z",
+      "grain": "One document."
+    },
+    {
+      "path": "Case law/output/case_metadata.parquet",
+      "family": "caselaw",
+      "rows": 5179698,
+      "bytes": 151548626,
+      "columns": [
+        "case_id",
+        "decision_year",
+        "decision_date",
+        "jurisdiction",
+        "jurisdiction_id",
+        "court",
+        "court_id",
+        "reporter",
+        "reporter_id",
+        "name_abbreviation",
+        "ref_count"
+      ],
+      "schema": [
+        {
+          "name": "case_id",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "decision_year",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "decision_date",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "jurisdiction",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "jurisdiction_id",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "court",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "court_id",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "reporter",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "reporter_id",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "name_abbreviation",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "ref_count",
+          "type": "int32",
+          "nullable": true
+        }
+      ],
+      "row_groups": 5,
+      "modified_utc": "2026-09-03T15:19:34.103850Z",
+      "grain": "One document."
+    },
+    {
+      "path": "Case law/output/case_sb.parquet",
+      "family": "caselaw",
+      "rows": 3787861,
+      "bytes": 30300643,
+      "columns": [
+        "case_id",
+        "SB_B",
+        "SB_T",
+        "n_cite"
+      ],
+      "schema": [
+        {
+          "name": "case_id",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "SB_B",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "SB_T",
+          "type": "int16",
+          "nullable": true
+        },
+        {
+          "name": "n_cite",
+          "type": "int32",
+          "nullable": true
+        }
+      ],
+      "row_groups": 4,
+      "modified_utc": "2026-09-03T15:20:20.846186Z",
+      "grain": "One document."
+    }
+  ],
+  "total_files": 34,
+  "total_rows": 3336548060,
+  "total_bytes": 39726570504,
+  "excluded_files": [
+    "OpenAlex/output/paper_z_score_1980_1984.parquet",
+    "OpenAlex/output/paper_z_score_1985_1989.parquet",
+    "OpenAlex/output/paper_z_score_1990_2000.parquet",
+    "OpenAlex/output/paper_z_score_2000_2005.parquet",
+    "OpenAlex/output/paper_z_score_2001_2006.onepass.parquet",
+    "OpenAlex/output/paper_z_score_2001_2006.parquet",
+    "OpenAlex/output/paper_z_score_2007_2011.parquet",
+    "OpenAlex/output/paper_z_score_2012_2012.parquet",
+    "OpenAlex/output/paper_z_score_2013_2013.parquet",
+    "OpenAlex/output/paper_z_score_2014_2014.parquet",
+    "OpenAlex/output/paper_z_score_2015_2015.parquet",
+    "OpenAlex/output/paper_z_score_2016_2016.parquet",
+    "OpenAlex/output/paper_z_score_2017_2017.parquet",
+    "OpenAlex/output/paper_z_score_2018_2018.parquet",
+    "OpenAlex/output/paper_z_score_2019_2019.parquet",
+    "OpenAlex/output/paper_z_score_2020_2020.parquet",
+    "OpenAlex/output/paper_z_score_old.parquet",
+    "OpenAlex/output/z_score_pair_1980_1984.parquet",
+    "OpenAlex/output/z_score_pair_1985_1989.parquet",
+    "OpenAlex/output/z_score_pair_1990_2000.parquet",
+    "OpenAlex/output/z_score_pair_2000_2005.parquet",
+    "OpenAlex/output/z_score_pair_2001_2006.onepass.parquet",
+    "OpenAlex/output/z_score_pair_2001_2006.parquet",
+    "OpenAlex/output/z_score_pair_2007_2011.parquet",
+    "OpenAlex/output/z_score_pair_2012_2012.parquet",
+    "OpenAlex/output/z_score_pair_2013_2013.parquet",
+    "OpenAlex/output/z_score_pair_2014_2014.parquet",
+    "OpenAlex/output/z_score_pair_2015_2015.parquet",
+    "OpenAlex/output/z_score_pair_2016_2016.parquet",
+    "OpenAlex/output/z_score_pair_2017_2017.parquet",
+    "OpenAlex/output/z_score_pair_2018_2018.parquet",
+    "OpenAlex/output/z_score_pair_2019_2019.parquet",
+    "OpenAlex/output/z_score_pair_2020_2020.parquet",
+    "OpenAlex/output/z_score_pair_old.parquet",
+    "PatentView/output/patent_citation.parquet.partial-granted-only",
+    "PatentView/output/patent_citation_trend_old.parquet",
+    "PatentView/output/patent_disruption.parquet.pre-dedup",
+    "PatentView/output/patent_hit_probability_old.parquet"
+  ],
+  "excluded_datasets": [
+    {
+      "path": "OpenAlex/output/referenced_works_w_year",
+      "reason": "Sharded reference intermediate, not a final top-level table."
+    }
+  ],
+  "exclusions_note": "Explicit canonical top-level outputs only. Old vintages, backups, dated z-score partitions and sharded reference intermediates are excluded. The legacy paper_team_size table remains listed and labeled.",
+  "paper_z_score_provenance": {
+    "path": "OpenAlex/output/paper_z_score_provenance.json",
+    "producer": "OpenAlex/notebook/paper_z_score_merge.ipynb",
+    "status": "row_count_matches_current_output",
+    "coverage_years": [
+      1980,
+      2020
+    ],
+    "paper_rows": 41425041,
+    "note": "Coverage is explicitly recorded in the provenance file; the bare output filename does not imply coverage beginning in 1900.",
+    "vintage": "post-MAG-alignment fix (is_journal-only mapping) and post two-pass rewrite",
+    "partitions": [
+      "paper_z_score_1980_1984.parquet",
+      "paper_z_score_1985_1989.parquet",
+      "paper_z_score_1990_2000.parquet",
+      "paper_z_score_2001_2006.parquet",
+      "paper_z_score_2007_2011.parquet",
+      "paper_z_score_2012_2012.parquet",
+      "paper_z_score_2013_2013.parquet",
+      "paper_z_score_2014_2014.parquet",
+      "paper_z_score_2015_2015.parquet",
+      "paper_z_score_2016_2016.parquet",
+      "paper_z_score_2017_2017.parquet",
+      "paper_z_score_2018_2018.parquet",
+      "paper_z_score_2019_2019.parquet",
+      "paper_z_score_2020_2020.parquet"
+    ]
+  },
+  "ppp_provenance": {
+    "status": "run_log_matches_current_output_counts",
+    "producer": "PPP/notebook/ppp_citation_trend.ipynb",
+    "configuration": "PPP/ppp_common.py",
+    "output_rows": {
+      "ppp_paper_trend": 5788073,
+      "ppp_patent_trend": 2906165
+    },
+    "note": "Pair counts describe linkage records, not trend rows. Saved outputs embedded in the producing notebook may be stale; provenance below requires a job log matching both current output row counts.",
+    "source": "PPP/_patent_paper_pairs_plus.csv",
+    "source_option": "plus",
+    "pairs": 548315,
+    "distinct_papers": 335917,
+    "distinct_patents": 309729,
+    "run_log": "jobs/PPP/logs/PPP_ppp_citation_trend-57022053.out",
+    "run_log_modified_utc": "2026-09-01T16:19:37.695050Z",
+    "source_bytes": 52679809
+  }
+}

@@ -1,0 +1,79 @@
+# ------------------------------------------------------------------------------
+# Science of Science -- what stays out of git
+#
+# The repository tracks CODE and small reference tables: notebooks, *_common.py
+# modules, SLURM job scripts, per-pipeline Readme.txt files, validation figures.
+# Bulk data lives on Midway only (/project/jevans/Dawoon/Science of Science).
+# Everything under the headings below is rebuildable from the notebooks or is a
+# raw-data mirror, and most of it is far above GitHub's 100 MB per-file limit.
+# ------------------------------------------------------------------------------
+
+# --- Excluded pipeline (kept out of this repository on purpose) ---------------
+Atypicality/
+jobs/Atypicality/
+
+# --- Bulk data: metric outputs, caches, raw mirrors ---------------------------
+*.parquet
+*.parquet.*
+*.npz
+*.pkl
+*.pickle
+*.gml
+*.h5
+*.hdf5
+*.feather
+*.arrow
+*.db
+*.duckdb
+*.sqlite
+*.zip
+*.tsv
+*.tsv.gz
+*.csv.gz
+
+# Data directories (rebuildable caches and raw dumps)
+**/cache/
+**/raw/
+PatentView/Granted/
+PatentView/Pregranted/
+
+# Large CSV inputs (the tiny schema/reference CSVs are re-included below)
+*.csv
+!openalex_2026_*.csv
+!OpenAlex/Abstract data/*.csv
+
+# --- Small summary tables that ARE committed (all under ~1 MB) ----------------
+!**/output/*_feg_disruption_trend.parquet
+!**/output/*_disruption_trend_summary.parquet
+!**/output/*_disruption_compare.parquet
+
+# --- SLURM logs and run artefacts --------------------------------------------
+**/logs/
+*.out
+*.err
+slurm-*.out
+.duckdb_tmp/
+duckdb_tmp/
+
+# --- Editor / interpreter noise ----------------------------------------------
+.ipynb_checkpoints/
+__pycache__/
+*.pyc
+*.pyo
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# --- Manuscript drafts (not code, not data) ------------------------------------
+PPP/*.pdf
+
+# --- Ad-hoc backups (superseded versions are kept in <pipeline>/Old/ instead) --
+*.bak
+*.bak-*
+*.bak.*
+
+# --- Superseded by README.md -------------------------------------------------
+Readme.txt
+!*/Readme.txt
+!*/*/Readme.txt

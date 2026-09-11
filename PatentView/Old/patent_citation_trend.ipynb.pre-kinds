@@ -1,0 +1,487 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "c9eb9319",
+   "metadata": {},
+   "source": [
+    "# Patent Citation Trend \u2014 yearly incoming citations per patent (granted + application)\n",
+    "\n",
+    "For every US patent, its **year-by-year incoming citations**, anchored at the **grant year**, split into\n",
+    "**examiner** / **non-examiner** (applicant + other; `cited by third party` excluded), for two citation\n",
+    "sources: **granted** patent->patent (`g_us_patent_citation`) and **application** (pre-grant) citations\n",
+    "(`g_us_application_citation`, cited pgpub mapped to a granted patent via `pg_granted_pgpubs_crosswalk`).\n",
+    "\n",
+    "Citing-year = the **citing patent's grant year** for both sources (kept identical so the two trends share the\n",
+    "same `yrs_since_grant` axis; application citations are physically made earlier, at the citing application's\n",
+    "filing, so their `yrs_since_grant` is an upper bound).\n",
+    "\n",
+    "## Raw / input data\n",
+    "```\n",
+    "E:/Dawoon Jeong/Data/PatentView/Granted/g_us_patent_citation.tsv.zip        # granted patent->patent\n",
+    "E:/Dawoon Jeong/Data/PatentView/Granted/g_us_application_citation.tsv.zip   # application (pgpub cited)\n",
+    "E:/Dawoon Jeong/Data/PatentView/Pregranted_260605/pg_granted_pgpubs_crosswalk.tsv.zip  # pgpub->patent\n",
+    "E:/Dawoon Jeong/Data/PatentView/Granted/g_patent.tsv.zip                    # grant years\n",
+    "```\n",
+    "\n",
+    "## Output\n",
+    "`notebook/patent/output/patent_citation_trend.parquet` \u2014 `patent_id, grant_year, cite_year, yrs_since_grant,\n",
+    "pat2pat_examiner, pat2pat_non_examiner, app2pat_examiner, app2pat_non_examiner` (one row per\n",
+    "patent x citing-year with >=1 citation from either source)."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "id": "d0b52af3",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-08-28T20:36:46.155292Z",
+     "iopub.status.busy": "2026-08-28T20:36:46.155292Z",
+     "iopub.status.idle": "2026-08-28T20:36:46.407157Z",
+     "shell.execute_reply": "2026-08-28T20:36:46.407157Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "ROOT: C:\\Users\\jdwoo\\OneDrive\\Desktop\\Research\\Science of Science\n"
+     ]
+    }
+   ],
+   "source": [
+    "import os, sys, gc, time\n",
+    "import numpy as np, pandas as pd\n",
+    "sys.path.insert(0, '/project/jevans/Dawoon/Science of Science/PatentView')\n",
+    "import pv_common as pv\n",
+    "ROOT, D, OUT = pv.BASE, pv.GRANTED, pv.OUT\n",
+    "OUT_FP = pv.out('patent_citation_trend.parquet')\n",
+    "XWALK = pv.pregranted('pg_granted_pgpubs_crosswalk.tsv.zip')   # arrived 2026-08-28\n",
+    "pv.preflight('patent_citation_trend')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "90665503",
+   "metadata": {},
+   "source": [
+    "## 1. grant years"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "id": "a70def14",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-08-28T20:36:46.408161Z",
+     "iopub.status.busy": "2026-08-28T20:36:46.408161Z",
+     "iopub.status.idle": "2026-08-28T20:36:56.464331Z",
+     "shell.execute_reply": "2026-08-28T20:36:56.464331Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "utility patents: 8,531,961\n",
+      "CPU times: total: 9.95 s\n",
+      "Wall time: 10.1 s\n"
+     ]
+    },
+    {
+     "data": {
+      "text/plain": [
+       "22"
+      ]
+     },
+     "execution_count": 2,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "%%time\n",
+    "gp = pd.read_csv(os.path.join(D, 'g_patent.tsv.zip'), sep='\\t',\n",
+    "                 usecols=['patent_id', 'patent_type', 'patent_date'], dtype={'patent_id': str, 'patent_type': str})\n",
+    "gp = gp[gp['patent_type'] == 'utility']\n",
+    "gp['gy'] = pd.to_datetime(gp['patent_date'], errors='coerce').dt.year\n",
+    "gp = gp.dropna(subset=['gy']); pid2year = dict(zip(gp['patent_id'], gp['gy'].astype(int)))\n",
+    "print(f'utility patents: {len(pid2year):,}'); del gp; gc.collect()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "68362f4e",
+   "metadata": {},
+   "source": [
+    "## 2. Scan patent\u2192patent citations \u2192 (cited, citing grant year, examiner/non-examiner)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "id": "f0442e9d",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-08-28T20:36:56.465339Z",
+     "iopub.status.busy": "2026-08-28T20:36:56.465339Z",
+     "iopub.status.idle": "2026-08-28T20:45:46.434980Z",
+     "shell.execute_reply": "2026-08-28T20:45:46.434980Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "[530s] scanned 152,626,482 rows -> 46,795,788 (cited, year, bucket) groups\n",
+      "CPU times: total: 8min 42s\n",
+      "Wall time: 8min 49s\n"
+     ]
+    }
+   ],
+   "source": [
+    "%%time\n",
+    "acc = []; t0 = time.time(); seen = 0\n",
+    "for ch in pd.read_csv(os.path.join(D, 'g_us_patent_citation.tsv.zip'), sep='\\t',\n",
+    "                      usecols=['patent_id', 'citation_patent_id', 'citation_category'], dtype=str, chunksize=5_000_000):\n",
+    "    ch = ch.dropna(subset=['patent_id', 'citation_patent_id'])\n",
+    "    cat = ch['citation_category'].fillna('').str.lower()\n",
+    "    notp = ~cat.str.contains('third party', na=False)\n",
+    "    ch = ch.loc[notp]; cat = cat.loc[notp]\n",
+    "    cy = ch['patent_id'].map(pid2year); dy = ch['citation_patent_id'].map(pid2year)\n",
+    "    keep = (cy.notna() & dy.notna()).values\n",
+    "    if keep.any():\n",
+    "        diff = (cy.values - dy.values)[keep]\n",
+    "        cited = ch['citation_patent_id'].values[keep]\n",
+    "        bucket = np.where(cat.values[keep] == 'cited by examiner', 'examiner', 'non_examiner')\n",
+    "        pos = diff >= 0\n",
+    "        d = pd.DataFrame({'cited': cited[pos], 'cite_year': cy.values[keep][pos].astype(int), 'bucket': bucket[pos]})\n",
+    "        acc.append(d.groupby(['cited', 'cite_year', 'bucket']).size().reset_index(name='n'))\n",
+    "    seen += len(ch)\n",
+    "pat = pd.concat(acc, ignore_index=True).groupby(['cited', 'cite_year', 'bucket'])['n'].sum().reset_index()\n",
+    "print(f'[{time.time()-t0:.0f}s] scanned {seen:,} rows -> {len(pat):,} (cited, year, bucket) groups')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "0857ce45",
+   "metadata": {},
+   "source": [
+    "## 2b. Scan application citations -> (cited, citing grant year, examiner/non-examiner)\n",
+    "\n",
+    "Cited pre-grant publication (`citation_document_number` = pgpub_id) mapped to a granted `patent_id` via `pg_granted_pgpubs_crosswalk`; same third-party exclusion and examiner/non-examiner split."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "id": "c018cd99",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-08-28T20:45:46.435985Z",
+     "iopub.status.busy": "2026-08-28T20:45:46.435985Z",
+     "iopub.status.idle": "2026-08-28T20:52:48.067101Z",
+     "shell.execute_reply": "2026-08-28T20:52:48.067101Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "crosswalk pgpub->patent: 5,432,615\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "[409s] scanned 78,557,720 app rows -> 20,098,313 (cited, year, bucket) groups\n",
+      "CPU times: total: 6min 54s\n",
+      "Wall time: 7min 1s\n"
+     ]
+    }
+   ],
+   "source": [
+    "%%time\n",
+    "XW = XWALK\n",
+    "xw = pd.read_csv(XW, sep='\\t', usecols=['pgpub_id', 'patent_id'], dtype=str, on_bad_lines='skip')\n",
+    "xw = xw.dropna(subset=['pgpub_id', 'patent_id']).drop_duplicates('pgpub_id')\n",
+    "pgpub2pid = dict(zip(xw['pgpub_id'], xw['patent_id'])); del xw; gc.collect()\n",
+    "print(f'crosswalk pgpub->patent: {len(pgpub2pid):,}')\n",
+    "accA = []; t0 = time.time(); seen = 0\n",
+    "for ch in pd.read_csv(os.path.join(D, 'g_us_application_citation.tsv.zip'), sep='\\t',\n",
+    "                      usecols=['patent_id', 'citation_document_number', 'citation_category'],\n",
+    "                      dtype=str, chunksize=5_000_000, on_bad_lines='skip'):\n",
+    "    ch = ch.dropna(subset=['patent_id', 'citation_document_number'])\n",
+    "    cat = ch['citation_category'].fillna('').str.lower()\n",
+    "    notp = ~cat.str.contains('third party', na=False)\n",
+    "    ch = ch.loc[notp]; cat = cat.loc[notp]\n",
+    "    cited = ch['citation_document_number'].map(pgpub2pid)\n",
+    "    cy = ch['patent_id'].map(pid2year); dy = cited.map(pid2year)\n",
+    "    keep = (cited.notna() & cy.notna() & dy.notna()).values\n",
+    "    if keep.any():\n",
+    "        diff = (cy.values - dy.values)[keep]\n",
+    "        cc = cited.values[keep]\n",
+    "        bucket = np.where(cat.values[keep] == 'cited by examiner', 'examiner', 'non_examiner')\n",
+    "        pos = diff >= 0\n",
+    "        d = pd.DataFrame({'cited': cc[pos], 'cite_year': cy.values[keep][pos].astype(int), 'bucket': bucket[pos]})\n",
+    "        accA.append(d.groupby(['cited', 'cite_year', 'bucket']).size().reset_index(name='n'))\n",
+    "    seen += len(ch)\n",
+    "patapp = pd.concat(accA, ignore_index=True).groupby(['cited', 'cite_year', 'bucket'])['n'].sum().reset_index()\n",
+    "del pgpub2pid; gc.collect()\n",
+    "print(f'[{time.time()-t0:.0f}s] scanned {seen:,} app rows -> {len(patapp):,} (cited, year, bucket) groups')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "3d4b4d32",
+   "metadata": {},
+   "source": [
+    "## 3. Assemble + save"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "id": "cd76d685",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-08-28T20:52:48.068104Z",
+     "iopub.status.busy": "2026-08-28T20:52:48.068104Z",
+     "iopub.status.idle": "2026-08-28T20:54:15.888490Z",
+     "shell.execute_reply": "2026-08-28T20:54:15.888490Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "WROTE C:\\Users\\jdwoo\\OneDrive\\Desktop\\Research\\Science of Science\\notebook\\patent\\output\\patent_citation_trend.parquet  (50,546,229 rows)\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "  patents covered: 7,160,531\n",
+      "  granted p2p total: 119,291,183 (examiner 17.1%)\n",
+      "  application p2p total: 49,541,000 (examiner 27.2%)\n"
+     ]
+    },
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th>bucket</th>\n",
+       "      <th>patent_id</th>\n",
+       "      <th>grant_year</th>\n",
+       "      <th>cite_year</th>\n",
+       "      <th>yrs_since_grant</th>\n",
+       "      <th>pat2pat_examiner</th>\n",
+       "      <th>pat2pat_non_examiner</th>\n",
+       "      <th>app2pat_examiner</th>\n",
+       "      <th>app2pat_non_examiner</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>10000000</td>\n",
+       "      <td>2018</td>\n",
+       "      <td>2018</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>2</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>10000000</td>\n",
+       "      <td>2018</td>\n",
+       "      <td>2019</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>2</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>10000000</td>\n",
+       "      <td>2018</td>\n",
+       "      <td>2020</td>\n",
+       "      <td>2</td>\n",
+       "      <td>1</td>\n",
+       "      <td>2</td>\n",
+       "      <td>2</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>10000000</td>\n",
+       "      <td>2018</td>\n",
+       "      <td>2021</td>\n",
+       "      <td>3</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>10000000</td>\n",
+       "      <td>2018</td>\n",
+       "      <td>2022</td>\n",
+       "      <td>4</td>\n",
+       "      <td>1</td>\n",
+       "      <td>3</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>5</th>\n",
+       "      <td>10000000</td>\n",
+       "      <td>2018</td>\n",
+       "      <td>2023</td>\n",
+       "      <td>5</td>\n",
+       "      <td>0</td>\n",
+       "      <td>2</td>\n",
+       "      <td>1</td>\n",
+       "      <td>3</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>6</th>\n",
+       "      <td>10000000</td>\n",
+       "      <td>2018</td>\n",
+       "      <td>2024</td>\n",
+       "      <td>6</td>\n",
+       "      <td>0</td>\n",
+       "      <td>3</td>\n",
+       "      <td>0</td>\n",
+       "      <td>5</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>7</th>\n",
+       "      <td>10000000</td>\n",
+       "      <td>2018</td>\n",
+       "      <td>2025</td>\n",
+       "      <td>7</td>\n",
+       "      <td>0</td>\n",
+       "      <td>6</td>\n",
+       "      <td>0</td>\n",
+       "      <td>4</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "bucket patent_id  grant_year  cite_year  yrs_since_grant  pat2pat_examiner  \\\n",
+       "0       10000000        2018       2018                0                 0   \n",
+       "1       10000000        2018       2019                1                 0   \n",
+       "2       10000000        2018       2020                2                 1   \n",
+       "3       10000000        2018       2021                3                 1   \n",
+       "4       10000000        2018       2022                4                 1   \n",
+       "5       10000000        2018       2023                5                 0   \n",
+       "6       10000000        2018       2024                6                 0   \n",
+       "7       10000000        2018       2025                7                 0   \n",
+       "\n",
+       "bucket  pat2pat_non_examiner  app2pat_examiner  app2pat_non_examiner  \n",
+       "0                          0                 1                     2  \n",
+       "1                          0                 0                     2  \n",
+       "2                          2                 2                     0  \n",
+       "3                          0                 0                     0  \n",
+       "4                          3                 1                     0  \n",
+       "5                          2                 1                     3  \n",
+       "6                          3                 0                     5  \n",
+       "7                          6                 0                     4  "
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "CPU times: total: 1min 25s\n",
+      "Wall time: 1min 27s\n"
+     ]
+    }
+   ],
+   "source": [
+    "%%time\n",
+    "def pivot_long(long_df, ex, nx):\n",
+    "    p = long_df.pivot_table(index=['cited', 'cite_year'], columns='bucket', values='n', fill_value=0).reset_index()\n",
+    "    for b in ['examiner', 'non_examiner']:\n",
+    "        if b not in p.columns: p[b] = 0\n",
+    "    return p.rename(columns={'examiner': ex, 'non_examiner': nx})[['cited', 'cite_year', ex, nx]]\n",
+    "\n",
+    "pg = pivot_long(pat, 'pat2pat_examiner', 'pat2pat_non_examiner')\n",
+    "pa = pivot_long(patapp, 'app2pat_examiner', 'app2pat_non_examiner')\n",
+    "allt = pg.merge(pa, on=['cited', 'cite_year'], how='outer')\n",
+    "valcols = ['pat2pat_examiner', 'pat2pat_non_examiner', 'app2pat_examiner', 'app2pat_non_examiner']\n",
+    "for c in valcols: allt[c] = allt[c].fillna(0).astype('int64')\n",
+    "allt = allt.rename(columns={'cited': 'patent_id'})\n",
+    "allt['grant_year'] = allt['patent_id'].map(pid2year)\n",
+    "allt = allt.dropna(subset=['grant_year'])\n",
+    "allt['grant_year'] = allt['grant_year'].astype(int); allt['cite_year'] = allt['cite_year'].astype(int)\n",
+    "allt = allt[allt['cite_year'] >= allt['grant_year']]\n",
+    "allt['yrs_since_grant'] = allt['cite_year'] - allt['grant_year']\n",
+    "allt = allt[['patent_id', 'grant_year', 'cite_year', 'yrs_since_grant'] + valcols]\n",
+    "allt.to_parquet(OUT_FP, index=False)\n",
+    "print(f'WROTE {OUT_FP}  ({len(allt):,} rows)')\n",
+    "gs = allt['pat2pat_examiner'].sum() + allt['pat2pat_non_examiner'].sum()\n",
+    "asum = allt['app2pat_examiner'].sum() + allt['app2pat_non_examiner'].sum()\n",
+    "print(f'  patents covered: {allt.patent_id.nunique():,}')\n",
+    "print(f'  granted p2p total: {gs:,} (examiner {allt.pat2pat_examiner.sum()/gs*100:.1f}%)')\n",
+    "print(f'  application p2p total: {asum:,} (examiner {allt.app2pat_examiner.sum()/max(asum,1)*100:.1f}%)')\n",
+    "display(allt.head(8))"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.11.9"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

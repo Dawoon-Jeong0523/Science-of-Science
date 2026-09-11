@@ -1,0 +1,160 @@
+\documentclass[11pt]{article}
+\usepackage[margin=2.2cm]{geometry}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage[hidelinks]{hyperref}
+\usepackage{xcolor}
+\usepackage{listings}
+\lstset{basicstyle=\ttfamily\small, breaklines=true, columns=fullflexible, frame=single, framerule=0.2pt}
+
+\title{PATSTAT metric chain: cancellation record (2026-09-09)}
+\author{Dawoon Jeong \\ \small \texttt{Science of Science/PATSTAT}}
+\date{Written 2026-09-09 09:45 CDT}
+
+\begin{document}
+\maketitle
+
+\section*{Summary}
+
+The nine-job PATSTAT metric chain submitted on 2026-09-07 15:18 by
+\texttt{jobs/PATSTAT/submit\_patstat.sh} was cancelled in full on
+2026-09-09 09:41:08 CDT with \texttt{scancel}, at the user's request.
+Only the first job, \texttt{ps\_patstat\_reference}, had started; it had run for
+24\,h\,06\,m of its 48\,h limit without leaving cell~2 of the notebook.
+The eight downstream jobs were still \texttt{PENDING (Dependency)} and never ran.
+No output parquet was written, so there is nothing partial to clean up; the chain can be
+resubmitted from scratch once the stall in \texttt{patstat\_reference} is understood.
+
+\section*{1. Jobs cancelled}
+
+All jobs ran on partition \texttt{jevans}, account \texttt{pi-jevans}, QOS \texttt{jevans},
+16 CPUs and 400\,GB per node, 48\,h limit (\texttt{jobs/PATSTAT/nb.sbatch}).
+
+\begin{center}
+\small
+\begin{tabular}{llllll}
+\toprule
+Job ID & Notebook & Depends on & State at cancel & Started & Elapsed \\
+\midrule
+57940901 & patstat\_reference            & (none)   & RUNNING & 2026-09-08 09:34:36 & 1-00:06:32 \\
+57940903 & patstat\_metadata             & 57940901 & PENDING & --- & 0 \\
+57940905 & patstat\_citation             & 57940903 & PENDING & --- & 0 \\
+57940907 & patstat\_disruption           & 57940903 & PENDING & --- & 0 \\
+57940911 & patstat\_sb                   & 57940903 & PENDING & --- & 0 \\
+57940913 & patstat\_z\_score             & 57940903 & PENDING & --- & 0 \\
+57940916 & patstat\_citation\_trend      & 57940905 & PENDING & --- & 0 \\
+57940920 & patstat\_hit\_probability     & 57940905 & PENDING & --- & 0 \\
+57940922 & patstat\_feg\_disruption\_trend & 57940907 & PENDING & --- & 0 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+All nine now show \texttt{CANCELLED by 30299883} in \texttt{sacct}. The stage-0 load array
+(57939749, 21 tasks, 2026-09-07) is unaffected: \texttt{raw/} holds all 11 tables
+(tls201, 202, 204, 206, 207, 209, 211, 212, 224, 228, 230; 22\,GB of zstd parquet) and remains valid input.
+
+\section*{2. State of \texttt{ps\_patstat\_reference} (57940901) at cancellation}
+
+\paragraph{Where it stopped.}
+The log \texttt{jobs/PATSTAT/logs/ps\_patstat\_reference-57940901.out} ends with the
+citation audit table that cell~2 prints \emph{before} it builds the edge table. The line
+``patent citations routed to a citing application: \ldots'' that follows the
+\texttt{CREATE OR REPLACE TABLE edges} statement never appeared, and cell~3 never began.
+So the whole 24 hours were spent inside one DuckDB statement: the three-way join
+
+\begin{lstlisting}
+CREATE OR REPLACE TABLE edges AS
+  SELECT ... FROM raw/tls212 c
+  JOIN pub pc      ON c.pat_publn_id = pc.pat_publn_id
+  LEFT JOIN pub pp ON c.cited_pat_publn_id <> 0
+                  AND c.cited_pat_publn_id = pp.pat_publn_id
+  WHERE (c.cited_pat_publn_id <> 0 OR c.cited_appln_id <> 0)
+    AND NOT <third-party predicate>
+\end{lstlisting}
+
+(An earlier same-day summary attributed the stall to cell~3; the log shows it was cell~2.)
+
+\paragraph{What the notebook had established before stalling.}
+\begin{center}
+\small
+\begin{tabular}{lr}
+\toprule
+Quantity & Value \\
+\midrule
+Universe (\texttt{ipr\_type='PI'}, \texttt{appln\_id} $<$ 900\,000\,000, filing year 1900--2023) & 84\,914\,026 applications \\
+Publications (\texttt{tls211}, \texttt{pat\_publn\_id} $\neq$ 0) & 151\,566\,588 \\
+\texttt{tls212} rows total & 507\,520\,117 \\
+\quad of which patent citations (cited publn or appln $\neq$ 0) & 434\,105\,665 \\
+\quad of which NPL or empty & 73\,414\,452 \\
+\quad of which third party (115 / TPO) & 132\,354 \\
+\quad of which replenished & 17\,728\,407 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Cells 0--2 up to the audit table completed within the first minute (log mtime 09:34).
+
+\paragraph{Resource picture (sstat / ps on midway3-0290 just before cancel).}
+\begin{center}
+\small
+\begin{tabular}{ll}
+\toprule
+Node & midway3-0290 (16 CPUs, 400\,GB requested) \\
+Wall time & 24\,h\,06\,m of 48\,h \\
+AveCPU & 16\,d\,00\,h\,33\,m $\approx$ 16 cores fully busy for the whole run \\
+Python RSS at cancel & 39.6\,GB; MaxRSS 65.3\,GB \\
+DuckDB memory\_limit & 200\,GB (\texttt{ps.connect}); never approached \\
+MaxDiskRead / MaxDiskWrite & 5.0\,GB / 1.4\,kB \\
+\texttt{cache/duckdb\_tmp} & empty --- no spill to disk \\
+\texttt{output/} & empty --- \texttt{patstat\_reference.parquet} never written \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The statement was CPU-bound in memory, not I/O- or memory-bound: all threads were busy,
+memory stayed at a third of the limit, nothing was spilled, and nothing was written.
+A hash join of 434\,M rows against a 152\,M-row table on 16 threads should finish in minutes,
+so a 24\,h run points to a pathological plan rather than to the data volume.
+Software: DuckDB 1.5.5, pyarrow 22.0.0, Python 3.12.12 (env \texttt{Curvature}).
+
+\section*{3. Hypotheses to test before resubmitting}
+
+None of these were verified; the job was cancelled without an \texttt{EXPLAIN ANALYZE}.
+
+\begin{enumerate}
+  \item \textbf{The LEFT JOIN condition.} \texttt{c.cited\_pat\_publn\_id <> 0 AND c.cited\_pat\_publn\_id = pp.pat\_publn\_id}
+        mixes a left-side filter into the join predicate. If the planner does not lift the
+        \texttt{<> 0} out, the join may degrade from a hash join to a nested-loop or a
+        filtered cross product. Rewrite with the filter in a CTE on \texttt{c} and a pure
+        equality join, or use \texttt{NULLIF(c.cited\_pat\_publn\_id, 0) = pp.pat\_publn\_id}.
+  \item \textbf{Two probes of the same 152\,M-row build side.} \texttt{pub} is joined twice.
+        Check with \texttt{EXPLAIN ANALYZE} on one \texttt{tls212} part whether the plan builds
+        the hash table once or once per probe, and whether the build side is \texttt{pub}
+        (as intended) or \texttt{tls212}.
+  \item \textbf{Parquet scan of \texttt{raw/tls212/*.parquet} inside the join.}
+        Materialising \texttt{tls212} into a DuckDB table first (or the filtered projection
+        only, about 434\,M rows and six columns) separates scan cost from join cost.
+  \item \textbf{Timing on a subset.} Run cell~2 on a single part
+        (\texttt{raw/tls212/part01.parquet}) on an interactive node with \texttt{\%\%time}
+        and \texttt{EXPLAIN ANALYZE}; the full statement should scale roughly linearly from that.
+\end{enumerate}
+
+\section*{4. How to resubmit}
+
+Nothing on disk needs deleting. After fixing cell~2 of
+\texttt{notebook/patstat\_reference.ipynb} and confirming the subset timing:
+
+\begin{lstlisting}
+cd "/project/jevans/Dawoon/Science of Science/jobs/PATSTAT"
+./submit_patstat.sh plan      # print the order
+./submit_patstat.sh           # submit the nine-job chain (afterok throughout)
+\end{lstlisting}
+
+To reproduce the accounting in this note:
+
+\begin{lstlisting}
+sacct -j 57940901,57940903,57940905,57940907,57940911,57940913,57940916,57940920,57940922 \
+      -X -P --format=JobID,JobName%32,State,Start,End,Elapsed
+\end{lstlisting}
+
+\end{document}

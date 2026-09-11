@@ -1,0 +1,363 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "0bf3091a",
+   "metadata": {},
+   "source": [
+    "# Patent Hit Probability \u2014 citation percentile within Sector \u00d7 grant-year cohorts\n",
+    "\n",
+    "Computes each US utility patent's **citation percentile** within its **WIPO technology sector \u00d7\n",
+    "grant year** cohort, for each window (C3 / C5 / C10 / C_all). A percentile of 0.99 = top 1%, 0.95 = top 5%,\n",
+    "0.90 = top 10%. Primary key: `patent_id`.\n",
+    "\n",
+    "## Raw / input data (directory & structure)\n",
+    "```\n",
+    "notebook/patent/output/patent_citation.parquet   # patent_id, C_3, C_5, C_10, C_all (forward citations per window)\n",
+    "notebook/patent/output/patent_metadata.parquet   # patent_id, grant_year\n",
+    "E:/Dawoon Jeong/Data/PatentView/Granted/g_wipo_technology.tsv.zip   # patent_id, wipo_field_sequence, wipo_sector_title\n",
+    "```\n",
+    "Cohort **Sector** = `wipo_sector_title` (5 sectors: Electrical engineering, Instruments, Chemistry,\n",
+    "Mechanical engineering, Other fields), taken as the patent's primary WIPO field (lowest sequence).\n",
+    "\n",
+    "## Metric (definition)\n",
+    "Within each (Sector, grant_year) cohort, `pctl_{w}` is the citation **percentile** in `[0, 1]`\n",
+    "(`rank(pct=True, ascending=True, method='min')`): higher = more cited, zero-citation ties sit near 0 and\n",
+    "the most-cited near 1. Read hits as: top 1% \u21d4 `pctl \u2265 0.99`, top 5% \u21d4 `\u2265 0.95`, top 10% \u21d4 `\u2265 0.90`.\n",
+    "Computed independently for `C_3, C_5, C_10, C_all`.\n",
+    "\n",
+    "## Output\n",
+    "`notebook/patent/output/patent_hit_probability.parquet` \u2014 `patent_id, wipo_sector, grant_year` +\n",
+    "`pctl_{w}` for w \u2208 {c3,c5,c10,call} (citation percentile in [0,1] within the cohort)."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "id": "23400fdb",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-08-27T19:43:14.690505Z",
+     "iopub.status.busy": "2026-08-27T19:43:14.690505Z",
+     "iopub.status.idle": "2026-08-27T19:43:15.022323Z",
+     "shell.execute_reply": "2026-08-27T19:43:15.022323Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "ROOT: C:\\Users\\jdwoo\\OneDrive\\Desktop\\Research\\Science of Science\n"
+     ]
+    }
+   ],
+   "source": [
+    "import os, sys, gc, time\n",
+    "import numpy as np, pandas as pd\n",
+    "sys.path.insert(0, '/project/jevans/Dawoon/Science of Science/PatentView')\n",
+    "import pv_common as pv\n",
+    "ROOT, D, OUT = pv.BASE, pv.GRANTED, pv.OUT\n",
+    "POUT = pv.OUT\n",
+    "OUT_FP = pv.out('patent_hit_probability.parquet')\n",
+    "pv.preflight('patent_hit_probability')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "id": "d45fb701",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-08-27T19:43:15.023328Z",
+     "iopub.status.busy": "2026-08-27T19:43:15.023328Z",
+     "iopub.status.idle": "2026-08-27T19:43:15.025802Z",
+     "shell.execute_reply": "2026-08-27T19:43:15.025802Z"
+    }
+   },
+   "outputs": [],
+   "source": [
+    "WINS = [('c3', 'C_3'), ('c5', 'C_5'), ('c10', 'C_10'), ('call', 'C_all')]\n",
+    "def add_percentile(df, cohort_cols):\n",
+    "    \"\"\"Within each cohort partition, the citation PERCENTILE per window in [0, 1]\n",
+    "    (higher = more cited). rank(ascending=True, method='min') puts zero-citation ties near 0 and the\n",
+    "    top near 1; e.g. top 1% / 5% / 10% correspond to pctl >= 0.99 / 0.95 / 0.90.\"\"\"\n",
+    "    for wtag, wcol in WINS:\n",
+    "        df[f'pctl_{wtag}'] = df.groupby(cohort_cols)[wcol].rank(pct=True, ascending=True, method='min').astype('float32')\n",
+    "    return df"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "d0b3e3d9",
+   "metadata": {},
+   "source": [
+    "## 1. Load citations + grant year + WIPO sector"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "id": "09bf1aaa",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-08-27T19:43:15.026804Z",
+     "iopub.status.busy": "2026-08-27T19:43:15.026804Z",
+     "iopub.status.idle": "2026-08-27T19:43:43.196696Z",
+     "shell.execute_reply": "2026-08-27T19:43:43.196696Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "patents with sector: 8,512,715\n",
+      "CPU times: total: 27.5 s\n",
+      "Wall time: 28.2 s\n"
+     ]
+    }
+   ],
+   "source": [
+    "%%time\n",
+    "cit = pd.read_parquet(os.path.join(POUT, 'patent_citation.parquet'), columns=['patent_id', 'C_3', 'C_5', 'C_10', 'C_all'])\n",
+    "yr = pd.read_parquet(os.path.join(POUT, 'patent_metadata.parquet'), columns=['patent_id', 'grant_year'])\n",
+    "wp = pd.read_csv(os.path.join(D, 'g_wipo_technology.tsv.zip'), sep='\\t',\n",
+    "                 usecols=['patent_id', 'wipo_field_sequence', 'wipo_sector_title'],\n",
+    "                 dtype={'patent_id': str, 'wipo_sector_title': str})\n",
+    "wp['wipo_field_sequence'] = pd.to_numeric(wp['wipo_field_sequence'], errors='coerce')\n",
+    "sector = (wp.sort_values(['patent_id', 'wipo_field_sequence']).drop_duplicates('patent_id', keep='first')\n",
+    "            .set_index('patent_id')['wipo_sector_title'].rename('wipo_sector'))\n",
+    "df = yr.merge(cit, on='patent_id', how='left').merge(sector, left_on='patent_id', right_index=True, how='left')\n",
+    "for c in ['C_3', 'C_5', 'C_10', 'C_all']:\n",
+    "    df[c] = df[c].fillna(0).astype('int64')\n",
+    "df = df.dropna(subset=['wipo_sector'])\n",
+    "print(f'patents with sector: {len(df):,}'); del cit, yr, wp"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "b7bef36e",
+   "metadata": {},
+   "source": [
+    "## 2. Compute percentiles + save"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "id": "a38c7505",
+   "metadata": {
+    "execution": {
+     "iopub.execute_input": "2026-08-27T19:43:43.197699Z",
+     "iopub.status.busy": "2026-08-27T19:43:43.197699Z",
+     "iopub.status.idle": "2026-08-27T19:43:58.495020Z",
+     "shell.execute_reply": "2026-08-27T19:43:58.495020Z"
+    }
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "WROTE C:\\Users\\jdwoo\\OneDrive\\Desktop\\Research\\Science of Science\\notebook\\patent\\output\\patent_hit_probability.parquet  (8,512,715 rows, 7 cols)\n",
+      "citation percentile summary:\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "            pctl_c3       pctl_c5      pctl_c10     pctl_call\n",
+      "count  8.512715e+06  8.512715e+06  8.512715e+06  8.512715e+06\n",
+      "mean   3.075000e-01  3.572000e-01  3.878000e-01  3.979000e-01\n",
+      "std    3.631000e-01  3.550000e-01  3.467000e-01  3.446000e-01\n",
+      "min    0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00\n",
+      "25%    0.000000e+00  0.000000e+00  0.000000e+00  0.000000e+00\n",
+      "50%    1.000000e-04  3.159000e-01  3.726000e-01  3.843000e-01\n",
+      "75%    6.487000e-01  6.814000e-01  7.062000e-01  7.131000e-01\n",
+      "max    1.000000e+00  1.000000e+00  1.000000e+00  1.000000e+00\n"
+     ]
+    },
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>patent_id</th>\n",
+       "      <th>wipo_sector</th>\n",
+       "      <th>grant_year</th>\n",
+       "      <th>pctl_c3</th>\n",
+       "      <th>pctl_c5</th>\n",
+       "      <th>pctl_c10</th>\n",
+       "      <th>pctl_call</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>10000000</td>\n",
+       "      <td>Instruments</td>\n",
+       "      <td>2018</td>\n",
+       "      <td>0.899643</td>\n",
+       "      <td>0.922765</td>\n",
+       "      <td>0.934123</td>\n",
+       "      <td>0.934123</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>10000001</td>\n",
+       "      <td>Mechanical engineering</td>\n",
+       "      <td>2018</td>\n",
+       "      <td>0.000020</td>\n",
+       "      <td>0.000020</td>\n",
+       "      <td>0.000020</td>\n",
+       "      <td>0.000020</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>10000002</td>\n",
+       "      <td>Chemistry</td>\n",
+       "      <td>2018</td>\n",
+       "      <td>0.000024</td>\n",
+       "      <td>0.000024</td>\n",
+       "      <td>0.000024</td>\n",
+       "      <td>0.000024</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>10000003</td>\n",
+       "      <td>Mechanical engineering</td>\n",
+       "      <td>2018</td>\n",
+       "      <td>0.607858</td>\n",
+       "      <td>0.687702</td>\n",
+       "      <td>0.599118</td>\n",
+       "      <td>0.599118</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>10000004</td>\n",
+       "      <td>Mechanical engineering</td>\n",
+       "      <td>2018</td>\n",
+       "      <td>0.000020</td>\n",
+       "      <td>0.000020</td>\n",
+       "      <td>0.000020</td>\n",
+       "      <td>0.000020</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>5</th>\n",
+       "      <td>10000005</td>\n",
+       "      <td>Mechanical engineering</td>\n",
+       "      <td>2018</td>\n",
+       "      <td>0.000020</td>\n",
+       "      <td>0.000020</td>\n",
+       "      <td>0.000020</td>\n",
+       "      <td>0.000020</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>6</th>\n",
+       "      <td>10000006</td>\n",
+       "      <td>Mechanical engineering</td>\n",
+       "      <td>2018</td>\n",
+       "      <td>0.607858</td>\n",
+       "      <td>0.473649</td>\n",
+       "      <td>0.394487</td>\n",
+       "      <td>0.394487</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>7</th>\n",
+       "      <td>10000007</td>\n",
+       "      <td>Mechanical engineering</td>\n",
+       "      <td>2018</td>\n",
+       "      <td>0.938078</td>\n",
+       "      <td>0.959226</td>\n",
+       "      <td>0.937536</td>\n",
+       "      <td>0.937536</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "  patent_id             wipo_sector  grant_year   pctl_c3   pctl_c5  pctl_c10  \\\n",
+       "0  10000000             Instruments        2018  0.899643  0.922765  0.934123   \n",
+       "1  10000001  Mechanical engineering        2018  0.000020  0.000020  0.000020   \n",
+       "2  10000002               Chemistry        2018  0.000024  0.000024  0.000024   \n",
+       "3  10000003  Mechanical engineering        2018  0.607858  0.687702  0.599118   \n",
+       "4  10000004  Mechanical engineering        2018  0.000020  0.000020  0.000020   \n",
+       "5  10000005  Mechanical engineering        2018  0.000020  0.000020  0.000020   \n",
+       "6  10000006  Mechanical engineering        2018  0.607858  0.473649  0.394487   \n",
+       "7  10000007  Mechanical engineering        2018  0.938078  0.959226  0.937536   \n",
+       "\n",
+       "   pctl_call  \n",
+       "0   0.934123  \n",
+       "1   0.000020  \n",
+       "2   0.000024  \n",
+       "3   0.599118  \n",
+       "4   0.000020  \n",
+       "5   0.000020  \n",
+       "6   0.394487  \n",
+       "7   0.937536  "
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "CPU times: total: 14.8 s\n",
+      "Wall time: 15.3 s\n"
+     ]
+    }
+   ],
+   "source": [
+    "%%time\n",
+    "df = add_percentile(df, ['wipo_sector', 'grant_year'])\n",
+    "out = df[['patent_id', 'wipo_sector', 'grant_year'] + [f'pctl_{w}' for w in ['c3','c5','c10','call']]]\n",
+    "out.to_parquet(OUT_FP, index=False)\n",
+    "print(f'WROTE {OUT_FP}  ({len(out):,} rows, {len(out.columns)} cols)')\n",
+    "print('citation percentile summary:')\n",
+    "print(out[[f'pctl_{w}' for w in ['c3','c5','c10','call']]].describe().round(4).to_string())\n",
+    "display(out.head(8))"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.11.9"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

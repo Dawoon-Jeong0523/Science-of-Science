@@ -1,0 +1,15 @@
+dataset,parts,size,n_cols,est_rows_M,key_column,form,rows_per_work,aligned
+works,1334,204.1 GB,13,395.7,id,accession,1.0,True
+works_semantic,1334,186.6 GB,5,395.7,work_id,URL,1.0,True
+concepts,1334,47.6 GB,3,4136.4,work_id,accession,15.750288803428635,True
+referenced_works,1334,27.1 GB,2,2218.5,work_id,accession,42.38526922319847,True
+related_works,1334,16.7 GB,2,1701.5,work_id,accession,10.035560300578984,True
+work_add_infor,1334,14.9 GB,12,395.7,work_id,accession,1.0,True
+locations,1334,13.8 GB,7,377.9,work_id,accession,1.1660237997537957,True
+ids,1334,13.2 GB,6,395.7,work_id,accession,1.0,True
+primary_locations,1334,11.4 GB,7,311.1,work_id,accession,1.0,True
+topics,1334,8.8 GB,3,736.0,work_id,accession,2.9455114482027445,True
+open_access,1334,8.0 GB,5,395.7,work_id,accession,1.0,True
+best_oa_locations,1334,6.7 GB,7,187.4,work_id,accession,1.0,True
+mesh,1334,5.0 GB,6,425.3,work_id,accession,29.65179187849118,True
+biblio,1334,2.4 GB,5,131.4,work_id,accession,1.0,True

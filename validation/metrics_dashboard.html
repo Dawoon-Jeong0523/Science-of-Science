@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta content="width=device-width, initial-scale=1" name="viewport"/><meta charset="utf-8"/><title>Science of Science Metrics Ledger</title><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&amp;family=IBM+Plex+Mono:wght@400;500;600&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet"/><style>
+:root {
+  color-scheme: light;
+  --ground:#f4f6f8; --surface:#ffffff; --surface-2:#eef1f5; --sunken:#e7ebf0;
+  --ink:#131720; --ink-2:#565d6c; --ink-3:#868d9c; --hair:#dfe4ea; --hair-2:#c9d0d9;
+  --accent:#2a4fb8; --accent-soft:#e8edfb;
+  --p1:#2a78d6; --p2:#eb6834; --p3:#1baf7a; --p4:#4a3aa7;
+  --p5:#e34948;
+  --ok:#1a7f4f; --warn:#a8650a; --crit:#c23b34; --info:#3f4b63;
+  --ok-bg:#e3f3ea; --warn-bg:#fbeedd; --crit-bg:#fbe6e4; --info-bg:#e9ecf3;
+  --shadow:0 1px 2px rgba(16,24,40,.05), 0 6px 20px -12px rgba(16,24,40,.28);
+  --band:#151b28;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --ground:#0d1015; --surface:#161b23; --surface-2:#1d232d; --sunken:#11151c;
+    --ink:#eef1f6; --ink-2:#a4adbd; --ink-3:#727b8c; --hair:#262d38; --hair-2:#343d4a;
+    --accent:#7f9cf0; --accent-soft:#1c2540;
+    --p1:#3987e5; --p2:#e0703f; --p3:#1fb583; --p4:#9085e9;
+    --ok:#4cbd85; --warn:#dda13f; --crit:#ef7a70; --info:#9aa6bd;
+    --ok-bg:#13291f; --warn-bg:#2c2313; --crit-bg:#2e1a19; --info-bg:#1b2130;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -14px rgba(0,0,0,.8);
+    --band:#0a0d13;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --ground:#0d1015; --surface:#161b23; --surface-2:#1d232d; --sunken:#11151c;
+  --ink:#eef1f6; --ink-2:#a4adbd; --ink-3:#727b8c; --hair:#262d38; --hair-2:#343d4a;
+  --accent:#7f9cf0; --accent-soft:#1c2540;
+  --p1:#3987e5; --p2:#e0703f; --p3:#1fb583; --p4:#9085e9;
+  --ok:#4cbd85; --warn:#dda13f; --crit:#ef7a70; --info:#9aa6bd;
+  --ok-bg:#13291f; --warn-bg:#2c2313; --crit-bg:#2e1a19; --info-bg:#1b2130;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -14px rgba(0,0,0,.8);
+  --band:#0a0d13;
+}
+* { box-sizing:border-box; }
+body {
+  margin:0; background:var(--ground); color:var(--ink);
+  font-family:"IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  font-size:15px; line-height:1.6; -webkit-font-smoothing:antialiased;
+}
+code, .num, .mono { font-family:"IBM Plex Mono", ui-monospace, SFMono-Regular, monospace; }
+code { font-size:.87em; background:var(--surface-2); padding:.08em .34em; border-radius:3px; color:var(--ink-2); }
+h1,h2,h3 { font-family:"Newsreader", Georgia, serif; font-weight:600; text-wrap:balance; margin:0; letter-spacing:-.01em; }
+a { color:var(--accent); }
+:focus-visible { outline:2px solid var(--accent); outline-offset:2px; border-radius:3px; }
+
+/* ── shell ── */
+.shell { display:grid; grid-template-columns:216px minmax(0,1fr); gap:0; max-width:1420px; margin:0 auto; }
+nav.rail { position:sticky; top:0; align-self:start; height:100vh; padding:26px 18px 26px 26px;
+  border-right:1px solid var(--hair); display:flex; flex-direction:column; gap:22px; overflow-y:auto; }
+.railmark { font-family:"Newsreader",serif; font-size:17px; line-height:1.25; font-weight:600; }
+.railmark span { display:block; font-family:"IBM Plex Mono",monospace; font-size:10px; font-weight:500;
+  letter-spacing:.13em; text-transform:uppercase; color:var(--ink-3); margin-top:5px; }
+.rail ol { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:1px; counter-reset:s; }
+.rail a { display:flex; gap:9px; padding:5px 9px; border-radius:5px; text-decoration:none; color:var(--ink-2);
+  font-size:13.5px; }
+.rail a::before { counter-increment:s; content:counter(s,decimal-leading-zero);
+  font-family:"IBM Plex Mono",monospace; font-size:10.5px; color:var(--ink-3); padding-top:3px; }
+.rail a:hover { background:var(--surface-2); color:var(--ink); }
+.rail a.on { background:var(--accent-soft); color:var(--accent); font-weight:500; }
+.rail a.on::before { color:var(--accent); }
+.subnav { list-style:none; margin:1px 0 3px; padding:0 0 0 20px; display:flex; flex-direction:column; gap:1px; }
+.subnav a { font-size:12.5px; padding:3px 9px; align-items:center; }
+.subnav a::before { content:none; }
+.subnav .dot { margin-right:0; }
+.railfoot { margin-top:auto; font-size:11.5px; color:var(--ink-3); line-height:1.5; }
+main { padding:0 0 90px; min-width:0; }
+
+/* ── band ── */
+.band { background:var(--band); color:#f2f4f8; padding:44px 44px 0; }
+.band .eyebrow { font-family:"IBM Plex Mono",monospace; font-size:11px; letter-spacing:.16em;
+  text-transform:uppercase; color:#8b95a8; margin:0 0 14px; display:flex; align-items:center;
+  gap:12px; flex-wrap:wrap; }
+.wip { color:#f0c07a; background:rgba(240,192,122,.14); border:1px solid rgba(240,192,122,.32);
+  padding:2.5px 9px; border-radius:3px; letter-spacing:.1em; }
+.band h1 { font-size:clamp(30px,3.5vw,45px); line-height:1.08; color:#fff; max-width:19ch; }
+.band p.lede { max-width:64ch; color:#b9c1cf; margin:16px 0 0; font-size:15.5px; }
+.pipebar { display:flex; margin-top:34px; height:4px; }
+.pipebar i { flex:1; }
+.pipebar i:nth-child(1) { background:var(--p1); } .pipebar i:nth-child(2) { background:var(--p2); }
+.pipebar i:nth-child(3) { background:var(--p3); } .pipebar i:nth-child(4) { background:var(--p4); }
+
+/* ── kpis ── */
+.kpis { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,158px),1fr)); gap:1px;
+  background:var(--hair); border-bottom:1px solid var(--hair); }
+.kpi { background:var(--surface); padding:18px 20px 16px; }
+.kpi .v { font-family:"IBM Plex Mono",monospace; font-size:24px; font-weight:600; letter-spacing:-.02em;
+  font-variant-numeric:tabular-nums; line-height:1.1; }
+.kpi .k { font-size:11.5px; color:var(--ink-3); margin-top:6px; letter-spacing:.02em; }
+.kpi .sub { font-size:11.5px; color:var(--ink-2); margin-top:2px; }
+
+section { padding:52px 44px 0; scroll-margin-top:16px; }
+.shead { border-bottom:1px solid var(--hair); padding-bottom:12px; margin-bottom:26px;
+  display:flex; align-items:baseline; gap:14px; flex-wrap:wrap; }
+.shead h2 { font-size:25px; }
+.shead .meta { font-family:"IBM Plex Mono",monospace; font-size:11px; color:var(--ink-3);
+  letter-spacing:.1em; text-transform:uppercase; margin-left:auto; }
+.intro { max-width:70ch; color:var(--ink-2); margin:0 0 24px; }
+
+/* ── tables ── */
+.tablewrap { overflow-x:auto; border:1px solid var(--hair); border-radius:8px; background:var(--surface); }
+table { width:100%; border-collapse:collapse; font-size:13.5px; }
+th, td { text-align:left; padding:11px 14px; border-bottom:1px solid var(--hair); vertical-align:top; }
+thead th { font-family:"IBM Plex Mono",monospace; font-size:10.5px; letter-spacing:.1em; text-transform:uppercase;
+  color:var(--ink-3); font-weight:500; background:var(--surface-2); border-bottom:1px solid var(--hair-2); }
+tbody tr:last-child td { border-bottom:none; }
+td.num, th.num { font-family:"IBM Plex Mono",monospace; font-variant-numeric:tabular-nums; white-space:nowrap; }
+td.cols, td.note { color:var(--ink-2); font-size:12.5px; }
+.path { font-size:11.5px; color:var(--ink-3); background:none; padding:0; }
+.nowrap { white-space:nowrap; }
+.dot { display:inline-block; width:7px; height:7px; border-radius:50%; margin-right:8px; vertical-align:middle; }
+.dot.p1 { background:var(--p1); } .dot.p2 { background:var(--p2); }
+.dot.p3 { background:var(--p3); } .dot.p4 { background:var(--p4); }
+
+/* ── chips & flags ── */
+.chip { font-family:"IBM Plex Mono",monospace; font-size:10px; letter-spacing:.07em; text-transform:uppercase;
+  padding:2.5px 7px; border-radius:3px; font-weight:500; white-space:nowrap; }
+.chip.p1 { color:var(--p1); background:color-mix(in srgb, var(--p1) 12%, transparent); }
+.chip.p2 { color:var(--p2); background:color-mix(in srgb, var(--p2) 12%, transparent); }
+.chip.p3 { color:var(--p3); background:color-mix(in srgb, var(--p3) 14%, transparent); }
+.chip.p4 { color:var(--p4); background:color-mix(in srgb, var(--p4) 12%, transparent); }
+.flag { font-family:"IBM Plex Mono",monospace; font-size:10px; letter-spacing:.06em; text-transform:uppercase;
+  padding:2.5px 7px; border-radius:3px; font-weight:500; white-space:nowrap; display:inline-block; }
+.flag.ok { color:var(--ok); background:var(--ok-bg); }
+.flag.warn { color:var(--warn); background:var(--warn-bg); }
+.flag.crit { color:var(--crit); background:var(--crit-bg); }
+.flag.info { color:var(--info); background:var(--info-bg); }
+
+/* ── metric cards ── */
+.metrics { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr)); gap:14px; }
+.metric { background:var(--surface); border:1px solid var(--hair); border-radius:8px; padding:18px 20px; }
+.metric h3 { font-size:18px; }
+.metric .cols2 { font-family:"IBM Plex Mono",monospace; font-size:11.5px; color:var(--ink-3); margin:5px 0 10px;
+  letter-spacing:.02em; }
+.metric p { margin:0 0 9px; font-size:13.5px; }
+.metric p.def { color:var(--ink); }
+.metric p.how { color:var(--ink-2); font-size:12.5px; margin-bottom:0; }
+
+/* ── agreement chart ── */
+.chartbox { background:var(--surface); border:1px solid var(--hair); border-radius:8px; padding:20px 22px 14px; }
+table.agree { font-size:13px; }
+table.agree th[scope="row"] { font-weight:500; width:180px; padding-right:8px; }
+table.agree th[scope="row"] .n { display:block; font-family:"IBM Plex Mono",monospace; font-size:10.5px;
+  color:var(--ink-3); font-weight:400; }
+table.agree td, table.agree th { border-bottom:1px solid var(--hair); padding:9px 10px; }
+.barcell { width:100%; min-width:200px; }
+.track { height:12px; background:var(--sunken); border-radius:3px; overflow:hidden; }
+.bar { height:12px; border-radius:0 3px 3px 0; min-width:2px; background:var(--p1); }
+.bar.s-strong { background:var(--p1); }
+.bar.s-moderate { background:color-mix(in srgb, var(--p1) 62%, var(--sunken)); }
+.bar.s-weak { background:color-mix(in srgb, var(--p1) 34%, var(--sunken)); }
+table.agree tr:hover td, table.agree tr:hover th { background:var(--surface-2); }
+table.agree tr.pending th[scope="row"], table.agree tr.pending td { color:var(--ink-3); }
+table.agree tr.pending .track { background:repeating-linear-gradient(135deg,
+  var(--sunken) 0 5px, transparent 5px 10px); }
+.chartnote { font-size:12.5px; color:var(--ink-2); margin:14px 0 4px; max-width:74ch; }
+
+/* ── figure gallery ── */
+.valsec { padding-top:40px; }
+.shead.sub { border-bottom:none; padding-bottom:6px; margin-bottom:16px; align-items:center; }
+.shead.sub h2 { font-size:22px; }
+.shead .rule { width:3px; height:22px; border-radius:2px; display:inline-block; }
+.shead .rule.p1 { background:var(--p1); } .shead .rule.p2 { background:var(--p2); }
+.shead .rule.p3 { background:var(--p3); } .shead .rule.p4 { background:var(--p4); }
+.gallery { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,370px),1fr)); gap:16px; }
+.card { background:var(--surface); border:1px solid var(--hair); border-radius:9px; padding:16px 18px 14px;
+  margin:0; display:flex; flex-direction:column; box-shadow:var(--shadow); }
+.card[hidden] { display:none; }
+.cardhead { display:flex; align-items:center; gap:8px; margin-bottom:9px; flex-wrap:wrap; }
+.cardhead .sec { font-family:"IBM Plex Mono",monospace; font-size:11px; font-weight:600; }
+.cardhead .sec.p1 { color:var(--p1); } .cardhead .sec.p2 { color:var(--p2); }
+.cardhead .sec.p3 { color:var(--p3); } .cardhead .sec.p4 { color:var(--p4); }
+/* caselaw-inject */
+.dot.p5 { background:var(--p5); }
+.chip.p5 { color:var(--p5); background:color-mix(in srgb, var(--p5) 12%, transparent); }
+.shead .rule.p5 { background:var(--p5); }
+.cardhead .sec.p5 { color:var(--p5); }
+/* /caselaw-inject */
+.cardhead .src { margin-left:auto; font-size:10.5px; background:none; color:var(--ink-3); padding:0; }
+.card h3 { font-size:17.5px; margin-bottom:5px; }
+.card p.tests { font-size:12.5px; color:var(--ink-2); margin:0 0 12px; }
+.figwrap { display:block; width:100%; padding:9px; margin:0 0 12px; border:1px solid var(--hair);
+  border-radius:6px; background:#fff; cursor:zoom-in; overflow:hidden; }
+.figimg { display:block; width:100%; height:auto; }
+figcaption { font-size:12.5px; color:var(--ink-2); border-top:1px solid var(--hair); padding-top:11px;
+  margin-top:auto; }
+figcaption b { font-family:"IBM Plex Mono",monospace; color:var(--ink); font-weight:600;
+  font-variant-numeric:tabular-nums; }
+.missing { padding:26px; text-align:center; color:var(--ink-3); font-size:12.5px; }
+
+/* ── gaps ── */
+.gaps { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr)); gap:14px; }
+.gap { background:var(--surface); border:1px solid var(--hair); border-left:3px solid var(--hair-2);
+  border-radius:0 8px 8px 0; padding:16px 18px; }
+.gap.crit { border-left-color:var(--crit); } .gap.warn { border-left-color:var(--warn); }
+.gap.info { border-left-color:var(--info); }
+.gaphead { display:flex; gap:8px; align-items:center; margin-bottom:9px; }
+.gap h3 { font-size:16.5px; margin-bottom:6px; font-family:"IBM Plex Sans",sans-serif; font-weight:600;
+  letter-spacing:0; }
+.gap p { margin:0; font-size:13px; color:var(--ink-2); }
+
+/* ── lightbox ── */
+dialog.lb { border:none; padding:0; background:transparent; max-width:96vw; max-height:96vh; }
+dialog.lb::backdrop { background:rgba(8,10,14,.86); }
+dialog.lb img { max-width:94vw; max-height:88vh; width:auto; height:auto; display:block; background:#fff;
+  border-radius:6px; padding:10px; }
+dialog.lb .lbbar { display:flex; justify-content:space-between; align-items:center; gap:16px; margin-top:10px;
+  color:#e6e9ef; font-size:12.5px; }
+dialog.lb button { background:rgba(255,255,255,.12); color:#fff; border:none; border-radius:5px;
+  padding:6px 13px; cursor:pointer; font-family:inherit; font-size:12.5px; }
+
+footer { padding:40px 44px 0; margin-top:56px; border-top:1px solid var(--hair); color:var(--ink-3);
+  font-size:12.5px; max-width:78ch; }
+
+@media (max-width:980px) {
+  .shell { grid-template-columns:1fr; }
+  nav.rail { position:static; height:auto; border-right:none; border-bottom:1px solid var(--hair);
+    flex-direction:row; align-items:center; flex-wrap:wrap; gap:12px; padding:16px 20px; }
+  .rail ol { flex-direction:row; flex-wrap:wrap; }
+  .rail a::before { display:none; }
+  .railfoot { display:none; }
+  .band, section, footer { padding-left:20px; padding-right:20px; }
+  .band { padding-top:32px; }
+}
+@media (prefers-reduced-motion:reduce) { * { animation:none !important; transition:none !important; } }
+
+/* responsive inventory */
+.card, .metric, .gap { min-width:0; overflow-wrap:anywhere; }
+#outputs td { overflow-wrap:anywhere; }
+#outputs details { margin-top:6px; }
+#outputs summary { cursor:pointer; color:var(--accent); }
+.pipebar i:nth-child(5) { background:var(--p5); }
+</style></head><body>
+<div class="shell">
+<nav class="rail">
+<div class="railmark">Metrics Ledger<span>Science of Science</span></div>
+<ol>
+<li><a class="on" href="#overview">Overview</a></li>
+<li><a href="#raw">Raw data</a></li>
+<li><a href="#outputs">Derived tables</a></li>
+<li><a href="#metrics">Metrics</a></li>
+<li><a href="#agreement">External agreement</a></li>
+<li><a href="#validation">Validation figures</a>
+<ul class="subnav">
+<li><a href="#val-paper"><span class="dot p1"></span>Papers</a></li>
+<li><a href="#val-patent"><span class="dot p2"></span>Patents</a></li>
+<li><a href="#val-pcs"><span class="dot p3"></span>Patent→paper</a></li>
+<li><a href="#val-ppp"><span class="dot p4"></span>Patent Paper Pair</a></li>
+<li><a href="#val-caselaw"><span class="dot p5"></span>Case law</a></li>
+</ul>
+</li>
+<li><a href="#gaps">Open gaps</a></li>
+</ol>
+<div class="railfoot">Inventory checked 7 Sep 2026 (UTC). Figures from saved validation exports.</div>
+</nav>
+<main>
+<div class="band" id="overview">
+<p class="eyebrow">Pipeline reference · OpenAlex 2026-01-16 <span class="wip">In progress</span></p>
+<h1>What we measure, and how we know it works</h1>
+<p class="lede">Five research pipelines cover papers, patents, patent-to-paper citations, paper–patent pairs and court opinions. Explore their inputs, derived tables, metric definitions and validation figures. Coverage and computation choices are stated alongside the results.</p>
+<div class="pipebar"><i></i><i></i><i></i><i></i><i></i></div>
+</div>
+<div class="kpis">
+<div class="kpi"><div class="v">3.34 B</div><div class="k">stored rows</div><div class="sub">across 34 derived tables</div></div>
+<div class="kpi"><div class="v">39.73 GB</div><div class="k">derived Parquet</div><div class="sub">canonical outputs · decimal GB</div></div>
+<div class="kpi"><div class="v">372.66 M</div><div class="k">papers</div><div class="sub">348.94 M citation-table rows</div></div>
+<div class="kpi"><div class="v">8.53 M</div><div class="k">patents</div><div class="sub">granted, PatentsView</div></div>
+<div class="kpi"><div class="v">34.8 M</div><div class="k">patent→paper links</div><div class="sub">5.11 M cited papers</div></div>
+<div class="kpi" data-inject="caselaw"><div class="v">5.18 M</div><div class="k">court opinions</div><div class="sub">47.5 M citations · 1666–2020</div></div>
+<div class="kpi"><div class="v">85</div><div class="k">validation figures</div><div class="sub">5 notebooks</div></div>
+</div>
+<section id="raw">
+<div class="shead"><h2>Raw data</h2><span class="meta">inputs · read-only</span></div>
+<p class="intro">These source collections supply the five pipelines. Authorship records provide native paper team sizes. SciSciNet is used for external validation only; it is not an input to the derived metrics. Source scales describe the available snapshots and need not equal the eligible sample in a figure.</p>
+<div class="tablewrap"><table>
+<thead><tr><th>Source</th><th class="num">Scale</th><th>Access</th><th>What it carries</th></tr></thead>
+<tbody>
+<tr data-inject="caselaw">
+<td><span class="dot p5"></span><b>Case law citation network</b><br/><code class="path">Science of Science/Case law</code></td>
+<td class="num nowrap">5,179,698 opinions · 47,519,638 citation edges</td>
+<td><span class="flag info">provided</span></td>
+<td class="note"><code>Edge_list.parquet</code> and <code>metadata.csv</code> — US court opinions 1666–2020 with jurisdiction, court, reporter and decision date. <b>Provided by the authors of</b> Lee, S., Kim, T., Yoon, J., &amp; Youn, H. (2024). <i>When Common Law Ages: Two Centuries of Growing Inertia in US Judicial Opinions.</i> arXiv preprint <a href="https://arxiv.org/abs/2410.04493">arXiv:2410.04493</a>.</td></tr><tr>
+<td><span class="dot p1"></span><b>OpenAlex snapshot 2026-01-16</b><br/><code class="path">renli_shared/OpenAlex_2026_Jan_16_Renly_parquet</code></td>
+<td class="num nowrap">~396M works · ~2.2B reference edges</td>
+<td><span class="flag info">read-only</span></td>
+<td class="note">Works, references, locations, topics, concepts and IDs: 14 datasets under works/. This snapshot supplies the paper citation graph and metadata.</td></tr>
+<tr>
+<td><span class="dot p1"></span><b>OpenAlex author–affiliation rows</b><br/><code class="path">works_au_affs_fixed.csv.gz</code></td>
+<td class="num nowrap">40.8 GB gz · ~1.1B rows</td>
+<td><span class="flag info">read-only</span></td>
+<td class="note">One row per (work, author, affiliation). Distinct author IDs are aggregated into paper_author.parquet, the native source of team size in the current validation.</td></tr>
+<tr>
+<td><span class="dot p2"></span><b>PatentsView granted bulk</b><br/><code class="path">PatentView/Granted/*.tsv.zip</code></td>
+<td class="num nowrap">35 files · 22 GB</td>
+<td><span class="flag info">local</span></td>
+<td class="note">Patents, applications, CPC, WIPO, disambiguated inventors and assignees, US patent and application citations.</td></tr>
+<tr>
+<td><span class="dot p3"></span><b>Reliance on Science</b><br/><code class="path">pcs/pcs_oa_uspto.csv</code></td>
+<td class="num nowrap">34,825,379 links · 1.4 GB</td>
+<td><span class="flag info">local</span></td>
+<td class="note">5,106,527 papers × 2,748,170 patents. Columns <code>reftype, confscore, oaid, patent, wherefound</code>; confidence 4–10.</td></tr>
+<tr>
+<td><span class="dot p4"></span><b>Patent–paper pair list</b><br/><code class="path">PPP/_patent_paper_pairs_plus.csv</code></td>
+<td class="num nowrap">548,315 pairs</td>
+<td><span class="flag info">local</span></td>
+<td class="note">335,917 distinct papers · 309,729 distinct patents. The current trend outputs use the plus list, verified against the completed production log and Parquet row counts. Pair-list selection is configurable and must accompany comparisons across runs.</td></tr>
+<tr>
+<td><span class="dot p1"></span><b>SciSciNet (comparison only)</b><br/><code class="path">OpenAlex/sciscinet_papers_fos_feg.parquet</code></td>
+<td class="num nowrap">249,803,279 rows · 39 cols · 9.5 GB</td>
+<td><span class="flag warn">external</span></td>
+<td class="note">External comparison for metric-specific agreement in paper figure §3c. The current team-size figure uses native OpenAlex author IDs. Earlier restricted-run atypicality comparisons are identified separately in §9d.</td></tr></tbody>
+</table></div>
+</section>
+<section id="outputs">
+<div class="shead"><h2>Derived tables</h2><span class="meta">34 Parquet files · 7 Sep 2026 UTC</span></div>
+<p class="intro">Counts come from current Parquet footers; sizes come from the filesystem. Rows have different meanings across tables and must not be summed as unique documents. The inventory includes the legacy team-size table, but excludes backups, dated score partitions already represented by merged files, and sharded reference intermediates. <a href="https://github.com/Dawoon-Jeong0523/SciSci#refresh-from-saved-research-outputs">How this inventory is refreshed.</a></p>
+<div class="tablewrap"><table>
+<thead><tr><th scope="col">Table / location</th><th scope="col">Rows</th><th scope="col">Size</th><th scope="col">Row meaning / columns</th></tr></thead>
+<tbody><tr data-path="OpenAlex/output/paper_author.parquet" data-pipe="paper"><td><span class="dot p1"></span><code>paper_author.parquet</code><br/><span class="path">OpenAlex/output</span></td><td class="num">251,654,553</td><td class="num">7.12 GB</td><td class="cols">One work_id with ordered, deduplicated author IDs and team_size.<details><summary>5 columns</summary><span>work_id, author_list, team_size, first_author, last_author</span></details></td></tr><tr data-path="OpenAlex/output/paper_citation.parquet" data-pipe="paper"><td><span class="dot p1"></span><code>paper_citation.parquet</code><br/><span class="path">OpenAlex/output</span></td><td class="num">348,939,837</td><td class="num">2.38 GB</td><td class="cols">One document.<details><summary>5 columns</summary><span>paper_id, C_3, C_5, C_10, C_all</span></details></td></tr><tr data-path="OpenAlex/output/paper_citation_trend.parquet" data-pipe="paper"><td><span class="dot p1"></span><code>paper_citation_trend.parquet</code><br/><span class="path">OpenAlex/output</span></td><td class="num">584,136,859</td><td class="num">2.22 GB</td><td class="cols">One document per citing year.<details><summary>7 columns</summary><span>paper_id, pub_year, cite_year, yrs_since_pub, p2p, pat2p_examiner, pat2p_non_examiner</span></details></td></tr><tr data-path="OpenAlex/output/paper_disruption.parquet" data-pipe="paper"><td><span class="dot p1"></span><code>paper_disruption.parquet</code><br/><span class="path">OpenAlex/output</span></td><td class="num">348,939,837</td><td class="num">6.61 GB</td><td class="cols">One document.<details><summary>29 columns</summary><span>paper_id, CD_3, F_3, E_3, G_3, ni_3, nj_3, nk_3, CD_5, F_5, E_5, G_5, ni_5, nj_5, nk_5, CD_10, F_10, E_10, G_10, ni_10, nj_10, nk_10, CD_all, F_all, E_all, G_all, ni_all, nj_all, nk_all</span></details></td></tr><tr data-path="OpenAlex/output/paper_hit_probability.parquet" data-pipe="paper"><td><span class="dot p1"></span><code>paper_hit_probability.parquet</code><br/><span class="path">OpenAlex/output</span></td><td class="num">262,469,628</td><td class="num">3.19 GB</td><td class="cols">One document.<details><summary>7 columns</summary><span>paper_id, FoS, year, pctl_c3, pctl_c5, pctl_c10, pctl_call</span></details></td></tr><tr data-path="OpenAlex/output/paper_metadata.parquet" data-pipe="paper"><td><span class="dot p1"></span><code>paper_metadata.parquet</code><br/><span class="path">OpenAlex/output</span></td><td class="num">372,655,605</td><td class="num">8.44 GB</td><td class="cols">One document.<details><summary>12 columns</summary><span>paper_id, year, doctype, ref_count, journal, is_journal, author_list, FoS_0, FoS_rep, domain, cited_by_count, is_retracted</span></details></td></tr><tr data-path="OpenAlex/output/paper_sb.parquet" data-pipe="paper"><td><span class="dot p1"></span><code>paper_sb.parquet</code><br/><span class="path">OpenAlex/output</span></td><td class="num">88,314,669</td><td class="num">820.73 MB</td><td class="cols">One document.<details><summary>4 columns</summary><span>paper_id, SB_B, SB_T, n_cite</span></details></td></tr><tr data-path="OpenAlex/output/paper_team_size.parquet" data-pipe="paper"><td><span class="dot p1"></span><code>paper_team_size.parquet</code><br/><span class="path">OpenAlex/output</span></td><td class="num">251,654,553</td><td class="num">1.45 GB</td><td class="cols">One paper_id with a legacy team_size value.<p>The current project has no producer for this legacy file. Native team-size validation uses the reproducible paper_author.parquet output, whose team_size counts distinct authors rather than affiliation rows.</p><details><summary>2 columns</summary><span>paper_id, team_size</span></details></td></tr><tr data-path="OpenAlex/output/paper_z_score.parquet" data-pipe="paper"><td><span class="dot p1"></span><code>paper_z_score.parquet</code><br/><span class="path">OpenAlex/output</span></td><td class="num">41,425,041</td><td class="num">1.07 GB</td><td class="cols">One document.<details><summary>5 columns</summary><span>paper_id, Z_median, Z_10pct, Z_min, n_pairs</span></details></td></tr><tr data-path="OpenAlex/output/z_score_pair.parquet" data-pipe="paper"><td><span class="dot p1"></span><code>z_score_pair.parquet</code><br/><span class="path">OpenAlex/output</span></td><td class="num">430,010,933</td><td class="num">2.53 GB</td><td class="cols">One journal pair per cohort year.<details><summary>4 columns</summary><span>code_1, code_2, year, Z_score</span></details></td></tr><tr data-path="PatentView/output/patent_citation.parquet" data-pipe="patent"><td><span class="dot p2"></span><code>patent_citation.parquet</code><br/><span class="path">PatentView/output</span></td><td class="num">7,160,531</td><td class="num">229.02 MB</td><td class="cols">One document.<details><summary>45 columns</summary><span>patent_id, C_3, C_5, C_10, C_all, C_examiner_3, C_non_examiner_3, C_unknown_3, C_examiner_5, C_non_examiner_5, C_unknown_5, C_examiner_10, C_non_examiner_10, C_unknown_10, C_examiner_all, C_non_examiner_all, C_unknown_all, appC_3, appC_5, appC_10, appC_all, appC_examiner_3, appC_non_examiner_3, appC_examiner_5, appC_non_examiner_5, appC_examiner_10, appC_non_examiner_10, appC_examiner_all, appC_non_examiner_all, uniqueC_3, uniqueC_5, uniqueC_10, uniqueC_all, uniqueC_examiner_3, uniqueC_examiner_5, uniqueC_examiner_10, uniqueC_examiner_all, uniqueC_non_examiner_3, uniqueC_non_examiner_5, uniqueC_non_examiner_10, uniqueC_non_examiner_all, uniqueC_unknown_3, uniqueC_unknown_5, uniqueC_unknown_10, uniqueC_unknown_all</span></details></td></tr><tr data-path="PatentView/output/patent_citation_trend.parquet" data-pipe="patent"><td><span class="dot p2"></span><code>patent_citation_trend.parquet</code><br/><span class="path">PatentView/output</span></td><td class="num">50,546,229</td><td class="num">209.93 MB</td><td class="cols">One document per citing year.<details><summary>15 columns</summary><span>patent_id, grant_year, cite_year, yrs_since_grant, C, C_examiner, C_non_examiner, C_unknown, appC, appC_examiner, appC_non_examiner, pat2pat_examiner, pat2pat_non_examiner, app2pat_examiner, app2pat_non_examiner</span></details></td></tr><tr data-path="PatentView/output/patent_disruption.parquet" data-pipe="patent"><td><span class="dot p2"></span><code>patent_disruption.parquet</code><br/><span class="path">PatentView/output</span></td><td class="num">8,062,166</td><td class="num">245.45 MB</td><td class="cols">One document.<details><summary>29 columns</summary><span>patent_id, CD_3, F_3, E_3, G_3, ni_3, nj_3, nk_3, CD_5, F_5, E_5, G_5, ni_5, nj_5, nk_5, CD_10, F_10, E_10, G_10, ni_10, nj_10, nk_10, CD_all, F_all, E_all, G_all, ni_all, nj_all, nk_all</span></details></td></tr><tr data-path="PatentView/output/patent_disruption_app.parquet" data-pipe="patent"><td><span class="dot p2"></span><code>patent_disruption_app.parquet</code><br/><span class="path">PatentView/output</span></td><td class="num">8,460,168</td><td class="num">319.24 MB</td><td class="cols">One document.<details><summary>29 columns</summary><span>patent_id, CD_3, F_3, E_3, G_3, ni_3, nj_3, nk_3, CD_5, F_5, E_5, G_5, ni_5, nj_5, nk_5, CD_10, F_10, E_10, G_10, ni_10, nj_10, nk_10, CD_all, F_all, E_all, G_all, ni_all, nj_all, nk_all</span></details></td></tr><tr data-path="PatentView/output/patent_disruption_compare.parquet" data-pipe="patent"><td><span class="dot p2"></span><code>patent_disruption_compare.parquet</code><br/><span class="path">PatentView/output</span></td><td class="num">4</td><td class="num">9.59 KB</td><td class="cols">One citation window (3, 5, 10, or all) with paired comparison statistics.<details><summary>16 columns</summary><span>window, n_base_rows, n_app_rows, n_app_only, n_paired, base_mean, app_mean, delta, pearson, spearman, pct_down, pct_up, pct_same, d_ni, d_nj, d_nk</span></details></td></tr><tr data-path="PatentView/output/patent_feg_disruption_trend.parquet" data-pipe="patent"><td><span class="dot p2"></span><code>patent_feg_disruption_trend.parquet</code><br/><span class="path">PatentView/output</span></td><td class="num">49</td><td class="num">27.27 KB</td><td class="cols">One grant cohort year with aggregate metrics.<details><summary>34 columns</summary><span>year, n, CD_3_mean, F_3_mean, E_3_mean, G_3_mean, ni_3_mean, nj_3_mean, nk_3_mean, njfrac_3_mean, CD_5_mean, F_5_mean, E_5_mean, G_5_mean, ni_5_mean, nj_5_mean, nk_5_mean, njfrac_5_mean, CD_10_mean, F_10_mean, E_10_mean, G_10_mean, ni_10_mean, nj_10_mean, nk_10_mean, njfrac_10_mean, CD_all_mean, F_all_mean, E_all_mean, G_all_mean, ni_all_mean, nj_all_mean, nk_all_mean, njfrac_all_mean</span></details></td></tr><tr data-path="PatentView/output/patent_hit_probability.parquet" data-pipe="patent"><td><span class="dot p2"></span><code>patent_hit_probability.parquet</code><br/><span class="path">PatentView/output</span></td><td class="num">8,512,715</td><td class="num">339.61 MB</td><td class="cols">One document.<details><summary>51 columns</summary><span>patent_id, wipo_sector, grant_year, pctl_C_3, pctl_C_5, pctl_C_10, pctl_C_all, pctl_C_examiner_3, pctl_C_non_examiner_3, pctl_C_unknown_3, pctl_C_examiner_5, pctl_C_non_examiner_5, pctl_C_unknown_5, pctl_C_examiner_10, pctl_C_non_examiner_10, pctl_C_unknown_10, pctl_C_examiner_all, pctl_C_non_examiner_all, pctl_C_unknown_all, pctl_appC_3, pctl_appC_5, pctl_appC_10, pctl_appC_all, pctl_appC_examiner_3, pctl_appC_non_examiner_3, pctl_appC_examiner_5, pctl_appC_non_examiner_5, pctl_appC_examiner_10, pctl_appC_non_examiner_10, pctl_appC_examiner_all, pctl_appC_non_examiner_all, pctl_uniqueC_3, pctl_uniqueC_5, pctl_uniqueC_10, pctl_uniqueC_all, pctl_uniqueC_examiner_3, pctl_uniqueC_examiner_5, pctl_uniqueC_examiner_10, pctl_uniqueC_examiner_all, pctl_uniqueC_non_examiner_3, pctl_uniqueC_non_examiner_5, pctl_uniqueC_non_examiner_10, pctl_uniqueC_non_examiner_all, pctl_uniqueC_unknown_3, pctl_uniqueC_unknown_5, pctl_uniqueC_unknown_10, pctl_uniqueC_unknown_all, pctl_c3, pctl_c5, pctl_c10, pctl_call</span></details></td></tr><tr data-path="PatentView/output/patent_metadata.parquet" data-pipe="patent"><td><span class="dot p2"></span><code>patent_metadata.parquet</code><br/><span class="path">PatentView/output</span></td><td class="num">8,531,961</td><td class="num">868.26 MB</td><td class="cols">One document.<details><summary>8 columns</summary><span>patent_id, grant_year, filing_year, ref_count, cpc_code, cpc_code_list, inventor_list, assignee_list</span></details></td></tr><tr data-path="PatentView/output/patent_reference.parquet" data-pipe="patent"><td><span class="dot p2"></span><code>patent_reference.parquet</code><br/><span class="path">PatentView/output</span></td><td class="num">171,532,249</td><td class="num">778.19 MB</td><td class="cols">One distinct (citing_id, cited_id, type) reference; grant_id identifies the granted cited endpoint.<p>Granted and application references may share a grant_id. Deduplicate (citing_id, grant_id) when unique patent edges are required; cited_id preserves the original cited identifier.</p><details><summary>4 columns</summary><span>citing_id, cited_id, type, grant_id</span></details></td></tr><tr data-path="PatentView/output/patent_sb.parquet" data-pipe="patent"><td><span class="dot p2"></span><code>patent_sb.parquet</code><br/><span class="path">PatentView/output</span></td><td class="num">6,803,034</td><td class="num">59.77 MB</td><td class="cols">One document.<details><summary>4 columns</summary><span>patent_id, SB_B, SB_T, n_cite</span></details></td></tr><tr data-path="PatentView/output/patent_z_score.parquet" data-pipe="patent"><td><span class="dot p2"></span><code>patent_z_score.parquet</code><br/><span class="path">PatentView/output</span></td><td class="num">4,160,856</td><td class="num">77.60 MB</td><td class="cols">One document.<details><summary>5 columns</summary><span>patent_id, Z_median, Z_10pct, Z_min, n_pairs</span></details></td></tr><tr data-path="PatentView/output/z_score_pair.parquet" data-pipe="patent"><td><span class="dot p2"></span><code>z_score_pair.parquet</code><br/><span class="path">PatentView/output</span></td><td class="num">981,662</td><td class="num">10.60 MB</td><td class="cols">One CPC-subclass pair per cohort year.<details><summary>4 columns</summary><span>code_1, code_2, year, Z_score</span></details></td></tr><tr data-path="pcs/output/pcs_citation.parquet" data-pipe="pcs"><td><span class="dot p3"></span><code>pcs_citation.parquet</code><br/><span class="path">pcs/output</span></td><td class="num">5,106,527</td><td class="num">62.57 MB</td><td class="cols">One document.<details><summary>16 columns</summary><span>paper_id, C_3, C_5, C_10, C_all, C_examiner_3, C_non_examiner_3, C_examiner_5, C_non_examiner_5, C_examiner_10, C_non_examiner_10, C_examiner_all, C_non_examiner_all, C_total, C_examiner_total, C_non_examiner_total</span></details></td></tr><tr data-path="pcs/output/pcs_citation_trend.parquet" data-pipe="pcs"><td><span class="dot p3"></span><code>pcs_citation_trend.parquet</code><br/><span class="path">pcs/output</span></td><td class="num">12,992,507</td><td class="num">51.59 MB</td><td class="cols">One document per citing year.<details><summary>7 columns</summary><span>paper_id, pub_year, cite_year, yrs_since_pub, pcs, pcs_examiner, pcs_non_examiner</span></details></td></tr><tr data-path="pcs/output/pcs_hit_probability.parquet" data-pipe="pcs"><td><span class="dot p3"></span><code>pcs_hit_probability.parquet</code><br/><span class="path">pcs/output</span></td><td class="num">4,480,434</td><td class="num">79.47 MB</td><td class="cols">One document.<details><summary>7 columns</summary><span>paper_id, FoS, year, pctl_c3, pctl_c5, pctl_c10, pctl_call</span></details></td></tr><tr data-path="PPP/output/ppp_paper_trend.parquet" data-pipe="ppp"><td><span class="dot p4"></span><code>ppp_paper_trend.parquet</code><br/><span class="path">PPP/output</span></td><td class="num">5,788,073</td><td class="num">21.10 MB</td><td class="cols">One paper-patent linkage pair per citing year with paper-side counts.<details><summary>8 columns</summary><span>paperid, patent, pub_year, cite_year, yrs_since_pub, p2p, pat2p_examiner, pat2p_non_examiner</span></details></td></tr><tr data-path="PPP/output/ppp_patent_trend.parquet" data-pipe="ppp"><td><span class="dot p4"></span><code>ppp_patent_trend.parquet</code><br/><span class="path">PPP/output</span></td><td class="num">2,906,165</td><td class="num">12.55 MB</td><td class="cols">One paper-patent linkage pair per citing year with patent-side counts.<details><summary>7 columns</summary><span>paperid, patent, grant_year, cite_year, yrs_since_grant, pat2pat_examiner, pat2pat_non_examiner</span></details></td></tr><tr data-path="Case law/output/case_citation.parquet" data-pipe="caselaw"><td><span class="dot p5"></span><code>case_citation.parquet</code><br/><span class="path">Case law/output</span></td><td class="num">5,179,698</td><td class="num">40.56 MB</td><td class="cols">One document.<details><summary>5 columns</summary><span>case_id, C_3, C_5, C_10, C_all</span></details></td></tr><tr data-path="Case law/output/case_citation_trend.parquet" data-pipe="caselaw"><td><span class="dot p5"></span><code>case_citation_trend.parquet</code><br/><span class="path">Case law/output</span></td><td class="num">25,816,136</td><td class="num">100.63 MB</td><td class="cols">One document per citing year.<details><summary>5 columns</summary><span>case_id, decision_year, cite_year, yrs_since_decision, C</span></details></td></tr><tr data-path="Case law/output/case_disruption.parquet" data-pipe="caselaw"><td><span class="dot p5"></span><code>case_disruption.parquet</code><br/><span class="path">Case law/output</span></td><td class="num">5,179,698</td><td class="num">169.93 MB</td><td class="cols">One document.<details><summary>29 columns</summary><span>case_id, CD_3, F_3, E_3, G_3, ni_3, nj_3, nk_3, CD_5, F_5, E_5, G_5, ni_5, nj_5, nk_5, CD_10, F_10, E_10, G_10, ni_10, nj_10, nk_10, CD_all, F_all, E_all, G_all, ni_all, nj_all, nk_all</span></details></td></tr><tr data-path="Case law/output/case_feg_disruption_trend.parquet" data-pipe="caselaw"><td><span class="dot p5"></span><code>case_feg_disruption_trend.parquet</code><br/><span class="path">Case law/output</span></td><td class="num">221</td><td class="num">64.48 KB</td><td class="cols">One decision cohort year with aggregate metrics.<details><summary>38 columns</summary><span>year, n, CD_3_mean, F_3_mean, E_3_mean, G_3_mean, ni_3_mean, nj_3_mean, nk_3_mean, njfrac_3_mean, CD_5_mean, F_5_mean, E_5_mean, G_5_mean, ni_5_mean, nj_5_mean, nk_5_mean, njfrac_5_mean, CD_10_mean, F_10_mean, E_10_mean, G_10_mean, ni_10_mean, nj_10_mean, nk_10_mean, njfrac_10_mean, CD_all_mean, F_all_mean, E_all_mean, G_all_mean, ni_all_mean, nj_all_mean, nk_all_mean, njfrac_all_mean, n_3_defined, n_5_defined, n_10_defined, n_all_defined</span></details></td></tr><tr data-path="Case law/output/case_hit_probability.parquet" data-pipe="caselaw"><td><span class="dot p5"></span><code>case_hit_probability.parquet</code><br/><span class="path">Case law/output</span></td><td class="num">5,177,903</td><td class="num">46.17 MB</td><td class="cols">One document.<details><summary>8 columns</summary><span>case_id, jurisdiction, decision_year, cohort_n, pctl_C_3, pctl_C_5, pctl_C_10, pctl_C_all</span></details></td></tr><tr data-path="Case law/output/case_metadata.parquet" data-pipe="caselaw"><td><span class="dot p5"></span><code>case_metadata.parquet</code><br/><span class="path">Case law/output</span></td><td class="num">5,179,698</td><td class="num">151.55 MB</td><td class="cols">One document.<details><summary>11 columns</summary><span>case_id, decision_year, decision_date, jurisdiction, jurisdiction_id, court, court_id, reporter, reporter_id, name_abbreviation, ref_count</span></details></td></tr><tr data-path="Case law/output/case_sb.parquet" data-pipe="caselaw"><td><span class="dot p5"></span><code>case_sb.parquet</code><br/><span class="path">Case law/output</span></td><td class="num">3,787,861</td><td class="num">30.30 MB</td><td class="cols">One document.<details><summary>4 columns</summary><span>case_id, SB_B, SB_T, n_cite</span></details></td></tr></tbody>
+</table></div>
+</section>
+<section id="metrics">
+<div class="shead"><h2>Metrics</h2><span class="meta">8 families · 3–4 windows each</span></div>
+<p class="intro">Every metric is computed at four horizons — 3, 5, 10 years and the full history — so that a
+  result can always be re-stated on a truncation-safe window. Papers and patents get the same families wherever
+  the underlying graph allows it.</p>
+<div class="metrics">
+<article class="metric"><h3>Citation counts</h3><div class="cols2">C<sub>3</sub> C<sub>5</sub> C<sub>10</sub> C<sub>all</sub></div>
+<p class="def">Forward citations inside a fixed window after publication or grant.</p><p class="how">Papers, patents and patent→paper all carry the same four windows. Patents additionally split every window by <b>examiner / non-examiner / unknown</b>, carry pre-grant <b>application</b> citations (<code>appC</code>), and a <b>de-duplicated</b> variant (<code>uniqueC</code>) that counts each citing patent once.</p></article><article class="metric"><h3>Disruption</h3><div class="cols2">CD<sub>3</sub> CD<sub>5</sub> CD<sub>10</sub> CD<sub>all</sub></div>
+<p class="def">Funk &amp; Owen-Smith CD index: does later work cite this instead of its references (disruptive, → +1) or alongside them (consolidating, → −1)?</p><p class="how">Stored with its counting terms <code>ni</code> (citing the focal work only), <code>nj</code> (citing both) and <code>nk</code> (citing the references only), so any variant can be recomputed without touching the graph.</p></article><article class="metric"><h3>F / E / G</h3><div class="cols2">F E G</div>
+<p class="def">Foundation, Extension, Generalization — the three-way decomposition of the disruption index.</p><p class="how">They sum to exactly 1 by construction, which §7 of the patent notebook uses as a build check.</p></article><article class="metric"><h3>Atypicality</h3><div class="cols2">Z_median Z_10pct Z_min n_pairs</div>
+<p class="def">Uzzi et al. journal-pair z-scores against a degree-preserving null. Median Z = conventionality, 10th-percentile Z = tail novelty.</p><p class="how">Papers use journal pairs; patents use CPC pairs (Kim et al. 2016 style). The pairwise z-scores are kept in a separate <code>z_score_pair</code> table.</p></article><article class="metric"><h3>Sleeping Beauty</h3><div class="cols2">SB_B SB_T</div>
+<p class="def">Ke et al. beauty coefficient B and awakening time T from the full citation history.</p><p class="how">B measures how far the real trajectory sits below the straight line to its peak; T is where that gap is widest.</p></article><article class="metric"><h3>Hit probability</h3><div class="cols2">pctl_c3 pctl_c5 pctl_c10 pctl_call</div>
+<p class="def">Percentile rank of citations within a cohort, so "top 1%" means top 1% of comparable work.</p><p class="how">Cohort = FoS × publication year for papers, WIPO sector × grant year for patents.</p></article><article class="metric"><h3>Citation trend</h3><div class="cols2">p2p pat2p pat2pat appC</div>
+<p class="def">One row per (document, citing year): the full accrual history rather than a single total.</p><p class="how">584M rows on the paper side alone. Every trajectory and convexity result is computed out-of-core from this table.</p></article><article class="metric"><h3>Convexity index</h3><div class="cols2">1 − mean(normalised citation age)</div>
+<p class="def">Shape of the min–max scaled cumulative citation curve. Below 0.5 = convex (late burst); above = concave (early peak, saturating).</p><p class="how">Introduced by the validation notebooks rather than by a published paper — it is the quantity that makes "sleeping beauty" and "flash in the pan" comparable on one axis.</p></article>
+</div>
+</section>
+<section id="agreement">
+<div class="shead"><h2>External agreement</h2><span class="flag warn">in progress</span>
+<span class="meta">paper_validation §3c</span></div>
+<p class="intro">The strongest validity evidence available: SciSciNet computes the same metrics on MAG, this
+  pipeline computes them on OpenAlex 2026-01. Joining on the paper id and correlating says which metrics survive
+  a change of citation graph. Only <b>Spearman rank correlation</b> is reported here — almost every downstream
+  use depends on the ordering of papers, not on the absolute value, and rank agreement is the claim that
+  actually transfers between two different citation graphs.</p>
+<div class="chartbox"><p class="intro">See the updated <a href="#val-paper">Agreement with SciSciNet figure (§3c)</a> for metric-specific correlations, sample sizes and coverage from the current validation run. Earlier restricted-run atypicality results are shown separately in §9d.</p></div>
+</section>
+<section id="validation">
+<div class="shead"><h2>Validation figures</h2><span class="meta">85 figures · 5 notebooks</span></div>
+<p class="intro">There is no gold standard for any of these metrics, so validation is face validity: each
+  figure either reproduces a published result, or checks an invariant the build must satisfy. The four pipelines
+  are kept apart below, because they are validated against different literature and different invariants. Click
+  any figure to enlarge it.</p>
+</section>
+<section class="valsec" id="val-paper">
+<div class="shead sub"><span class="rule p1"></span><h2>Papers</h2>
+<span class="chip p1">OpenAlex</span>
+<span class="meta">19 figures · paper_validation.ipynb</span></div>
+<p class="intro">Validated against the paper literature: the Funk &amp; Owen-Smith disruption distribution,
+  the Wu et al. team-size result, the Uzzi atypicality 2×2, and Ke et al. sleeping beauties — plus the
+  convexity tests the notebooks add on top.</p>
+<div class="gallery"><figure class="card" data-pipe="paper">
+<div class="cardhead">
+<span class="sec p1">§1</span>
+<code class="src">paper_validation.ipynb</code>
+</div>
+<h3>Disruption frequency spectrum</h3>
+<p class="tests">Raw CD<sub>all</sub> over every paper with a computable index, symlog x, log y.</p>
+<button aria-label="Enlarge figure: Disruption frequency spectrum" class="figwrap" type="button"><img alt="paper_validation_1" class="figimg" decoding="async" height="1717" loading="lazy" src="Figures/paper_validation_1.jpg?v=d258c96b6fb1" width="5922"/></button>
+</figure>
+<figure class="card" data-pipe="paper">
+<div class="cardhead">
+<span class="sec p1">§2</span>
+<code class="src">paper_validation.ipynb</code>
+</div>
+<h3>Team size → disruption &amp; impact</h3>
+<p class="tests">Native team size from distinct author IDs in paper_author.parquet; disruption percentile and citation impact by team size.</p>
+<button aria-label="Enlarge figure: Team size → disruption &amp; impact" class="figwrap" type="button"><img alt="paper_validation_2" class="figimg" decoding="async" height="2723" loading="lazy" src="Figures/paper_validation_2.jpg?v=fe6adf919f76" width="3382"/></button>
+</figure>
+<figure class="card" data-pipe="paper">
+<div class="cardhead">
+<span class="sec p1">§3</span>
+<code class="src">paper_validation.ipynb</code>
+</div>
+<h3>Atypicality 2×2 — our Z-scores</h3>
+<p class="tests">Corrected merged atypicality scores, 1980–2020; journal-only mapping. Conventionality and tail novelty are evaluated within publication-year cohorts.</p>
+<button aria-label="Enlarge figure: Atypicality 2×2 — our Z-scores" class="figwrap" type="button"><img alt="paper_validation_3" class="figimg" decoding="async" height="3006" loading="lazy" src="Figures/paper_validation_3.jpg?v=22bc4eb0aa6f" width="4345"/></button>
+</figure>
+<figure class="card" data-pipe="paper">
+<div class="cardhead">
+<span class="sec p1">§3c</span>
+<code class="src">paper_validation.ipynb</code>
+</div>
+<h3>Agreement with SciSciNet</h3>
+<p class="tests">Convergent validity: the same metrics computed on two different citation graphs.</p>
+<button aria-label="Enlarge figure: Agreement with SciSciNet" class="figwrap" type="button"><img alt="paper_validation_3c" class="figimg" decoding="async" height="11628" loading="lazy" src="Figures/paper_validation_3c.jpg?v=e1754e5022e2" width="10498"/></button>
+</figure>
+<figure class="card" data-pipe="paper">
+<div class="cardhead">
+<span class="sec p1">§4</span>
+<code class="src">paper_validation.ipynb</code>
+</div>
+<h3>Atypicality Z-score CDF</h3>
+<p class="tests">CDF of median and 10th-percentile Z from the corrected merged 1980–2020 run.</p>
+<button aria-label="Enlarge figure: Atypicality Z-score CDF" class="figwrap" type="button"><img alt="paper_validation_4" class="figimg" decoding="async" height="2806" loading="lazy" src="Figures/paper_validation_4.jpg?v=447636e3c8f8" width="3777"/></button>
+</figure>
+<figure class="card" data-pipe="paper">
+<div class="cardhead">
+<span class="sec p1">§5</span>
+<code class="src">paper_validation.ipynb</code>
+</div>
+<h3>Sleeping Beauty — B, T and impact</h3>
+<p class="tests">Ke et al. beauty coefficient: B distribution, awakening time T, B vs eventual citations.</p>
+<button aria-label="Enlarge figure: Sleeping Beauty — B, T and impact" class="figwrap" type="button"><img alt="paper_validation_5" class="figimg" decoding="async" height="2334" loading="lazy" src="Figures/paper_validation_5.jpg?v=a68530266690" width="9531"/></button>
+</figure>
+<figure class="card" data-pipe="paper">
+<div class="cardhead">
+<span class="sec p1">§6a</span>
+<code class="src">paper_validation.ipynb</code>
+</div>
+<h3>Citation trajectory &amp; convexity — hit top 1%</h3>
+<p class="tests">Min–max scaled cumulative p2p curves; convexity index = 1 − mean(normalised citation age).</p>
+<button aria-label="Enlarge figure: Citation trajectory &amp; convexity — hit top 1%" class="figwrap" type="button"><img alt="paper_validation_6a" class="figimg" decoding="async" height="3053" loading="lazy" src="Figures/paper_validation_6a.jpg?v=8d77d56d1208" width="8941"/></button>
+</figure>
+<figure class="card" data-pipe="paper">
+<div class="cardhead">
+<span class="sec p1">§6b</span>
+<code class="src">paper_validation.ipynb</code>
+</div>
+<h3>Convex vs concave — by field</h3>
+<p class="tests">Splits the hit top-1% into convex / concave and compares their properties.</p>
+<button aria-label="Enlarge figure: Convex vs concave — by field" class="figwrap" type="button"><img alt="paper_validation_6b" class="figimg" decoding="async" height="3537" loading="lazy" src="Figures/paper_validation_6b.jpg?v=c641741f74ba" width="5474"/></button>
+</figure>
+<figure class="card" data-pipe="paper"><div class="cardhead"><span class="sec p1">§6c</span><code class="src">paper_validation.ipynb</code></div><h3>Citation trajectories by field — hit top 1%</h3><p class="tests">Mean cumulative citation curves by FoS level-0 field.</p><button aria-label="Enlarge figure: Citation trajectories by field — hit top 1%" class="figwrap" type="button"><img alt="paper_validation_6c" class="figimg" decoding="async" height="15565" loading="lazy" src="Figures/paper_validation_6c.jpg?v=fa29be57ded9" width="10254"/></button></figure>
+<figure class="card" data-pipe="paper"><div class="cardhead"><span class="sec p1">§6d</span><code class="src">paper_validation.ipynb</code></div><h3>Citation trajectories — all eligible papers</h3><p class="tests">Corpus-wide trajectories with the citation-count and observation-span filters required by the metric.</p><button aria-label="Enlarge figure: Citation trajectories — all eligible papers" class="figwrap" type="button"><img alt="paper_validation_6d" class="figimg" decoding="async" height="2697" loading="lazy" src="Figures/paper_validation_6d.jpg?v=6c06ec1736c5" width="10138"/></button></figure>
+<figure class="card" data-pipe="paper"><div class="cardhead"><span class="sec p1">§6e</span><code class="src">paper_validation.ipynb</code></div><h3>Trajectories by field — hit top 1% vs all papers</h3><p class="tests">Compare selected high-impact papers with all eligible papers in each field.</p><button aria-label="Enlarge figure: Trajectories by field — hit top 1% vs all papers" class="figwrap" type="button"><img alt="paper_validation_6e" class="figimg" decoding="async" height="15565" loading="lazy" src="Figures/paper_validation_6e.jpg?v=cd6fa2f49b75" width="10254"/></button></figure>
+<figure class="card" data-pipe="paper">
+<div class="cardhead">
+<span class="sec p1">§7a</span>
+<code class="src">paper_validation.ipynb</code>
+</div>
+<h3>Yearly metric trends &amp; convexity</h3>
+<p class="tests">Same convexity test on the time trend of each metric, mean by publication year, 1950–2010.</p>
+<button aria-label="Enlarge figure: Yearly metric trends &amp; convexity" class="figwrap" type="button"><img alt="paper_validation_7a" class="figimg" decoding="async" height="4828" loading="lazy" src="Figures/paper_validation_7a.jpg?v=a7a960ee3afd" width="10739"/></button>
+</figure>
+<figure class="card" data-pipe="paper">
+<div class="cardhead">
+<span class="sec p1">§7b</span>
+<code class="src">paper_validation.ipynb</code>
+</div>
+<h3>Trend convexity by field</h3>
+<p class="tests">Convexity index heatmap, FoS level-0 × metric.</p>
+<button aria-label="Enlarge figure: Trend convexity by field" class="figwrap" type="button"><img alt="paper_validation_7b" class="figimg" decoding="async" height="8934" loading="lazy" src="Figures/paper_validation_7b.jpg?v=d04e62889028" width="5517"/></button>
+</figure>
+<figure class="card" data-pipe="paper"><div class="cardhead"><span class="sec p1">§8</span><code class="src">paper_validation.ipynb</code></div><h3>Disruption over publication years</h3><p class="tests">Mean CD by window, indexed trends, and field-level comparisons with closed citation windows.</p><button aria-label="Enlarge figure: Disruption over publication years" class="figwrap" type="button"><img alt="paper_validation_8" class="figimg" decoding="async" height="2720" loading="lazy" src="Figures/paper_validation_8.jpg?v=aa7dafab28a2" width="9838"/></button></figure>
+<figure class="card" data-pipe="paper"><div class="cardhead"><span class="sec p1">§9a</span><code class="src">paper_validation.ipynb</code></div><h3>Earlier 2000–2005 run — atypicality coverage</h3><p class="tests">Historical restricted run, before the journal-mapping fix; separate from the merged scores in §3–4.</p><button aria-label="Enlarge figure: Earlier 2000–2005 run — atypicality coverage" class="figwrap" type="button"><img alt="paper_validation_9a" class="figimg" decoding="async" height="2338" loading="lazy" src="Figures/paper_validation_9a.jpg?v=9303d4e23671" width="7739"/></button></figure>
+<figure class="card" data-pipe="paper"><div class="cardhead"><span class="sec p1">§9b1</span><code class="src">paper_validation.ipynb</code></div><h3>Earlier 2000–2005 run — Z-score distributions</h3><p class="tests">Historical restricted-run median, 10th-percentile and minimum Z distributions.</p><button aria-label="Enlarge figure: Earlier 2000–2005 run — Z-score distributions" class="figwrap" type="button"><img alt="paper_validation_9b1" class="figimg" decoding="async" height="2314" loading="lazy" src="Figures/paper_validation_9b1.jpg?v=f94c1ba0cad8" width="10130"/></button></figure>
+<figure class="card" data-pipe="paper"><div class="cardhead"><span class="sec p1">§9b2</span><code class="src">paper_validation.ipynb</code></div><h3>Earlier 2000–2005 run — Z-score CDF</h3><p class="tests">Historical restricted-run cumulative distributions; do not pool with the corrected merged run.</p><button aria-label="Enlarge figure: Earlier 2000–2005 run — Z-score CDF" class="figwrap" type="button"><img alt="paper_validation_9b2" class="figimg" decoding="async" height="2806" loading="lazy" src="Figures/paper_validation_9b2.jpg?v=e2f52c73e966" width="3777"/></button></figure>
+<figure class="card" data-pipe="paper"><div class="cardhead"><span class="sec p1">§9c</span><code class="src">paper_validation.ipynb</code></div><h3>Earlier 2000–2005 run — hit-paper probability</h3><p class="tests">Historical restricted-run conventionality and novelty split within publication-year cohorts.</p><button aria-label="Enlarge figure: Earlier 2000–2005 run — hit-paper probability" class="figwrap" type="button"><img alt="paper_validation_9c" class="figimg" decoding="async" height="3011" loading="lazy" src="Figures/paper_validation_9c.jpg?v=d181330a191b" width="3109"/></button></figure>
+<figure class="card" data-pipe="paper"><div class="cardhead"><span class="sec p1">§9d</span><code class="src">paper_validation.ipynb</code></div><h3>Earlier 2000–2005 run — SciSciNet agreement</h3><p class="tests">Historical restricted-run atypicality comparison; the latest merged-run comparison is in §3c.</p><button aria-label="Enlarge figure: Earlier 2000–2005 run — SciSciNet agreement" class="figwrap" type="button"><img alt="paper_validation_9d" class="figimg" decoding="async" height="2613" loading="lazy" src="Figures/paper_validation_9d.jpg?v=06ad4923418e" width="8928"/></button></figure>
+</div>
+</section>
+<section class="valsec" id="val-patent">
+<div class="shead sub"><span class="rule p2"></span><h2>Patents</h2>
+<span class="chip p2">PatentsView</span>
+<span class="meta">34 figures · patent_validation.ipynb</span></div>
+<p class="intro">No external gold standard exists for the patent metrics, so this is the invariant-heavy
+  notebook: window nesting, the F + E + G = 1 identity, citation truncation by grant year, and the
+  examiner / applicant and granted / pre-grant splits that only the patent side has.</p>
+<div class="gallery"><figure class="card" data-pipe="patent">
+<div class="cardhead">
+<span class="sec p2">§2</span>
+<code class="src">patent_validation.ipynb</code>
+</div>
+<h3>Coverage by metric</h3>
+<p class="tests">How many of the 8.53M patents have each metric defined.</p>
+<button aria-label="Enlarge figure: Coverage by metric" class="figwrap" type="button"><img alt="patent_validation_2" class="figimg" decoding="async" height="2338" loading="lazy" src="Figures/patent_validation_2.jpg?v=03f5fe8fcbda" width="4736"/></button>
+</figure>
+<figure class="card" data-pipe="patent">
+<div class="cardhead">
+<span class="sec p2">§3</span>
+<code class="src">patent_validation.ipynb</code>
+</div>
+<h3>Grant year &amp; filing→grant lag</h3>
+<p class="tests">Volume by grant year and the pendency distribution.</p>
+<button aria-label="Enlarge figure: Grant year &amp; filing→grant lag" class="figwrap" type="button"><img alt="patent_validation_3" class="figimg" decoding="async" height="2338" loading="lazy" src="Figures/patent_validation_3.jpg?v=b0ef6f83974d" width="7738"/></button>
+</figure>
+<figure class="card" data-pipe="patent">
+<div class="cardhead">
+<span class="sec p2">§4</span>
+<code class="src">patent_validation.ipynb</code>
+</div>
+<h3>Forward citations (de-duplicated) &amp; monotonicity</h3>
+<p class="tests">uniqueC distributions plus the window-nesting invariant.</p>
+<button aria-label="Enlarge figure: Forward citations (de-duplicated) &amp; monotonicity" class="figwrap" type="button"><img alt="patent_validation_4" class="figimg" decoding="async" height="2338" loading="lazy" src="Figures/patent_validation_4.jpg?v=169ed315c18f" width="7739"/></button>
+</figure>
+<figure class="card" data-pipe="patent">
+<div class="cardhead">
+<span class="sec p2">§5</span>
+<code class="src">patent_validation.ipynb</code>
+</div>
+<h3>Mean citations by grant year</h3>
+<p class="tests">De-duplicated forward citations by grant year.</p>
+<button aria-label="Enlarge figure: Mean citations by grant year" class="figwrap" type="button"><img alt="patent_validation_5-1" class="figimg" decoding="async" height="2338" loading="lazy" src="Figures/patent_validation_5-1.jpg?v=05a281cf8a59" width="4301"/></button>
+</figure>
+<figure class="card" data-pipe="patent">
+<div class="cardhead">
+<span class="sec p2">§5</span>
+<code class="src">patent_validation.ipynb</code>
+</div>
+<h3>Examiner vs non-examiner split by year</h3>
+<p class="tests">The same series split by who added the reference.</p>
+<button aria-label="Enlarge figure: Examiner vs non-examiner split by year" class="figwrap" type="button"><img alt="patent_validation_5-2" class="figimg" decoding="async" height="2338" loading="lazy" src="Figures/patent_validation_5-2.jpg?v=f7fe7b884ec1" width="7738"/></button>
+</figure>
+<figure class="card" data-pipe="patent">
+<div class="cardhead">
+<span class="sec p2">§5b</span>
+<code class="src">patent_validation.ipynb</code>
+</div>
+<h3>Application (pre-grant) citations</h3>
+<p class="tests">appC — citations from published applications, and how they relate to granted citations.</p>
+<button aria-label="Enlarge figure: Application (pre-grant) citations" class="figwrap" type="button"><img alt="patent_validation_5b" class="figimg" decoding="async" height="2334" loading="lazy" src="Figures/patent_validation_5b.jpg?v=552b293a7194" width="10737"/></button>
+</figure>
+<figure class="card" data-pipe="patent">
+<div class="cardhead">
+<span class="sec p2">§6</span>
+<code class="src">patent_validation.ipynb</code>
+</div>
+<h3>Disruption — distribution, trend, ni/nj/nk</h3>
+<p class="tests">CD over patents plus the composition of its three counting terms.</p>
+<button aria-label="Enlarge figure: Disruption — distribution, trend, ni/nj/nk" class="figwrap" type="button"><img alt="patent_validation_6" class="figimg" decoding="async" height="2334" loading="lazy" src="Figures/patent_validation_6.jpg?v=7a652321898e" width="9539"/></button>
+</figure>
+<figure class="card" data-pipe="patent">
+<div class="cardhead">
+<span class="sec p2">§7</span>
+<code class="src">patent_validation.ipynb</code>
+</div>
+<h3>F / E / G decomposition</h3>
+<p class="tests">Foundation / Extension / Generalization shares in the five-year citation window; shares sum to one.</p>
+<button aria-label="Enlarge figure: F / E / G decomposition" class="figwrap" type="button"><img alt="patent_validation_7" class="figimg" decoding="async" height="2334" loading="lazy" src="Figures/patent_validation_7.jpg?v=c3df0c6e81c3" width="7739"/></button>
+</figure>
+<figure class="card" data-pipe="patent">
+<div class="cardhead">
+<span class="sec p2">§8</span>
+<code class="src">patent_validation.ipynb</code>
+</div>
+<h3>Atypicality Z-scores</h3>
+<p class="tests">Z_median / Z_10pct / Z_min from CPC-pair combination z-scores (Kim et al. 2016 style).</p>
+<button aria-label="Enlarge figure: Atypicality Z-scores" class="figwrap" type="button"><img alt="patent_validation_8" class="figimg" decoding="async" height="2334" loading="lazy" src="Figures/patent_validation_8.jpg?v=a0c2a3d4f10c" width="7738"/></button>
+</figure>
+<figure class="card" data-pipe="patent">
+<div class="cardhead">
+<span class="sec p2">§9</span>
+<code class="src">patent_validation.ipynb</code>
+</div>
+<h3>Hit percentile distribution</h3>
+<p class="tests">Percentile of citations within WIPO sector × grant year.</p>
+<button aria-label="Enlarge figure: Hit percentile distribution" class="figwrap" type="button"><img alt="patent_validation_9" class="figimg" decoding="async" height="2338" loading="lazy" src="Figures/patent_validation_9.jpg?v=1089a83fcd0c" width="7739"/></button>
+</figure>
+<figure class="card" data-pipe="patent">
+<div class="cardhead">
+<span class="sec p2">§10</span>
+<code class="src">patent_validation.ipynb</code>
+</div>
+<h3>Metric means by CPC section</h3>
+<p class="tests">Every metric broken out by the eight CPC sections.</p>
+<button aria-label="Enlarge figure: Metric means by CPC section" class="figwrap" type="button"><img alt="patent_validation_10" class="figimg" decoding="async" height="4733" loading="lazy" src="Figures/patent_validation_10.jpg?v=c49e1f3beb7c" width="7739"/></button>
+</figure>
+<figure class="card" data-pipe="patent">
+<div class="cardhead">
+<span class="sec p2">§11</span>
+<code class="src">patent_validation.ipynb</code>
+</div>
+<h3>Cross-metric correlations</h3>
+<p class="tests">Correlation matrix across all patent metrics.</p>
+<button aria-label="Enlarge figure: Cross-metric correlations" class="figwrap" type="button"><img alt="patent_validation_11" class="figimg" decoding="async" height="4135" loading="lazy" src="Figures/patent_validation_11.jpg?v=ddc9ae60299c" width="4844"/></button>
+</figure>
+<figure class="card" data-pipe="patent">
+<div class="cardhead">
+<span class="sec p2">§12</span>
+<code class="src">patent_validation.ipynb</code>
+</div>
+<h3>Scatter checks</h3>
+<p class="tests">Pairwise scatter on a 50k sample.</p>
+<button aria-label="Enlarge figure: Scatter checks" class="figwrap" type="button"><img alt="patent_validation_12" class="figimg" decoding="async" height="2634" loading="lazy" src="Figures/patent_validation_12.jpg?v=fca595133c6c" width="9535"/></button>
+</figure>
+<figure class="card" data-pipe="patent">
+<div class="cardhead">
+<span class="sec p2">§13</span>
+<code class="src">patent_validation.ipynb</code>
+</div>
+<h3>Sleeping Beauty — patents</h3>
+<p class="tests">B / T distributions, B vs impact, and the sector breakdown.</p>
+<button aria-label="Enlarge figure: Sleeping Beauty — patents" class="figwrap" type="button"><img alt="patent_validation_13" class="figimg" decoding="async" height="2334" loading="lazy" src="Figures/patent_validation_13.jpg?v=dbb4f127449e" width="9531"/></button>
+</figure>
+<figure class="card" data-pipe="patent">
+<div class="cardhead">
+<span class="sec p2">§14a</span>
+<code class="src">patent_validation.ipynb</code>
+</div>
+<h3>Citation trajectory &amp; convexity — hit top 1%</h3>
+<p class="tests">Cumulative patent→patent curves for the top 1% by uniqueC5 within CPC section × grant year.</p>
+<button aria-label="Enlarge figure: Citation trajectory &amp; convexity — hit top 1%" class="figwrap" type="button"><img alt="patent_validation_14a" class="figimg" decoding="async" height="3053" loading="lazy" src="Figures/patent_validation_14a.jpg?v=647069843f85" width="8941"/></button>
+</figure>
+<figure class="card" data-pipe="patent">
+<div class="cardhead">
+<span class="sec p2">§14b</span>
+<code class="src">patent_validation.ipynb</code>
+</div>
+<h3>Convex vs concave — by CPC section</h3>
+<p class="tests">Group properties of the two shapes.</p>
+<button aria-label="Enlarge figure: Convex vs concave — by CPC section" class="figwrap" type="button"><img alt="patent_validation_14b" class="figimg" decoding="async" height="2938" loading="lazy" src="Figures/patent_validation_14b.jpg?v=4b2be4cc9229" width="5619"/></button>
+</figure>
+<figure class="card" data-pipe="patent">
+<div class="cardhead">
+<span class="sec p2">§15</span>
+<code class="src">patent_validation.ipynb</code>
+</div>
+<h3>Extended network — granted + application</h3>
+<p class="tests">Repeats §14 with pre-grant application citations added to the trajectory.</p>
+<button aria-label="Enlarge figure: Extended network — granted + application" class="figwrap" type="button"><img alt="patent_validation_15" class="figimg" decoding="async" height="2697" loading="lazy" src="Figures/patent_validation_15.jpg?v=35e9396ec021" width="10138"/></button>
+</figure>
+<figure class="card" data-pipe="patent"><div class="cardhead"><span class="sec p2">§15a</span><code class="src">patent_validation.ipynb</code></div><h3>Trajectories by CPC — hit top 1%</h3><p class="tests">Granted-only and extended citation networks compared within each CPC section.</p><button aria-label="Enlarge figure: Trajectories by CPC — hit top 1%" class="figwrap" type="button"><img alt="patent_validation_15a" class="figimg" decoding="async" height="7045" loading="lazy" src="Figures/patent_validation_15a.jpg?v=2f03c7013dfa" width="8214"/></button></figure>
+<figure class="card" data-pipe="patent"><div class="cardhead"><span class="sec p2">§15b</span><code class="src">patent_validation.ipynb</code></div><h3>Trajectories — all eligible patents</h3><p class="tests">Corpus-wide cumulative curves on the granted-only and extended networks.</p><button aria-label="Enlarge figure: Trajectories — all eligible patents" class="figwrap" type="button"><img alt="patent_validation_15b" class="figimg" decoding="async" height="2695" loading="lazy" src="Figures/patent_validation_15b.jpg?v=6485851d5e06" width="10136"/></button></figure>
+<figure class="card" data-pipe="patent"><div class="cardhead"><span class="sec p2">§15c</span><code class="src">patent_validation.ipynb</code></div><h3>Trajectories by CPC — all eligible patents</h3><p class="tests">Granted-only and extended curves by technology section, with the same eligibility filters.</p><button aria-label="Enlarge figure: Trajectories by CPC — all eligible patents" class="figwrap" type="button"><img alt="patent_validation_15c" class="figimg" decoding="async" height="7045" loading="lazy" src="Figures/patent_validation_15c.jpg?v=7b1387a8686d" width="8214"/></button></figure>
+<figure class="card" data-pipe="patent">
+<div class="cardhead">
+<span class="sec p2">§16a</span>
+<code class="src">patent_validation.ipynb</code>
+</div>
+<h3>Yearly metric trends &amp; convexity</h3>
+<p class="tests">Convexity of each metric's grant-year trend, 1980–2015.</p>
+<button aria-label="Enlarge figure: Yearly metric trends &amp; convexity" class="figwrap" type="button"><img alt="patent_validation_16a" class="figimg" decoding="async" height="4828" loading="lazy" src="Figures/patent_validation_16a.jpg?v=96baa6480570" width="10739"/></button>
+</figure>
+<figure class="card" data-pipe="patent">
+<div class="cardhead">
+<span class="sec p2">§16b</span>
+<code class="src">patent_validation.ipynb</code>
+</div>
+<h3>Trend convexity by CPC section</h3>
+<p class="tests">Convexity index heatmap, metric × CPC section.</p>
+<button aria-label="Enlarge figure: Trend convexity by CPC section" class="figwrap" type="button"><img alt="patent_validation_16b" class="figimg" decoding="async" height="4077" loading="lazy" src="Figures/patent_validation_16b.jpg?v=d562cfc2756b" width="7136"/></button>
+</figure>
+<figure class="card" data-pipe="patent">
+<div class="cardhead">
+<span class="sec p2">§17</span>
+<code class="src">patent_validation.ipynb</code>
+</div>
+<h3>Team size (inventors) → disruption &amp; impact</h3>
+<p class="tests">The patent analogue of the Wu et al. figure — team size from <code>inventor_list</code>, ours, not borrowed.</p>
+<button aria-label="Enlarge figure: Team size (inventors) → disruption &amp; impact" class="figwrap" type="button"><img alt="patent_validation_17" class="figimg" decoding="async" height="2941" loading="lazy" src="Figures/patent_validation_17.jpg?v=d8ccff4790e8" width="3240"/></button>
+</figure>
+<figure class="card" data-pipe="patent">
+<div class="cardhead">
+<span class="sec p2">§18</span>
+<code class="src">patent_validation.ipynb</code>
+</div>
+<h3>Atypicality Z-score CDF</h3>
+<p class="tests">CDF of Z_median and Z_min across dyadic thresholds.</p>
+<button aria-label="Enlarge figure: Atypicality Z-score CDF" class="figwrap" type="button"><img alt="patent_validation_18" class="figimg" decoding="async" height="2806" loading="lazy" src="Figures/patent_validation_18.jpg?v=8aa2e48ea9b0" width="3904"/></button>
+</figure>
+<figure class="card" data-pipe="patent">
+<div class="cardhead">
+<span class="sec p2">§19</span>
+<code class="src">patent_validation.ipynb</code>
+</div>
+<h3>Atypicality 2×2 — hit-patent probability</h3>
+<p class="tests">Kim et al. (2016) CPC atypicality against top-5% C5.</p>
+<button aria-label="Enlarge figure: Atypicality 2×2 — hit-patent probability" class="figwrap" type="button"><img alt="patent_validation_19" class="figimg" decoding="async" height="3099" loading="lazy" src="Figures/patent_validation_19.jpg?v=408280f0600d" width="5183"/></button>
+</figure>
+<figure class="card" data-pipe="patent"><div class="cardhead"><span class="sec p2">§20</span><code class="src">patent_validation.ipynb</code></div><h3>Disruption over grant years</h3><p class="tests">Windowed mean CD, indexed trends and CPC comparisons; account for left and right truncation.</p><button aria-label="Enlarge figure: Disruption over grant years" class="figwrap" type="button"><img alt="patent_validation_20" class="figimg" decoding="async" height="2720" loading="lazy" src="Figures/patent_validation_20.jpg?v=3e886de3a81e" width="9836"/></button></figure>
+<figure class="card" data-pipe="patent"><div class="cardhead"><span class="sec p2">§21</span><code class="src">patent_validation.ipynb</code></div><h3>Extended network — disruption coverage and distributions</h3><p class="tests">Granted citations plus mapped application citations; compare CD coverage and distributions.</p><button aria-label="Enlarge figure: Extended network — disruption coverage and distributions" class="figwrap" type="button"><img alt="patent_validation_21" class="figimg" decoding="async" height="2452" loading="lazy" src="Figures/patent_validation_21.jpg?v=e487052cde17" width="10130"/></button></figure>
+<figure class="card" data-pipe="patent"><div class="cardhead"><span class="sec p2">§22</span><code class="src">patent_validation.ipynb</code></div><h3>Extended network — CD and F/E/G over time</h3><p class="tests">Granted-only versus extended CD, counting terms and five-year F/E/G shares by grant year.</p><button aria-label="Enlarge figure: Extended network — CD and F/E/G over time" class="figwrap" type="button"><img alt="patent_validation_22" class="figimg" decoding="async" height="2578" loading="lazy" src="Figures/patent_validation_22.jpg?v=65710a2f4b56" width="10733"/></button></figure>
+<figure class="card" data-pipe="patent"><div class="cardhead"><span class="sec p2">§23</span><code class="src">patent_validation.ipynb</code></div><h3>Extended network — CPC differences and paired shifts</h3><p class="tests">Compare five-year CD by CPC section and its per-patent change across networks.</p><button aria-label="Enlarge figure: Extended network — CPC differences and paired shifts" class="figwrap" type="button"><img alt="patent_validation_23" class="figimg" decoding="async" height="2574" loading="lazy" src="Figures/patent_validation_23.jpg?v=9ebdd8fb414e" width="10132"/></button></figure>
+<figure class="card" data-pipe="patent"><div class="cardhead"><span class="sec p2">§24a</span><code class="src">patent_validation.ipynb</code></div><h3>Extended network — disruption decline</h3><p class="tests">Repeat the grant-year decline analysis using granted and application citations.</p><button aria-label="Enlarge figure: Extended network — disruption decline" class="figwrap" type="button"><img alt="patent_validation_24a" class="figimg" decoding="async" height="2720" loading="lazy" src="Figures/patent_validation_24a.jpg?v=f413643b5d5c" width="9836"/></button></figure>
+<figure class="card" data-pipe="patent"><div class="cardhead"><span class="sec p2">§24b</span><code class="src">patent_validation.ipynb</code></div><h3>Disruption decline — granted vs extended</h3><p class="tests">Compare the grant-year trends across the two citation networks.</p><button aria-label="Enlarge figure: Disruption decline — granted vs extended" class="figwrap" type="button"><img alt="patent_validation_24b" class="figimg" decoding="async" height="2577" loading="lazy" src="Figures/patent_validation_24b.jpg?v=8d3e26d720e6" width="8039"/></button></figure>
+<figure class="card" data-pipe="patent"><div class="cardhead"><span class="sec p2">§25a</span><code class="src">patent_validation.ipynb</code></div><h3>Extended network — yearly trends and convexity</h3><p class="tests">Scaled yearly metric trends and their convexity over the notebook analysis window.</p><button aria-label="Enlarge figure: Extended network — yearly trends and convexity" class="figwrap" type="button"><img alt="patent_validation_25a" class="figimg" decoding="async" height="4828" loading="lazy" src="Figures/patent_validation_25a.jpg?v=afb095cef9ad" width="10739"/></button></figure>
+<figure class="card" data-pipe="patent"><div class="cardhead"><span class="sec p2">§25b</span><code class="src">patent_validation.ipynb</code></div><h3>Extended network — trend convexity by CPC</h3><p class="tests">Compare yearly-trend convexity across CPC sections.</p><button aria-label="Enlarge figure: Extended network — trend convexity by CPC" class="figwrap" type="button"><img alt="patent_validation_25b" class="figimg" decoding="async" height="4076" loading="lazy" src="Figures/patent_validation_25b.jpg?v=0a2f356f2028" width="7108"/></button></figure>
+<figure class="card" data-pipe="patent"><div class="cardhead"><span class="sec p2">§26</span><code class="src">patent_validation.ipynb</code></div><h3>Extended network — team size and disruption</h3><p class="tests">Inventor count versus disruption percentile recomputed on the extended citation network.</p><button aria-label="Enlarge figure: Extended network — team size and disruption" class="figwrap" type="button"><img alt="patent_validation_26" class="figimg" decoding="async" height="2697" loading="lazy" src="Figures/patent_validation_26.jpg?v=96960f3e1972" width="8038"/></button></figure>
+</div>
+</section>
+<section class="valsec" id="val-pcs">
+<div class="shead sub"><span class="rule p3"></span><h2>Patent → paper</h2>
+<span class="chip p3">Reliance on Science</span>
+<span class="meta">4 figures · pcs_validation.ipynb</span></div>
+<p class="intro">How often US patents cite each paper. The checks here are about accrual and coverage:
+  patent citations arrive an order of magnitude more slowly than paper citations, so the short windows are
+  nearly empty by construction rather than by error.</p>
+<div class="gallery"><figure class="card" data-pipe="pcs">
+<div class="cardhead">
+<span class="sec p3">§2</span>
+<code class="src">pcs_validation.ipynb</code>
+</div>
+<h3>Coverage &amp; citation distributions</h3>
+<p class="tests">How often US patents cite each paper, by window.</p>
+<button aria-label="Enlarge figure: Coverage &amp; citation distributions" class="figwrap" type="button"><img alt="pcs_validation_2" class="figimg" decoding="async" height="2338" loading="lazy" src="Figures/pcs_validation_2.jpg?v=ed2bbdd0a588" width="7736"/></button>
+</figure>
+<figure class="card" data-pipe="pcs">
+<div class="cardhead">
+<span class="sec p3">§3</span>
+<code class="src">pcs_validation.ipynb</code>
+</div>
+<h3>Windowed monotonicity</h3>
+<p class="tests">Window nesting and the windowed-vs-total invariant.</p>
+<button aria-label="Enlarge figure: Windowed monotonicity" class="figwrap" type="button"><img alt="pcs_validation_3" class="figimg" decoding="async" height="2334" loading="lazy" src="Figures/pcs_validation_3.jpg?v=6ab39b2860b2" width="7739"/></button>
+</figure>
+<figure class="card" data-pipe="pcs">
+<div class="cardhead">
+<span class="sec p3">§4</span>
+<code class="src">pcs_validation.ipynb</code>
+</div>
+<h3>Accrual by publication year &amp; examiner share</h3>
+<p class="tests">When patent citations arrive relative to the paper's publication, split by who added them.</p>
+<button aria-label="Enlarge figure: Accrual by publication year &amp; examiner share" class="figwrap" type="button"><img alt="pcs_validation_4" class="figimg" decoding="async" height="2338" loading="lazy" src="Figures/pcs_validation_4.jpg?v=f031888dc981" width="7738"/></button>
+</figure>
+<figure class="card" data-pipe="pcs">
+<div class="cardhead">
+<span class="sec p3">§5</span>
+<code class="src">pcs_validation.ipynb</code>
+</div>
+<h3>Hit percentile distribution</h3>
+<p class="tests">Percentile of patent citations within FoS × publication year.</p>
+<button aria-label="Enlarge figure: Hit percentile distribution" class="figwrap" type="button"><img alt="pcs_validation_5" class="figimg" decoding="async" height="2334" loading="lazy" src="Figures/pcs_validation_5.jpg?v=88996bcb0ff3" width="7739"/></button>
+</figure>
+</div>
+</section>
+<section class="valsec" id="val-ppp">
+<div class="shead sub"><span class="rule p4"></span><h2>Paper–patent pairs</h2>
+<span class="chip p4">PPP</span>
+<span class="meta">12 figures · ppp_validation.ipynb</span></div>
+<p class="intro">The 548,315-pair plus list links scientific and technological contributions. These validation figures join the document-level paper and patent citation histories, then apply figure-specific eligibility filters; the average cumulative trajectory in §5b covers 107,260 pairs. The separately inventoried PPP trend files are pair-level outputs. The hypothesis under test is that the paper side is convex and the patent side concave.</p>
+<div class="gallery"><figure class="card" data-pipe="ppp">
+<div class="cardhead">
+<span class="sec p4">§2</span>
+<code class="src">ppp_validation.ipynb</code>
+</div>
+<h3>Citation-age profiles</h3>
+<p class="tests">Per-pair average citations against years since publication (paper) and years since grant (patent).</p>
+<button aria-label="Enlarge figure: Citation-age profiles" class="figwrap" type="button"><img alt="ppp_validation_2" class="figimg" decoding="async" height="2637" loading="lazy" src="Figures/ppp_validation_2.jpg?v=7c7f1118be4c" width="8339"/></button>
+</figure>
+<figure class="card" data-pipe="ppp">
+<div class="cardhead">
+<span class="sec p4">§3</span>
+<code class="src">ppp_validation.ipynb</code>
+</div>
+<h3>Per-pair citation totals</h3>
+<p class="tests">Distribution of each citation channel per pair, and the examiner split.</p>
+<button aria-label="Enlarge figure: Per-pair citation totals" class="figwrap" type="button"><img alt="ppp_validation_3" class="figimg" decoding="async" height="2637" loading="lazy" src="Figures/ppp_validation_3.jpg?v=567a4ebdcd8c" width="8339"/></button>
+</figure>
+<figure class="card" data-pipe="ppp">
+<div class="cardhead">
+<span class="sec p4">§4</span>
+<code class="src">ppp_validation.ipynb</code>
+</div>
+<h3>Scientific vs technological impact</h3>
+<p class="tests">p2p against pat2p for the same pair — do the two impacts travel together?</p>
+<button aria-label="Enlarge figure: Scientific vs technological impact" class="figwrap" type="button"><img alt="ppp_validation_4" class="figimg" decoding="async" height="2938" loading="lazy" src="Figures/ppp_validation_4.jpg?v=37350022b53d" width="3538"/></button>
+</figure>
+<figure class="card" data-pipe="ppp">
+<div class="cardhead">
+<span class="sec p4">§5a</span>
+<code class="src">ppp_validation.ipynb</code>
+</div>
+<h3>Example pair trajectories</h3>
+<p class="tests">Individual pairs, each min–max scaled. Red = paper (p2p), blue = patent (pat2pat).</p>
+<button aria-label="Enlarge figure: Example pair trajectories" class="figwrap" type="button"><img alt="ppp_validation_5a" class="figimg" decoding="async" height="6629" loading="lazy" src="Figures/ppp_validation_5a.jpg?v=e701bef95a56" width="7139"/></button>
+</figure>
+<figure class="card" data-pipe="ppp">
+<div class="cardhead">
+<span class="sec p4">§5b</span>
+<code class="src">ppp_validation.ipynb</code>
+</div>
+<h3>Average trajectory, all pairs</h3>
+<p class="tests">The mean normalised cumulative curve for each side.</p>
+<button aria-label="Enlarge figure: Average trajectory, all pairs" class="figwrap" type="button"><img alt="ppp_validation_5b" class="figimg" decoding="async" height="3537" loading="lazy" src="Figures/ppp_validation_5b.jpg?v=619fd6512dbd" width="3838"/></button>
+</figure>
+<figure class="card" data-pipe="ppp">
+<div class="cardhead">
+<span class="sec p4">§5c</span>
+<code class="src">ppp_validation.ipynb</code>
+</div>
+<h3>Mean trajectories by CPC section</h3>
+<p class="tests">The same average, panelled by the patent's technology area.</p>
+<button aria-label="Enlarge figure: Mean trajectories by CPC section" class="figwrap" type="button"><img alt="ppp_validation_5c" class="figimg" decoding="async" height="6629" loading="lazy" src="Figures/ppp_validation_5c.jpg?v=515a0691487f" width="8939"/></button>
+</figure>
+<figure class="card" data-pipe="ppp">
+<div class="cardhead">
+<span class="sec p4">§5d</span>
+<code class="src">ppp_validation.ipynb</code>
+</div>
+<h3>Mean trajectories by field of study</h3>
+<p class="tests">The same average, panelled by the paper's FoS.</p>
+<button aria-label="Enlarge figure: Mean trajectories by field of study" class="figwrap" type="button"><img alt="ppp_validation_5d" class="figimg" decoding="async" height="4829" loading="lazy" src="Figures/ppp_validation_5d.jpg?v=ba5c2ee7ac53" width="10453"/></button>
+</figure>
+<figure class="card" data-pipe="ppp">
+<div class="cardhead">
+<span class="sec p4">§6a</span>
+<code class="src">ppp_validation.ipynb</code>
+</div>
+<h3>Sleeping-beauty pairs — examples</h3>
+<p class="tests">Top-SB papers and patents within the pair set.</p>
+<button aria-label="Enlarge figure: Sleeping-beauty pairs — examples" class="figwrap" type="button"><img alt="ppp_validation_6a" class="figimg" decoding="async" height="4829" loading="lazy" src="Figures/ppp_validation_6a.jpg?v=1328a5b966e6" width="9539"/></button>
+</figure>
+<figure class="card" data-pipe="ppp">
+<div class="cardhead">
+<span class="sec p4">§6b</span>
+<code class="src">ppp_validation.ipynb</code>
+</div>
+<h3>High-SB vs all — average trajectory</h3>
+<p class="tests">The high-beauty average against the overall average.</p>
+<button aria-label="Enlarge figure: High-SB vs all — average trajectory" class="figwrap" type="button"><img alt="ppp_validation_6b" class="figimg" decoding="async" height="3237" loading="lazy" src="Figures/ppp_validation_6b.jpg?v=173421f7ae9b" width="7738"/></button>
+</figure>
+<figure class="card" data-pipe="ppp">
+<div class="cardhead">
+<span class="sec p4">§6c</span>
+<code class="src">ppp_validation.ipynb</code>
+</div>
+<h3>Convexity index vs SB_B, by decile</h3>
+<p class="tests">Does a higher beauty coefficient mean a more convex curve?</p>
+<button aria-label="Enlarge figure: Convexity index vs SB_B, by decile" class="figwrap" type="button"><img alt="ppp_validation_6c" class="figimg" decoding="async" height="2934" loading="lazy" src="Figures/ppp_validation_6c.jpg?v=8d980a77f1b5" width="7879"/></button>
+</figure>
+<figure class="card" data-pipe="ppp">
+<div class="cardhead">
+<span class="sec p4">§7</span>
+<code class="src">ppp_validation.ipynb</code>
+</div>
+<h3>Paper convex &amp; patent concave</h3>
+<p class="tests">The quadrant where the paper blooms late and the patent peaks early.</p>
+<button aria-label="Enlarge figure: Paper convex &amp; patent concave" class="figwrap" type="button"><img alt="ppp_validation_7" class="figimg" decoding="async" height="3237" loading="lazy" src="Figures/ppp_validation_7.jpg?v=736a85c53f6a" width="7738"/></button>
+</figure>
+<figure class="card" data-pipe="ppp">
+<div class="cardhead">
+<span class="sec p4">§7a</span>
+<code class="src">ppp_validation.ipynb</code>
+</div>
+<h3>That subset — examples &amp; composition</h3>
+<p class="tests">Example trajectories plus the field / CPC composition of the subset.</p>
+<button aria-label="Enlarge figure: That subset — examples &amp; composition" class="figwrap" type="button"><img alt="ppp_validation_7a" class="figimg" decoding="async" height="6629" loading="lazy" src="Figures/ppp_validation_7a.jpg?v=f6b2500ab9ca" width="7801"/></button>
+</figure>
+</div>
+</section>
+<section class="valsec" id="val-caselaw">
+<div class="shead sub"><span class="rule p5"></span><h2>Case law</h2>
+<span class="chip p5">CASE</span>
+<span class="meta">16 figures · case_law_validation.ipynb</span></div>
+<p class="intro">5,179,698 US court opinions and 47,519,638 citations between them, 1800–2020.
+  The same estimators as the paper and patent families — citation windows, the CD index and its
+  F/E/G decomposition, the beauty coefficient — on a network whose citation culture is different:
+  precedent is cited immediately and then, occasionally, rediscovered a century later.</p>
+<p class="intro" style="border-left:3px solid var(--p5);padding-left:12px">
+<b>Data provenance.</b> The citation network and metadata were provided by the authors of Lee, S., Kim, T., Yoon, J., &amp; Youn, H. (2024). <i>When Common Law Ages: Two Centuries of Growing Inertia in US Judicial Opinions.</i> arXiv preprint <a href="https://arxiv.org/abs/2410.04493">arXiv:2410.04493</a>. Any use of the <code>case_*</code> outputs should cite it.</p>
+<div class="gallery"><figure class="card" data-pipe="caselaw">
+<div class="cardhead">
+<span class="sec p5">§2</span>
+<code class="src">case_law_validation.ipynb</code>
+</div>
+<h3>The corpus in time</h3>
+<p class="tests">Cases per decision year, cumulative share, and references per case. 1800–2020.</p>
+<button aria-label="Enlarge figure: The corpus in time" class="figwrap" type="button"><img alt="case_law_validation_2" class="figimg" decoding="async" height="2338" loading="lazy" src="Figures/case_law_validation_2.jpg?v=29e8db799779" width="8938"/></button>
+</figure>
+<figure class="card" data-pipe="caselaw">
+<div class="cardhead">
+<span class="sec p5">§3</span>
+<code class="src">case_law_validation.ipynb</code>
+</div>
+<h3>Forward citations &amp; windowed monotonicity</h3>
+<p class="tests">C<sub>3</sub> ≤ C<sub>5</sub> ≤ C<sub>10</sub> ≤ C<sub>all</sub> asserted on every case; log–log tail.</p>
+<button aria-label="Enlarge figure: Forward citations &amp; windowed monotonicity" class="figwrap" type="button"><img alt="case_law_validation_3" class="figimg" decoding="async" height="2434" loading="lazy" src="Figures/case_law_validation_3.jpg?v=eb263bbe2e5b" width="6520"/></button>
+</figure>
+<figure class="card" data-pipe="caselaw">
+<div class="cardhead">
+<span class="sec p5">§4</span>
+<code class="src">case_law_validation.ipynb</code>
+</div>
+<h3>Mean citations by decision year</h3>
+<p class="tests">Each window drawn faint past the year it stops having elapsed.</p>
+<button aria-label="Enlarge figure: Mean citations by decision year" class="figwrap" type="button"><img alt="case_law_validation_4" class="figimg" decoding="async" height="2697" loading="lazy" src="Figures/case_law_validation_4.jpg?v=6e71a274fb1e" width="5938"/></button>
+</figure>
+<figure class="card" data-pipe="caselaw">
+<div class="cardhead">
+<span class="sec p5">§5</span>
+<code class="src">case_law_validation.ipynb</code>
+</div>
+<h3>Citation age profile</h3>
+<p class="tests">When a case is cited, overall and by decision era — the shape the windows cut through.</p>
+<button aria-label="Enlarge figure: Citation age profile" class="figwrap" type="button"><img alt="case_law_validation_5" class="figimg" decoding="async" height="2576" loading="lazy" src="Figures/case_law_validation_5.jpg?v=8b0ce1b7d133" width="7138"/></button>
+</figure>
+<figure class="card" data-pipe="caselaw">
+<div class="cardhead">
+<span class="sec p5">§6</span>
+<code class="src">case_law_validation.ipynb</code>
+</div>
+<h3>Disruption — distribution, trend, composition</h3>
+<p class="tests">CD spikes at ±1 split by citer count; n<sub>i</sub>/n<sub>j</sub>/n<sub>k</sub> over time.</p>
+<button aria-label="Enlarge figure: Disruption — distribution, trend, composition" class="figwrap" type="button"><img alt="case_law_validation_6" class="figimg" decoding="async" height="2454" loading="lazy" src="Figures/case_law_validation_6.jpg?v=8bd7c2f05a98" width="8930"/></button>
+</figure>
+<figure class="card" data-pipe="caselaw">
+<div class="cardhead">
+<span class="sec p5">§7</span>
+<code class="src">case_law_validation.ipynb</code>
+</div>
+<h3>F / E / G decomposition</h3>
+<p class="tests">Foundation / Extension / Generalization shares in the five-year citation window; shares sum to one.</p>
+<button aria-label="Enlarge figure: F / E / G decomposition" class="figwrap" type="button"><img alt="case_law_validation_7" class="figimg" decoding="async" height="2577" loading="lazy" src="Figures/case_law_validation_7.jpg?v=92c661453cf5" width="7138"/></button>
+</figure>
+<figure class="card" data-pipe="caselaw">
+<div class="cardhead">
+<span class="sec p5">§8</span>
+<code class="src">case_law_validation.ipynb</code>
+</div>
+<h3>Hit percentile</h3>
+<p class="tests">Percentile within (jurisdiction, year); the block at 0 is the 27% never cited.</p>
+<button aria-label="Enlarge figure: Hit percentile" class="figwrap" type="button"><img alt="case_law_validation_8" class="figimg" decoding="async" height="2452" loading="lazy" src="Figures/case_law_validation_8.jpg?v=005d268ce0d5" width="8938"/></button>
+</figure>
+<figure class="card" data-pipe="caselaw">
+<div class="cardhead">
+<span class="sec p5">§9</span>
+<code class="src">case_law_validation.ipynb</code>
+</div>
+<h3>Metric means by jurisdiction</h3>
+<p class="tests">All 43 jurisdictions above 20,000 cases, citations and disruption.</p>
+<button aria-label="Enlarge figure: Metric means by jurisdiction" class="figwrap" type="button"><img alt="case_law_validation_9" class="figimg" decoding="async" height="6642" loading="lazy" src="Figures/case_law_validation_9.jpg?v=e8a760da28db" width="7140"/></button>
+</figure>
+<figure class="card" data-pipe="caselaw">
+<div class="cardhead">
+<span class="sec p5">§10</span>
+<code class="src">case_law_validation.ipynb</code>
+</div>
+<h3>Cross-metric correlations</h3>
+<p class="tests">Spearman on a 500k sample — CD against citations, hit against C<sub>all</sub>.</p>
+<button aria-label="Enlarge figure: Cross-metric correlations" class="figwrap" type="button"><img alt="case_law_validation_10" class="figimg" decoding="async" height="4011" loading="lazy" src="Figures/case_law_validation_10.jpg?v=ceb7413ecc57" width="4399"/></button>
+</figure>
+<figure class="card" data-pipe="caselaw">
+<div class="cardhead">
+<span class="sec p5">§11</span>
+<code class="src">case_law_validation.ipynb</code>
+</div>
+<h3>Sleeping Beauty — B, T and impact</h3>
+<p class="tests">B distribution, awakening time, and B rising with T.</p>
+<button aria-label="Enlarge figure: Sleeping Beauty — B, T and impact" class="figwrap" type="button"><img alt="case_law_validation_11" class="figimg" decoding="async" height="2434" loading="lazy" src="Figures/case_law_validation_11.jpg?v=08c3efd9614e" width="8931"/></button>
+</figure>
+<figure class="card" data-pipe="caselaw">
+<div class="cardhead">
+<span class="sec p5">§11b</span>
+<code class="src">case_law_validation.ipynb</code>
+</div>
+<h3>Sleeping Beauty across three families</h3>
+<p class="tests">Papers, patents and cases on one axis — same kernel, same n_cite floor.</p>
+<button aria-label="Enlarge figure: Sleeping Beauty across three families" class="figwrap" type="button"><img alt="case_law_validation_11b" class="figimg" decoding="async" height="2514" loading="lazy" src="Figures/case_law_validation_11b.jpg?v=e5062e1a24d0" width="7138"/></button>
+</figure>
+<figure class="card" data-pipe="caselaw">
+<div class="cardhead">
+<span class="sec p5">§11c</span>
+<code class="src">case_law_validation.ipynb</code>
+</div>
+<h3>Beauty coefficient survival</h3>
+<p class="tests">Share of documents above each B threshold, by family.</p>
+<button aria-label="Enlarge figure: Beauty coefficient survival" class="figwrap" type="button"><img alt="case_law_validation_11c" class="figimg" decoding="async" height="2498" loading="lazy" src="Figures/case_law_validation_11c.jpg?v=f4fe07f90531" width="4430"/></button>
+</figure>
+<figure class="card" data-pipe="caselaw">
+<div class="cardhead">
+<span class="sec p5">§12</span>
+<code class="src">case_law_validation.ipynb</code>
+</div>
+<h3>Citation trajectory &amp; convexity — top 1%</h3>
+<p class="tests">Cumulative 30-year trajectory against the straight line.</p>
+<button aria-label="Enlarge figure: Citation trajectory &amp; convexity — top 1%" class="figwrap" type="button"><img alt="case_law_validation_12" class="figimg" decoding="async" height="2577" loading="lazy" src="Figures/case_law_validation_12.jpg?v=ab3d7e866adc" width="7138"/></button>
+</figure>
+<figure class="card" data-pipe="caselaw">
+<div class="cardhead">
+<span class="sec p5">§13</span>
+<code class="src">case_law_validation.ipynb</code>
+</div>
+<h3>Is case law becoming less disruptive?</h3>
+<p class="tests">Mean CD by decision year, each window only where it has closed.</p>
+<button aria-label="Enlarge figure: Is case law becoming less disruptive?" class="figwrap" type="button"><img alt="case_law_validation_13" class="figimg" decoding="async" height="4144" loading="lazy" src="Figures/case_law_validation_13.jpg?v=b5a9b7345c88" width="7068"/></button>
+</figure>
+<figure class="card" data-pipe="caselaw">
+<div class="cardhead">
+<span class="sec p5">§14</span>
+<code class="src">case_law_validation.ipynb</code>
+</div>
+<h3>Stratified — All / State / Federal × Supreme</h3>
+<p class="tests">Disruption, citations and B by court level and bench.</p>
+<button aria-label="Enlarge figure: Stratified — All / State / Federal × Supreme" class="figwrap" type="button"><img alt="case_law_validation_14" class="figimg" decoding="async" height="2577" loading="lazy" src="Figures/case_law_validation_14.jpg?v=193e7e207e71" width="8935"/></button>
+</figure>
+<figure class="card" data-pipe="caselaw">
+<div class="cardhead">
+<span class="sec p5">§14b</span>
+<code class="src">case_law_validation.ipynb</code>
+</div>
+<h3>Age profile and F/E/G by stratum</h3>
+<p class="tests">Whether the four strata are comparable on fixed windows.</p>
+<button aria-label="Enlarge figure: Age profile and F/E/G by stratum" class="figwrap" type="button"><img alt="case_law_validation_14b" class="figimg" decoding="async" height="2572" loading="lazy" src="Figures/case_law_validation_14b.jpg?v=6c4772186a0f" width="7439"/></button>
+</figure>
+</div>
+</section>
+<section id="gaps">
+<div class="shead"><h2>Open gaps</h2><span class="meta">read before citing a number</span></div>
+<p class="intro">What is missing, what is borrowed, and which results carry a condition. Nothing here
+  invalidates the metrics; all of it changes how a specific number should be quoted.</p>
+<div class="gaps"><article class="gap crit">
+<div class="gaphead"><span class="flag crit">coverage</span>
+<span class="chip p1">Papers</span></div>
+<h3>Atypicality coverage and computation vintage</h3><p>The saved figures in sections 3–4 use the corrected merged 1980–2020 run (41,425,041 papers, 14 partitions at export). Section 9 preserves the earlier 2000–2005 run, before the journal-mapping fix; these vintages must not be pooled. Derived tables reports current stored-table counts, while each figure retains its stated analysis window.</p></article>
+<article class="gap warn">
+<div class="gaphead"><span class="flag warn">updated</span>
+<span class="chip p1">Papers</span></div>
+<h3>Native author-based team size</h3><p>The team-size figure uses distinct author IDs per paper from paper_author.parquet, built from the OpenAlex authorship snapshot.</p></article>
+<article class="gap info">
+<div class="gaphead"><span class="flag info">known limit</span>
+<span class="chip p3">Patent→paper</span></div>
+<h3>Patent→paper citations carry no usable examiner split</h3><p>Only 846 of 34,825,379 linkage rows have <code>reftype = exm</code>, so <code>C_examiner_*</code> is effectively always zero. The columns exist; they should not be interpreted.</p></article>
+<article class="gap warn">
+<div class="gaphead"><span class="flag warn">read with care</span>
+<span class="chip p1">Papers</span></div>
+<h3>Disruption transfers as a ranking, not as a value</h3><p>Agreement depends on the citation graph and observation window. Consult the current §3c comparison before carrying disruption values or rankings across sources.</p></article>
+<article class="gap warn">
+<div class="gaphead"><span class="flag warn">read with care</span>
+<span class="chip p1">Papers</span></div>
+<h3>Beauty coefficient is the least portable metric</h3><p>B depends on the whole citation history and therefore on snapshot coverage. Consult §3c for the current cross-source comparison.</p></article>
+<article class="gap warn">
+<div class="gaphead"><span class="flag warn">read with care</span>
+<span class="chip p2">Patents</span></div>
+<h3>Citation-network choice changes trajectory shape</h3><p>Granted-only and extended networks can produce different convexity classifications. Sections 15 and 21–26 show the comparisons; state the citation network with every result.</p></article>
+<article class="gap info">
+<div class="gaphead"><span class="flag info">known limit</span>
+<span class="chip p4">Paper–patent pairs</span></div>
+<h3>The pair list is a choice, not a given</h3><p>The saved validation figures use the 548,315-pair plus list; the adjusted list contains 42,967 pairs. Pair choice and eligibility filters determine the analysis sample. The Raw data section reports separately verified provenance for the current stored trend outputs. Record both when comparing results or rerunning the pipeline.</p></article></div>
+</section>
+<footer>
+<p>Inventory checked 7 Sep 2026 (UTC) across OpenAlex, PatentView, pcs, PPP and Case law. Row counts and schemas come from Parquet footers; file sizes and modification times come from filesystem metadata. Figures are saved exports from five validation notebooks. Refreshing this page does not recompute metrics or rerun those notebooks. The inventory snapshot and each figure’s analysis coverage are distinct; earlier atypicality exports remain explicitly labelled.</p>
+<p>References: Funk &amp; Owen-Smith (2017) disruption · Wu, Wang &amp; Evans (2019) team size · Uzzi, Mukherjee,
+  Stringer &amp; Jones (2013) atypicality · Kim, Cerigo, Jeong &amp; Youn (2016) technological novelty ·
+  Ke, Ferrara, Radicchi &amp; Flammini (2015) sleeping beauties · Marx &amp; Fuegi (2022) Reliance on Science.</p>
+</footer>
+</main>
+</div>
+<dialog class="lb">
+<img alt=""/>
+<div class="lbbar"><span class="cap"></span><button data-close="" type="button">Close (Esc)</button></div>
+</dialog>
+<script>
+(function () {
+  // lightbox
+  var lb = document.querySelector('dialog.lb');
+  var lbImg = lb.querySelector('img');
+  var lbCap = lb.querySelector('.cap');
+  document.querySelectorAll('.figwrap').forEach(function (w) {
+    w.addEventListener('click', function () {
+      var im = w.querySelector('img');
+      if (!im) return;
+      lbImg.src = im.src;
+      lbImg.alt = im.alt;
+      var fig = w.closest('figure');
+      lbCap.textContent = fig ? fig.querySelector('h3').textContent : '';
+      if (typeof lb.showModal === 'function') lb.showModal();
+    });
+  });
+  lb.querySelector('[data-close]').addEventListener('click', function () { lb.close(); });
+  lb.addEventListener('click', function (e) { if (e.target === lb) lb.close(); });
+
+  // scrollspy
+  var links = Array.prototype.slice.call(document.querySelectorAll('.rail a'));
+  var targets = links.map(function (a) { return document.querySelector(a.getAttribute('href')); });
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (en) {
+      if (!en.isIntersecting) return;
+      var i = targets.indexOf(en.target);
+      if (i < 0) return;
+      links.forEach(function (a, j) { a.classList.toggle('on', i === j); });
+    });
+  }, { rootMargin: '-10% 0px -75% 0px' });
+  targets.forEach(function (t) { if (t) io.observe(t); });
+})();
+</script>
+</body></html>
