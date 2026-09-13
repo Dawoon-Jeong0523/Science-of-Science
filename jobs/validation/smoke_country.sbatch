@@ -27,13 +27,15 @@ export PYTHONUNBUFFERED=1 MPLBACKEND=Agg
 echo "==================== smoke START $(date) on $(hostname) ===================="
 rm -f "$S/smoke_base.parquet"
 
+# Both hooks are belt and braces: the notebooks honour NB_FIG_DIR themselves (val_common reads
+# it), and smoke_val.py redirects val_common.FIG a second time in case that ever changes.
 echo "---------- author_country_validation (base limited to ${NB_BASE_LIMIT:-400000} papers) ----------"
-NB_BASE_FP="$S/smoke_base.parquet" NB_BASE_LIMIT="${NB_BASE_LIMIT:-400000}" \
+NB_BASE_FP="$S/smoke_base.parquet" NB_BASE_LIMIT="${NB_BASE_LIMIT:-400000}" NB_FIG_DIR="$S/figs_author" \
   python "$S/smoke_val.py" author_country_validation.ipynb "$S/figs_author"
 A=$?
 
 echo "---------- inventor_country_validation (full 8.5M patents, sampled paper side) ----------"
-NB_BASE_FP="$S/smoke_base.parquet" \
+NB_PAPER_BASE_FP="$S/smoke_base.parquet" NB_FIG_DIR="$S/figs_inventor" \
   python "$S/smoke_val.py" inventor_country_validation.ipynb "$S/figs_inventor"
 I=$?
 

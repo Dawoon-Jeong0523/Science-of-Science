@@ -23,7 +23,9 @@ import os
 
 BASE = "/project/jevans/Dawoon/Science of Science"
 VAL  = f"{BASE}/validation"
-FIG  = f"{VAL}/Figures"
+# NB_FIG_DIR redirects every save() of a run -- the way a smoke test of a validation notebook
+# keeps its sampled figures out of the folder refresh_dashboard.py publishes from.
+FIG  = os.environ.get("NB_FIG_DIR", f"{VAL}/Figures")
 
 # Where each upstream pipeline writes. These are the notebook/<side>/output directories of
 # the Windows layout, relocated.
@@ -167,7 +169,7 @@ NEEDS = {
     "author_country_validation": [
         paper("paper_author_country.parquet"), paper("paper_metadata.parquet"),
         paper("paper_hit_probability.parquet"), paper("paper_disruption.parquet"),
-        paper("paper_citation.parquet"), WORLD_GEOJSON,
+        WORLD_GEOJSON,
     ],
     "inventor_country_validation": [
         patent("patent_inventor_country.parquet"), patent("patent_metadata.parquet"),

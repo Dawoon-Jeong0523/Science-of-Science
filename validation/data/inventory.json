@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "source_project": "Science of Science",
-  "generated_utc": "2026-09-13T18:36:56.300238Z",
+  "generated_utc": "2026-09-13T19:06:12.547602Z",
   "method": "Parquet footers and filesystem metadata only for table inventories; small provenance JSON and run logs for provenance. No table data pages or large raw inputs are scanned.",
   "count_unit": "Stored rows across derived tables; not unique documents.",
   "files": [
