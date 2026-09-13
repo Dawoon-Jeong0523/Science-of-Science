@@ -34,12 +34,19 @@ FAMILIES = [
  dict(key='pcs', prefix='pcs_validation', accent=3, title='Patent → paper', chip='Reliance on Science', nav='Patent→paper', pipeline=True),
  dict(key='ppp', prefix='ppp_validation', accent=4, title='Paper–patent pairs', chip='PPP', nav='Patent Paper Pair', pipeline=True),
  dict(key='caselaw', prefix='case_law_validation', accent=5, title='Case law', chip='CASE', nav='Case law', pipeline=True),
+ dict(key='authorcountry', prefix='author_country_validation', accent=8, title='Author countries', chip='OpenAlex', nav='Author countries', pipeline=False,
+  intro=('Where the authors of 251.7 M OpenAlex works sit: ISO2 countries from the institution each affiliation resolved to, one row per work in paper_author_country.parquet. '
+         '44.6% of works have at least one located author. Coverage, country shares under full and fractional counting, international collaboration by team size, '
+         'its relation to impact and disruption, partner pairs, country profiles, and a cross-check against the Dimensions author countries.')),
+ dict(key='inventorcountry', prefix='inventor_country_validation', accent=9, title='Inventor countries', chip='PatentsView', nav='Inventor countries', pipeline=False,
+  intro=('Where the inventors of 8.5 M US utility patents sit: the country of the address printed on the grant, one row per patent in patent_inventor_country.parquet, with the assignee countries beside it. '
+         '99.3% of patents are located. The same sections as the author-country gallery, plus inventor-vs-assignee country and the CPC-section mix of each country, and a side-by-side with the paper table.')),
  dict(key='crosscheck', prefix='disruption_crosscheck', accent=7, title='Cross-checks', chip='all families', nav='Cross-checks', pipeline=False,
   intro=('An independent transcription of the CD<sub>5</sub> reference algorithm, scored against this pipeline\'s stored disruption values on the identical cached graphs '
          'for papers (OpenAlex) and patents (PatentsView). The reference drops the focal document from the n<sub>k</sub> set, so the prediction is '
          'n<sub>k</sub><sup>ref</sup> = n<sub>k</sub><sup>ours</sup> + 1; the figure reports how often the counting terms agree exactly and how close CD is under both variants.')),
 ]
-ACCENTS = {6: '#b7791f', 7: '#6b7280'}     # --p1..--p5 already live in the page
+ACCENTS = {6: '#b7791f', 7: '#6b7280', 8: '#0f766e', 9: '#7c3aed'}     # --p1..--p5 already live in the page
 
 # section -> (title, what the figure tests). Existing cards keep the caption written into the
 # page unless their section is listed here; a card created by this script needs an entry or it
@@ -89,6 +96,29 @@ CAPTIONS = {
   '25a': ('Extended network — yearly trends and convexity', 'Scaled yearly metric trends and their convexity over the notebook analysis window.'),
   '25b': ('Extended network — trend convexity by CPC', 'Compare yearly-trend convexity across CPC sections.'),
   '26': ('Extended network — team size and disruption', 'Inventor count versus disruption percentile recomputed on the extended citation network.'),
+ },
+ 'authorcountry': {
+  '1': ('Coverage by year and team size', 'Share of works with ≥ 1 located author and share of author slots located, by publication year; located share by team size (1990+).'),
+  '2': ('Country composition over time', 'Top-12 countries\' share of located works by year under full counting; full vs fractional share 2010–2020, the gap being each country\'s internationalisation.'),
+  '3': ('International collaboration', 'Share of located multi-author works spanning ≥ 2 countries, overall and by team-size band; distribution of the number of countries, 2010–2020.'),
+  '4': ('Internationality vs impact and disruption', 'Mean within-(field, year) citation percentile, top-10% share and mean CD<sub>5</sub> by number of countries, within team-size bands, 1990–2015.'),
+  '5': ('Country pairs', 'Row-normalised co-authorship between the 15 most international countries, 2015–2020: the share of A\'s international works that involve B.'),
+  '6': ('Country profiles', 'Top-30 producers 2000–2015: international share against mean citation percentile and against mean CD<sub>5</sub>; marker area ∝ works.'),
+  '7': ('Cross-check against Dimensions', 'Located share by year and top-15 country shares 2010–2020 from the Dimensions author countries beside the OpenAlex ones; agreement is on ranking and trend, not on coverage level.'),
+  '8': ('First and last author', 'Share of multi-author works whose first and last author share a country, by year; the most common cross-country first→last pairs 2015–2020.'),
+  '9': ('World map — output, openness, impact, change', 'Robinson choropleths: share of world output 2015–2020 on a log scale (fractional counting), international collaboration rate, mean citation percentile 1990–2015, and the log₂ change in share since 2000–2005. Grey is "no value", not zero; panels 3 and 4 carry volume floors.'),
+  '10': ('World map — collaboration flows', 'The 70 largest country pairs of 2015–2020 as great-circle arcs, width ∝ √(joint papers). The same data as §5, with distance restored.'),
+ },
+ 'inventorcountry': {
+  '1': ('Coverage by grant year', 'Share of patents with a located inventor, of located inventor slots and of patents with a located assignee, by grant year; team-size distribution for located vs unlocated patents.'),
+  '2': ('Country composition and inventor vs assignee', 'Top-10 inventor countries\' share of located patents by grant year; full vs fractional share 2010–2020; share of patents whose first inventor\'s country is among the assignee countries.'),
+  '3': ('International co-invention', 'Share of located multi-inventor patents spanning ≥ 2 countries, overall and by team-size band; number-of-countries distribution, 2010–2020.'),
+  '4': ('Internationality vs impact and disruption', 'Mean within-(sector, grant year) citation percentile, top-10% share and mean CD<sub>5</sub> by number of inventor countries, within team-size bands, 1990–2015.'),
+  '5': ('Country pairs', 'Row-normalised co-invention between the 15 most international countries, 2010–2020.'),
+  '6': ('Country profiles and CPC mix', 'Top-25 inventor countries 2000–2015: international share against impact and disruption; CPC-section mix of the ten largest.'),
+  '7': ('Papers against patents', 'Coverage, international share and countries-per-document for the OpenAlex author table and the PatentsView inventor table, side by side.'),
+  '8': ('World map — output, openness, impact, change', 'The same four Robinson choropleths as the author gallery, on patents: share of world patenting 2015–2020 (log, fractional counting), international co-invention rate, mean citation percentile 1990–2015, and the log₂ change in share since 2000–2005.'),
+  '9': ('World map — co-invention flows', 'The 70 largest inventor-country pairs of 2010–2020 as great-circle arcs. Nearly every heavy arc lands in the United States: this is the US patent record.'),
  },
  'crosscheck': {
   '1': ('CD<sub>5</sub> cross-check — reference algorithm vs this pipeline', 'Sampled papers and patents scored by an independent transcription of the CD index on the same cached graphs; exact agreement of n<sub>i</sub> / n<sub>j</sub> / n<sub>k</sub>, the predicted n<sub>k</sub> + 1 offset, and CD closeness under both focal-handling variants.'),

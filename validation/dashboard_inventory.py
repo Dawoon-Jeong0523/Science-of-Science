@@ -22,6 +22,7 @@ CANONICAL_TABLES = {
         "paper",
         (
             "paper_author.parquet",
+            "paper_author_country.parquet",
             "paper_citation.parquet",
             "paper_citation_trend.parquet",
             "paper_disruption.parquet",
@@ -60,6 +61,7 @@ CANONICAL_TABLES = {
             "patent_disruption_compare.parquet",
             "patent_feg_disruption_trend.parquet",
             "patent_hit_probability.parquet",
+            "patent_inventor_country.parquet",
             "patent_metadata.parquet",
             "patent_reference.parquet",
             "patent_sb.parquet",
@@ -95,6 +97,15 @@ GRAINS = {
         "One work_id with ordered, deduplicated author IDs and team_size."
     ),
     "paper_team_size.parquet": "One paper_id with a legacy team_size value.",
+    "paper_author_country.parquet": (
+        "One work with the ISO2 countries of its authors' institutions: the sorted "
+        "distinct set, the per-country author counts, and the first and last author's "
+        "own countries."
+    ),
+    "patent_inventor_country.parquet": (
+        "One utility patent with the ISO2 countries of the inventor addresses printed "
+        "on the grant, the per-country inventor counts, and the assignee countries."
+    ),
     "paper_z_score_1990_2000.parquet": (
         "One publication with journal-pair atypicality scores; 1990-2000 partition "
         "only, no merged corpus-wide file yet."

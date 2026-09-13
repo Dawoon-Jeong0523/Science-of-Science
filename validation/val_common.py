@@ -42,6 +42,12 @@ TMP = f"{BASE}/.duckdb_tmp"
 # 249,803,279 rows; `paperid` is already the 'W…' form, so it joins our paper_id directly.
 SCISCINET_FOS = f"{OA_BASE}/sciscinet_papers_fos_feg.parquet"
 
+# Country boundaries for the world maps of the two *_country_validation notebooks. Natural
+# Earth 1:50m Admin 0, public domain, trimmed and simplified; provenance in the .source.json
+# beside it. Checked in, because geopandas 1.0 removed its bundled naturalearth_lowres and a
+# compute node cannot be assumed to reach the internet.
+WORLD_GEOJSON = f"{VAL}/data/world_countries.geojson"
+
 DPI = 600          # raster resolution for .jpg, and for rasterised elements inside .pdf
 
 for _d in (FIG, TMP):
@@ -155,6 +161,18 @@ NEEDS = {
         # section 14 puts the two paper indices side by side
         paper("paper_metadata.parquet"), paper("paper_citation.parquet"),
         paper("paper_disruption.parquet"), paper("paper_sb.parquet"),
+    ],
+    # Author / inventor countries (added 2026-09-13). §7 of each reads the other family's table
+    # and is guarded, so only the own-family inputs are required.
+    "author_country_validation": [
+        paper("paper_author_country.parquet"), paper("paper_metadata.parquet"),
+        paper("paper_hit_probability.parquet"), paper("paper_disruption.parquet"),
+        paper("paper_citation.parquet"), WORLD_GEOJSON,
+    ],
+    "inventor_country_validation": [
+        patent("patent_inventor_country.parquet"), patent("patent_metadata.parquet"),
+        patent("patent_hit_probability.parquet"), patent("patent_disruption.parquet"),
+        WORLD_GEOJSON,
     ],
     # Citation histories now come from the DOCUMENT-level trends, not a pair-level build.
     "ppp_validation": [

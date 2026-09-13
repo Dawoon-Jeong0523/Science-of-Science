@@ -12,6 +12,10 @@
 Atypicality/
 jobs/Atypicality/
 
+# --- Figshare upload: API token and staging area (tar bundles, md5 cache) ------
+FIgshare_token.txt
+figshare_staging/
+
 # --- Bulk data: metric outputs, caches, raw mirrors ---------------------------
 *.parquet
 *.parquet.*

@@ -56,6 +56,9 @@ NEEDS = {
     "patent_sb":                  ["g_patent.tsv.zip", "g_us_patent_citation.tsv.zip"],
     "patent_hit_probability":     ["g_wipo_technology.tsv.zip"],
     "patent_z_score":             ["g_cpc_current.tsv.zip"],
+    "patent_inventor_country":    ["g_patent.tsv.zip", "g_inventor_disambiguated.tsv.zip",
+                                   "g_assignee_disambiguated.tsv.zip",
+                                   "g_location_disambiguated.tsv.zip"],
     "patent_disruption_app_compare": [],     # reads only this folder's own output
     "patent_feg_disruption_trend":   [],     # ditto
 }

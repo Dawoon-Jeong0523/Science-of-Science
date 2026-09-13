@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "source_project": "Science of Science",
-  "generated_utc": "2026-09-11T23:05:18.104774Z",
+  "generated_utc": "2026-09-13T18:36:56.300238Z",
   "method": "Parquet footers and filesystem metadata only for table inventories; small provenance JSON and run logs for provenance. No table data pages or large raw inputs are scanned.",
   "count_unit": "Stored rows across derived tables; not unique documents.",
   "files": [
@@ -48,6 +48,73 @@
       "modified_utc": "2026-09-03T13:35:43.610014Z",
       "grain": "One work_id with ordered, deduplicated author IDs and team_size.",
       "provenance": "OpenAlex/notebook/paper_author.ipynb"
+    },
+    {
+      "path": "OpenAlex/output/paper_author_country.parquet",
+      "family": "paper",
+      "rows": 251654553,
+      "bytes": 1582666211,
+      "columns": [
+        "paper_id",
+        "team_size",
+        "n_located",
+        "countries",
+        "n_countries",
+        "country_author_counts",
+        "first_author_country",
+        "last_author_country",
+        "is_international"
+      ],
+      "schema": [
+        {
+          "name": "paper_id",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "team_size",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "n_located",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "countries",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "n_countries",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "country_author_counts",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "first_author_country",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "last_author_country",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "is_international",
+          "type": "bool",
+          "nullable": true
+        }
+      ],
+      "row_groups": 252,
+      "modified_utc": "2026-09-13T17:36:49.372913Z",
+      "grain": "One work with the ISO2 countries of its authors' institutions: the sorted distinct set, the per-country author counts, and the first and last author's own countries."
     },
     {
       "path": "OpenAlex/output/paper_citation.parquet",
@@ -2681,6 +2748,73 @@
       "grain": "One document."
     },
     {
+      "path": "PatentView/output/patent_inventor_country.parquet",
+      "family": "patent",
+      "rows": 8531216,
+      "bytes": 36534060,
+      "columns": [
+        "patent_id",
+        "n_inventors",
+        "n_located",
+        "countries",
+        "n_countries",
+        "country_inventor_counts",
+        "first_inventor_country",
+        "is_international",
+        "assignee_countries"
+      ],
+      "schema": [
+        {
+          "name": "patent_id",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "n_inventors",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "n_located",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "countries",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "n_countries",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "country_inventor_counts",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "first_inventor_country",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "is_international",
+          "type": "bool",
+          "nullable": true
+        },
+        {
+          "name": "assignee_countries",
+          "type": "string",
+          "nullable": true
+        }
+      ],
+      "row_groups": 9,
+      "modified_utc": "2026-09-13T17:34:14.010161Z",
+      "grain": "One utility patent with the ISO2 countries of the inventor addresses printed on the grant, the per-country inventor counts, and the assignee countries."
+    },
+    {
       "path": "PatentView/output/patent_metadata.parquet",
       "family": "patent",
       "rows": 8531961,
@@ -3924,9 +4058,9 @@
       "grain": "One document."
     }
   ],
-  "total_files": 43,
-  "total_rows": 4765846747,
-  "total_bytes": 60665831537,
+  "total_files": 45,
+  "total_rows": 5026032516,
+  "total_bytes": 62285031808,
   "excluded_files": [
     "OpenAlex/output/paper_disruption_trend.parquet",
     "OpenAlex/output/paper_disruption_trend_summary.parquet",

@@ -34,6 +34,8 @@ if [ "${1:-}" = "plan" ]; then
   5  paper_z_score             <- 3
   6  paper_citation_trend      <- 3
   7  paper_hit_probability     <- 1, 2
+  8  paper_author_country      (no dependency; scans works_au_affs_fixed.csv.gz like paper_author,
+                                and cross-checks paper_author.parquet only if it exists)
 MSG
   exit 0
 fi
@@ -59,6 +61,7 @@ J4=$(sub paper_sb              "$J3")
 J5=$(sub paper_z_score         "$J3")
 J6=$(sub paper_citation_trend  "$J3")
 J7=$(sub paper_hit_probability "$J1" "$J2")
+J8=$(sub paper_author_country)
 
 cat <<'MSG'
 

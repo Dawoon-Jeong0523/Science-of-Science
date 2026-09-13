@@ -26,6 +26,7 @@ if [ "${1:-}" = "plan" ]; then
     8  patent_feg_disruption_trend   <- 1, 2
     9  patent_hit_probability        <- 1, 4
    10  patent_disruption_app_compare <- 1, 2, 6
+   11  patent_inventor_country       <- 1   (soft: only the n_inventors cross-check reads patent_metadata)
 MSG
   exit 0
 fi
@@ -53,6 +54,7 @@ P7=$(sub patent_z_score                "$P1")
 P8=$(sub patent_feg_disruption_trend   "$P1" "$P2")
 P9=$(sub patent_hit_probability        "$P1" "$P4")
 PA=$(sub patent_disruption_app_compare "$P1" "$P2" "$P6")
+PB=$(sub patent_inventor_country       "$P1")
 
 cat <<'MSG'
 
