@@ -44,67 +44,194 @@ data paths are absolute Midway paths under
 
 ## Layout
 
+Every file the repository tracks, as of this commit (`git ls-files`), with the data
+directories that live beside them on Midway but are not tracked noted where they sit.
+`Figures/`, `Old/` and `fonts/` are collapsed to a count.
+
 ```
 Science of Science/
-├── README.md                      this file
-├── run_notebook.py                exec a notebook's code cells in order, as a plain script
-├── paper_style.py, fonts/         shared matplotlib style (Lato)
-├── figshare_upload.py             deposit the output parquets on Figshare (resumable, md5-checked)
-├── FIGSHARE_README.md             the dataset README that accompanies that deposit
-├── openalex_2026_*.csv            schema listings for the OpenAlex snapshot
-├── Disruption_Index.ipynb         ┐
-├── Atypical_combinations.ipynb    ├ superseded 2025 Colab originals on MAG/SciSciNet
-├── MAG-Disruption-CD5.ipynb       ┘
-│
-├── OpenAlex/                      papers, OpenAlex 2026-01-16
-│   ├── oa_common.py               paths + data layer; every notebook imports this
-│   ├── notebook/                  13 metric notebooks (see Metrics below)
-│   ├── output/                    the parquet tables            (not tracked)
-│   ├── cache/                     graph/CSR/journal/FoS caches  (not tracked)
-│   ├── Abstract data/, Old/       superseded notebooks and side data
-│   └── Readme.txt                 how the MAG-era notebooks were ported to OpenAlex
-├── Dimensions/                    the same paper metrics on the Dimensions June 2025 index
-│   ├── dim_common.py              keeps the public names of oa_common.py
-│   ├── notebook/                  10 notebooks
-│   └── Readme.txt                 where Dimensions is NOT equivalent to OpenAlex
-├── PatentView/                    US granted utility patents
-│   ├── pv_common.py               paths, the granted/pre-grant file resolver, preflight()
-│   ├── notebook/                  15 notebooks
-│   ├── Granted/, Pregranted/      PatentsView bulk .tsv.zip     (not tracked)
-│   └── Old/
-├── PATSTAT/                       worldwide applications, PATSTAT Global 2023 Autumn
-│   ├── ps_common.py               plays the role of pv_common.py
-│   ├── notebook/                  10 notebooks
-│   ├── raw/                       zip -> parquet mirror         (not tracked)
-│   └── Readme.txt                 filing-year anchor, citation-origin codes
-├── Case law/                      US court opinions, Caselaw Access Project
-│   ├── cl_common.py
-│   ├── notebook/                  7 notebooks + gml_to_edgelist.ipynb
-│   └── Figures/
-├── pcs/                           patent -> paper citations, Reliance on Science
-│   ├── pcs_common.py
-│   └── notebook/                  3 notebooks
-├── PPP/                           patent-paper pairs
-│   ├── ppp_common.py
-│   └── notebook/                  ppp_citation_trend.ipynb
-│
-├── validation/                    face validity, and the public dashboard
-│   ├── val_common.py              V.init / V.save / V.paper / V.patent / V.dim / NEEDS
-│   ├── *_validation.ipynb         one per literature, plus the two country notebooks
-│   ├── disruption_crosscheck.ipynb   an independent transcription of CD_5, scored against ours
-│   ├── dashboard_update.ipynb     legacy Case-law injector; its last cell calls the script below
-│   ├── refresh_dashboard.py       rebuild metrics_dashboard.html from the figures + inventory
-│   ├── dashboard_inventory.py     read row counts and schemas out of the parquet footers
-│   ├── metrics_dashboard.html     the dashboard, also published to the SciSci Pages repo
-│   ├── Figures/                   <notebook>_<section>.{jpg,pdf} at 600 dpi
-│   └── data/
-│       ├── world_countries.geojson         Natural Earth 1:50m Admin 0, trimmed (tracked)
-│       ├── world_countries.source.json     its provenance
-│       ├── inventory.json                  local diagnostic report (not published)
-│       └── author_country_base.parquet     cached join, rebuilt on demand (not tracked)
-│
-└── jobs/<pipeline>/               nb.sbatch, submit_<pipeline>.sh, run_notebook.py, logs/
-    └── validation/                also execute_inplace.py and smoke_country.sbatch
+├── README.md                           this file
+├── .gitignore                          data, caches, raw mirrors, token: all excluded
+├── Atypical_combinations.ipynb         superseded 2025 Colab original
+├── Disruption_Index.ipynb              superseded 2025 Colab original
+├── explore_openalex_2026_renli.ipynb   first look at the OpenAlex snapshot
+├── FIGSHARE_README.md                  dataset README that accompanies the Figshare deposit
+├── figshare_upload.py                  deposit the output parquets on Figshare (resumable, MD5-checked)
+├── MAG-Disruption-CD5.ipynb            superseded 2025 Colab original
+├── openalex_2026_entity_tables.csv     schema listings of the OpenAlex snapshot
+├── openalex_2026_schemas.csv
+├── openalex_2026_top_level.csv
+├── openalex_2026_works_datasets.csv
+├── paper_style.py                      shared matplotlib style
+├── run_notebook.py                     exec a notebook's code cells in order, as a plain script
+├── OpenAlex/                           papers, OpenAlex 2026-01-16
+│   ├── oa_common.py                        paths + data layer; every OpenAlex notebook imports this
+│   ├── oa_common.py.pre-pcsswap
+│   ├── oa_common.py.pre-stream
+│   ├── Readme.txt                          where this index is NOT equivalent to its twin
+│   ├── verify_stream.py                    checks the streaming edge-table build
+│   ├── Abstract data/                      abstract-side helpers and notes (16 files)
+│   ├── notebook/
+│   │   ├── MAG-Atyp-Comb-1990-2000.ipynb
+│   │   ├── paper_author.ipynb
+│   │   ├── paper_author_country.ipynb
+│   │   ├── paper_citation.ipynb
+│   │   ├── paper_citation_trend.ipynb
+│   │   ├── paper_disruption.ipynb
+│   │   ├── paper_disruption_trend.ipynb
+│   │   ├── paper_hit_probability.ipynb
+│   │   ├── paper_metadata.ipynb
+│   │   ├── paper_sb.ipynb
+│   │   ├── paper_z_score.ipynb
+│   │   ├── paper_z_score.ipynb.pre-1980
+│   │   ├── paper_z_score.ipynb.pre-twopass
+│   │   ├── paper_z_score_merge.ipynb
+│   │   └── referenced_works_w_year.ipynb
+│   ├── Old/                                superseded notebook versions (11 files)
+│   └── output/                             parquet tables live here on Midway (not tracked)
+│       └── paper_z_score_provenance.json       year coverage of the merged atypicality file
+├── Dimensions/                         the same paper metrics on the Dimensions June 2025 index
+│   ├── dim_common.py                       keeps the public names of oa_common.py
+│   ├── Readme.txt                          where this index is NOT equivalent to its twin
+│   └── notebook/
+│       ├── paper_author.ipynb
+│       ├── paper_citation.ipynb
+│       ├── paper_citation_trend.ipynb
+│       ├── paper_disruption.ipynb
+│       ├── paper_hit_probability.ipynb
+│       ├── paper_metadata.ipynb
+│       ├── paper_sb.ipynb
+│       ├── paper_z_score.ipynb
+│       ├── paper_z_score_merge.ipynb
+│       └── references_w_year.ipynb
+├── PatentView/                         US granted utility patents, PatentsView
+│   ├── Log.txt                             download log of the PatentsView bulk files
+│   ├── pv_common.py                        paths, granted/pre-grant file resolver, preflight()
+│   ├── run_patent_reference.sbatch         one-off job for patent_reference
+│   ├── notebook/
+│   │   ├── patent_citation.ipynb
+│   │   ├── patent_citation_trend.ipynb
+│   │   ├── patent_disruption.ipynb
+│   │   ├── patent_disruption_app_add.ipynb
+│   │   ├── patent_disruption_app_compare.ipynb
+│   │   ├── patent_disruption_trend.ipynb
+│   │   ├── patent_feg_disruption_trend.ipynb
+│   │   ├── patent_hit_probability.ipynb
+│   │   ├── patent_inventor_country.ipynb
+│   │   ├── patent_metadata.ipynb
+│   │   ├── patent_reference.ipynb
+│   │   ├── patent_sb.ipynb
+│   │   ├── patent_uniqueC_trend.ipynb
+│   │   ├── patent_z_score.ipynb
+│   │   └── Test.ipynb                          scratch
+│   └── Old/                                superseded notebook versions (19 files)
+├── PATSTAT/                            worldwide applications, PATSTAT Global 2023 Autumn
+│   ├── patstat_chain_cancel_20260909.tex   note on a cancelled PATSTAT chain
+│   ├── ps_common.py                        plays the role of pv_common.py
+│   ├── Readme.txt                          where this index is NOT equivalent to its twin
+│   └── notebook/
+│       ├── patstat_citation.ipynb
+│       ├── patstat_citation_trend.ipynb
+│       ├── patstat_disruption.ipynb
+│       ├── patstat_feg_disruption_trend.ipynb
+│       ├── patstat_hit_probability.ipynb
+│       ├── patstat_load.ipynb
+│       ├── patstat_metadata.ipynb
+│       ├── patstat_reference.ipynb
+│       ├── patstat_sb.ipynb
+│       └── patstat_z_score.ipynb
+├── Case law/                           US court opinions, Caselaw Access Project
+│   ├── cl_common.py                        CAP paths, id codec, graph caches
+│   ├── gml_to_edgelist.ipynb               CAP GML -> Edge_list.parquet
+│   ├── Figures/                            figure exports, <notebook>_<section>.{jpg,pdf} (1 file)
+│   └── notebook/
+│       ├── case_citation.ipynb
+│       ├── case_citation_trend.ipynb
+│       ├── case_disruption.ipynb
+│       ├── case_feg_disruption_trend.ipynb
+│       ├── case_hit_probability.ipynb
+│       ├── case_metadata.ipynb
+│       └── case_sb.ipynb
+├── pcs/                                patent -> paper citations, Reliance on Science
+│   ├── __relianceonscience2024.pdf         Marx & Fuegi, the pcs source paper
+│   ├── pcs_common.py                       Reliance on Science paths
+│   ├── notebook/
+│   │   ├── pcs_citation.ipynb
+│   │   ├── pcs_citation_trend.ipynb
+│   │   └── pcs_hit_probability.ipynb
+│   └── Old/                                superseded notebook versions (4 files)
+├── PPP/                                patent-paper pairs
+│   ├── ppp_common.py                       pair loader
+│   ├── ppp_common.py.pre-plus
+│   ├── notebook/
+│   │   └── ppp_citation_trend.ipynb
+│   └── Old/                                superseded notebook versions (3 files)
+├── validation/                         face validity and the dashboard
+│   ├── author_country_validation.ipynb     10 figures incl. world maps
+│   ├── case_law_validation.ipynb
+│   ├── case_law_validation.ipynb.pre-feg5
+│   ├── dashboard_inventory.py              row counts and schemas from parquet footers
+│   ├── dashboard_update.ipynb              legacy Case-law injector; last cell calls refresh_dashboard.py
+│   ├── dimension_validation.ipynb
+│   ├── disruption_crosscheck.ipynb         independent CD_5 transcription vs ours
+│   ├── inventor_country_validation.ipynb   9 figures incl. world maps
+│   ├── metrics_dashboard.html              the dashboard; published to the SciSci Pages repo
+│   ├── paper_validation.ipynb
+│   ├── paper_validation.ipynb.pre-author
+│   ├── paper_validation.ipynb.pre-update
+│   ├── patent_validation.ipynb
+│   ├── patent_validation.ipynb.pre-feg5
+│   ├── pcs_validation.ipynb
+│   ├── ppp_validation.ipynb
+│   ├── refresh_dashboard.py                rebuild metrics_dashboard.html from Figures/ + the inventory
+│   ├── val_common.py                       V.init / V.save / V.paper / V.patent / V.dim / NEEDS / NB_FIG_DIR
+│   ├── val_common.py.pre-caselaw
+│   ├── data/
+│   │   ├── inventory.json                      local diagnostic report of the 45 derived tables
+│   │   ├── world_countries.geojson             Natural Earth 1:50m Admin 0, trimmed (the maps need it)
+│   │   └── world_countries.source.json         its provenance
+│   ├── Figures/                            figure exports, <notebook>_<section>.{jpg,pdf} (238 files)
+│   └── Old/                                superseded notebook versions (20 files)
+├── jobs/                               SLURM: one folder per pipeline
+│   ├── Case law/
+│   │   ├── nb.sbatch                           run ONE notebook on a jevans node
+│   │   └── submit_case_law.sh                  submit the chain with afterok dependencies (`plan` prints the order)
+│   ├── Dimensions/
+│   │   ├── nb.sbatch                           run ONE notebook on a jevans node
+│   │   ├── run_notebook.py                     per-pipeline copy of the runner
+│   │   └── submit_dimensions.sh                submit the chain with afterok dependencies (`plan` prints the order)
+│   ├── OpenAlex/
+│   │   ├── disruption_trend.sbatch             the long disruption-trajectory job
+│   │   ├── nb.sbatch                           run ONE notebook on a jevans node
+│   │   ├── run_notebook.py                     per-pipeline copy of the runner
+│   │   ├── submit_openalex.sh                  submit the chain with afterok dependencies (`plan` prints the order)
+│   │   ├── verify.sbatch
+│   │   └── zsec.sbatch                         z-score by year range
+│   ├── PatentView/
+│   │   ├── disruption_trend.sbatch             the long disruption-trajectory job
+│   │   ├── nb.sbatch                           run ONE notebook on a jevans node
+│   │   ├── run_notebook.py                     per-pipeline copy of the runner
+│   │   ├── submit_patentview.sh                submit the chain with afterok dependencies (`plan` prints the order)
+│   │   ├── verify_dedup.py                     checks the citation de-duplication
+│   │   └── verify_dedup.sbatch
+│   ├── PATSTAT/
+│   │   ├── load.sbatch                         array job: 21 PATSTAT zip parts -> raw/
+│   │   ├── nb.sbatch                           run ONE notebook on a jevans node
+│   │   ├── run_notebook.py                     per-pipeline copy of the runner
+│   │   └── submit_patstat.sh                   submit the chain with afterok dependencies (`plan` prints the order)
+│   ├── pcs/
+│   │   ├── nb.sbatch                           run ONE notebook on a jevans node
+│   │   └── run_notebook.py                     per-pipeline copy of the runner
+│   ├── PPP/
+│   │   ├── nb.sbatch                           run ONE notebook on a jevans node
+│   │   └── run_notebook.py                     per-pipeline copy of the runner
+│   └── validation/
+│       ├── execute_inplace.py                  run on a real kernel, write outputs back into the .ipynb
+│       ├── nb.sbatch                           run ONE notebook on a jevans node
+│       ├── run_notebook.py                     per-pipeline copy of the runner
+│       ├── smoke_country.sbatch                sampled-base smoke run of the two country notebooks, figures to scratch
+│       └── viz.sbatch
+└── fonts/                              Lato, for paper_style.py (4 files)
 ```
 
 Each pipeline has a `*_common.py` that holds the absolute paths and the data
