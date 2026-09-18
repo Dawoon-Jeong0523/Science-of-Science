@@ -55,7 +55,6 @@ CAPTIONS = {
  'paper': {
   '2': ('Team size → disruption percentile & impact', 'Native team size from distinct author IDs in paper_author.parquet; disruption percentile and citation impact by team size.'),
   '3': ('Atypicality 2×2 — hit-paper probability', 'Corrected merged atypicality scores, 1980–2020; journal-only mapping. Conventionality and tail novelty are evaluated within publication-year cohorts.'),
-  '3b': ('Atypicality 2×2 — SciSciNet scores', 'The same 2×2 on SciSciNet\'s own Atyp_Median_Z × Atyp_10pct_Z, high/low relative to the paper\'s own publication-year median. External comparison only; SciSciNet is not an input to the derived metrics.'),
   '4': ('Atypicality Z-score CDF', 'CDF of median and 10th-percentile Z from the corrected merged 1980–2020 run.'),
   '6c': ('Citation trajectories by field — hit top 1%', 'Mean cumulative citation curves by FoS level-0 field.'),
   '6d': ('Citation trajectories — all eligible papers', 'Corpus-wide trajectories with the citation-count and observation-span filters required by the metric.'),
@@ -64,7 +63,6 @@ CAPTIONS = {
   '9a': ('Earlier 2000–2005 run — atypicality coverage', 'Historical restricted run, before the journal-mapping fix; separate from the merged scores in §3–4.'),
   '9b1': ('Earlier 2000–2005 run — Z-score distributions', 'Historical restricted-run median, 10th-percentile and minimum Z distributions.'),
   '9b2': ('Earlier 2000–2005 run — Z-score CDF', 'Historical restricted-run cumulative distributions; do not pool with the corrected merged run.'),
-  '9c': ('Earlier 2000–2005 run — hit-paper probability', 'Historical restricted-run conventionality and novelty split within publication-year cohorts.'),
   '9d': ('Earlier 2000–2005 run — SciSciNet agreement', 'Historical restricted-run atypicality comparison; the latest merged-run comparison is in §3c.'),
  },
  'dimension': {
@@ -96,6 +94,7 @@ CAPTIONS = {
   '25a': ('Extended network — yearly trends and convexity', 'Scaled yearly metric trends and their convexity over the notebook analysis window.'),
   '25b': ('Extended network — trend convexity by CPC', 'Compare yearly-trend convexity across CPC sections.'),
   '26': ('Extended network — team size and disruption', 'Inventor count versus disruption percentile recomputed on the extended citation network.'),
+  '27': ('Atypicality Z-score CDF by grant year', 'Kim et al. (2016) Fig. 2 style: one cumulative curve per grant year 1976–2025 on a symmetric base-2 axis, for distinct CPC-subclass pairs (a) and for patents\' median Z (b). Left of zero is atypical. The share of atypical pairs rises from 19% to 55%; |z| also grows with the cumulative null base, so the crossing at zero is the scale-free reading.'),
  },
  'authorcountry': {
   '1': ('Coverage by year and team size', 'Share of works with ≥ 1 located author and share of author slots located, by publication year; located share by team size (1990+).'),
@@ -128,6 +127,12 @@ CAPTIONS = {
 # record but are not shown: a figure nobody can regenerate is not evidence.
 ORPHANS = {
  'paper': {'2b': 'superseded 2026-09-06 by §2 (native team size from paper_author.parquet); the current notebook has no §2b'},
+}
+# Saved exports kept off the page on request (2026-09-18). They can still be regenerated; they are
+# duplicates of the §3 Uzzi 2×2 on other inputs and were removed to keep one 2×2 per family.
+HIDDEN = {
+ 'paper': {'3b': 'Uzzi 2×2 on SciSciNet\'s own scores (3D bars); SciSciNet is comparison-only and §3c carries the agreement check',
+           '9c': 'Uzzi 2×2 from the earlier restricted run (3D bars); the current run is §3'},
 }
 FAMILY_DESC = {'paper': 'Foundation / Extension / Generalization shares in the five-year citation window; shares sum to one.'}
 
@@ -249,7 +254,7 @@ def update_inventory_page(soup, inventory):
   if 'OpenAlex author' in text:
    cells[3].string = 'One row per (work, author, affiliation). Distinct author IDs are aggregated into paper_author.parquet, the native source of team size in the current validation.'
   elif 'SciSciNet (comparison only)' in text:
-   cells[3].string = 'External comparison only: metric-specific agreement in paper figure §3c and the SciSciNet-score 2×2 in §3b. The current team-size figure uses native OpenAlex author IDs. Earlier restricted-run atypicality comparisons are identified separately in §9d.'
+   cells[3].string = 'External comparison only: metric-specific agreement in paper figure §3c. The current team-size figure uses native OpenAlex author IDs. Earlier restricted-run atypicality comparisons are identified separately in §9d.'
   elif 'Patent–paper pair list' in text:
    cells[0].select_one('code').string = ppp.get('source', 'PPP/ppp_common.py')
    cells[1].string = f'{ppp["pairs"]:,} pairs' if ppp_verified else 'Unverified source cohort'
@@ -359,7 +364,7 @@ def refresh(source=None, output=None):
   cards = {f.img['alt'].removeprefix(prefix+'_'): f for f in gallery.select('figure')}
   # every saved export of this notebook is a card, whether or not the page had it before
   exported = {p.stem.removeprefix(prefix+'_'): p for p in (VAL / 'Figures').glob(f'{prefix}_*.jpg')}
-  for key in ORPHANS.get(pipe, {}):
+  for key in list(ORPHANS.get(pipe, {})) + list(HIDDEN.get(pipe, {})):
    exported.pop(key, None); cards.pop(key, None)
   for key in exported:
    if key not in cards:
@@ -400,7 +405,7 @@ def refresh(source=None, output=None):
  if agreement:
   chart = agreement.select_one('.chartbox')
   if chart:
-   chart.clear(); chart.append(BeautifulSoup('<p class="intro">See the updated <a href="#val-paper">Agreement with SciSciNet figure (§3c)</a> for metric-specific correlations, sample sizes and coverage from the current validation run, and §3b for the Uzzi 2×2 on SciSciNet\'s own scores. Earlier restricted-run atypicality results are shown separately in §9d. The <a href="#val-dimension">Dimensions section</a> (§14) compares the same metrics across the OpenAlex and Dimensions indices, and the <a href="#val-crosscheck">cross-check</a> compares the disruption kernel with an independent implementation.</p>', 'html.parser'))
+   chart.clear(); chart.append(BeautifulSoup('<p class="intro">See the updated <a href="#val-paper">Agreement with SciSciNet figure (§3c)</a> for metric-specific correlations, sample sizes and coverage from the current validation run. Earlier restricted-run atypicality results are shown separately in §9d. The <a href="#val-dimension">Dimensions section</a> (§14) compares the same metrics across the OpenAlex and Dimensions indices, and the <a href="#val-crosscheck">cross-check</a> compares the disruption kernel with an independent implementation.</p>', 'html.parser'))
  for article in soup.select('#gaps article'):
   title = article.h3.get_text()
   if 'paper_z_score.parquet' in title or title == 'Atypicality coverage and computation vintage':

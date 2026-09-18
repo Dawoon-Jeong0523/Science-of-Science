@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "source_project": "Science of Science",
-  "generated_utc": "2026-09-13T19:06:12.547602Z",
+  "generated_utc": "2026-09-18T16:18:15.911122Z",
   "method": "Parquet footers and filesystem metadata only for table inventories; small provenance JSON and run logs for provenance. No table data pages or large raw inputs are scanned.",
   "count_unit": "Stored rows across derived tables; not unique documents.",
   "files": [
@@ -218,7 +218,7 @@
       "path": "OpenAlex/output/paper_disruption.parquet",
       "family": "paper",
       "rows": 348939837,
-      "bytes": 6608130905,
+      "bytes": 6381320053,
       "columns": [
         "paper_id",
         "CD_3",
@@ -248,7 +248,17 @@
         "G_all",
         "ni_all",
         "nj_all",
-        "nk_all"
+        "nk_all",
+        "pctl_year",
+        "pctl_group",
+        "CD_3_pctl",
+        "CD_3_pctl_cume",
+        "CD_5_pctl",
+        "CD_5_pctl_cume",
+        "CD_10_pctl",
+        "CD_10_pctl_cume",
+        "CD_all_pctl",
+        "CD_all_pctl_cume"
       ],
       "schema": [
         {
@@ -395,10 +405,60 @@
           "name": "nk_all",
           "type": "int32",
           "nullable": true
+        },
+        {
+          "name": "pctl_year",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "pctl_group",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "CD_3_pctl",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "CD_3_pctl_cume",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "CD_5_pctl",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "CD_5_pctl_cume",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "CD_10_pctl",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "CD_10_pctl_cume",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "CD_all_pctl",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "CD_all_pctl_cume",
+          "type": "double",
+          "nullable": true
         }
       ],
-      "row_groups": 333,
-      "modified_utc": "2026-08-29T17:20:31.357330Z",
+      "row_groups": 2841,
+      "modified_utc": "2026-09-14T23:49:03.917502Z",
       "grain": "One document."
     },
     {
@@ -460,7 +520,7 @@
       "path": "OpenAlex/output/paper_metadata.parquet",
       "family": "paper",
       "rows": 372655605,
-      "bytes": 8440201269,
+      "bytes": 8984140325,
       "columns": [
         "paper_id",
         "year",
@@ -472,6 +532,8 @@
         "FoS_0",
         "FoS_rep",
         "domain",
+        "primary_topic_field",
+        "primary_topic_subfield",
         "cited_by_count",
         "is_retracted"
       ],
@@ -527,6 +589,16 @@
           "nullable": true
         },
         {
+          "name": "primary_topic_field",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "primary_topic_subfield",
+          "type": "string",
+          "nullable": true
+        },
+        {
           "name": "cited_by_count",
           "type": "int64",
           "nullable": true
@@ -538,7 +610,7 @@
         }
       ],
       "row_groups": 356,
-      "modified_utc": "2026-08-29T10:51:04.418669Z",
+      "modified_utc": "2026-09-14T17:40:28.036441Z",
       "grain": "One document."
     },
     {
@@ -1732,7 +1804,7 @@
       "path": "PatentView/output/patent_disruption.parquet",
       "family": "patent",
       "rows": 8062166,
-      "bytes": 245446812,
+      "bytes": 308466344,
       "columns": [
         "patent_id",
         "CD_3",
@@ -1762,7 +1834,17 @@
         "G_all",
         "ni_all",
         "nj_all",
-        "nk_all"
+        "nk_all",
+        "pctl_year",
+        "pctl_group",
+        "CD_3_pctl",
+        "CD_3_pctl_cume",
+        "CD_5_pctl",
+        "CD_5_pctl_cume",
+        "CD_10_pctl",
+        "CD_10_pctl_cume",
+        "CD_all_pctl",
+        "CD_all_pctl_cume"
       ],
       "schema": [
         {
@@ -1909,10 +1991,60 @@
           "name": "nk_all",
           "type": "float",
           "nullable": true
+        },
+        {
+          "name": "pctl_year",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "pctl_group",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "CD_3_pctl",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "CD_3_pctl_cume",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "CD_5_pctl",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "CD_5_pctl_cume",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "CD_10_pctl",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "CD_10_pctl_cume",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "CD_all_pctl",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "CD_all_pctl_cume",
+          "type": "double",
+          "nullable": true
         }
       ],
-      "row_groups": 8,
-      "modified_utc": "2026-09-02T19:09:38.482439Z",
+      "row_groups": 67,
+      "modified_utc": "2026-09-14T23:26:00.008322Z",
       "grain": "One document."
     },
     {
@@ -4060,7 +4192,7 @@
   ],
   "total_files": 45,
   "total_rows": 5026032516,
-  "total_bytes": 62285031808,
+  "total_bytes": 62665179544,
   "excluded_files": [
     "OpenAlex/output/paper_disruption_trend.parquet",
     "OpenAlex/output/paper_disruption_trend_summary.parquet",
