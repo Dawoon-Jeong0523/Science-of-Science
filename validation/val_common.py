@@ -36,6 +36,13 @@ PCS_OUT = f"{BASE}/pcs/output"           # was notebook/pcs/output
 PPP_OUT = f"{BASE}/PPP/output"           # was notebook/PPP/output
 CL_OUT  = f"{BASE}/Case law/output"       # Case law metrics (case_* notebooks)
 DIM_OUT = f"{BASE}/Dimensions/output"     # the same paper metrics on the Dimensions June 2025 index
+# PATSTAT Global 2023 Autumn: the PatentView pipeline at application level, worldwide, on two clocks --
+# output/ dates both ends of a citation by FILING year (all applications), output_grant/ by GRANT year
+# (granted applications only, PatentView's convention). Same file names in both.
+PS_BASE = f"{BASE}/PATSTAT"
+PS_OUT  = f"{PS_BASE}/output"
+PS_OUT_GRANT = f"{PS_BASE}/output_grant"
+PS_OUT_FAMILY = f"{PS_BASE}/output_family"     # DOCDB families, priority year (NB_PS_UNIT=family)
 
 # duckdb spills here when a query exceeds memory_limit. Was 'E:/duckdb_tmp'.
 TMP = f"{BASE}/.duckdb_tmp"
@@ -81,6 +88,18 @@ def case(name: str) -> str:
 
 def dim(name: str) -> str:
     return f"{DIM_OUT}/{name}"
+
+
+def patstat(name: str) -> str:
+    return f"{PS_OUT}/{name}"
+
+
+def patstat_grant(name: str) -> str:
+    return f"{PS_OUT_GRANT}/{name}"
+
+
+def patstat_family(name: str) -> str:
+    return f"{PS_OUT_FAMILY}/{name}"
 
 
 def init(notebook: str) -> None:
@@ -174,6 +193,25 @@ NEEDS = {
     "inventor_country_validation": [
         patent("patent_inventor_country.parquet"), patent("patent_metadata.parquet"),
         patent("patent_hit_probability.parquet"), patent("patent_disruption.parquet"),
+        WORLD_GEOJSON,
+    ],
+    # PATSTAT (added 2026-10-01): both clocks, plus the PatentView files section 16 matches US grants against.
+    "patstat_validation": [
+        *(f(n) for f in (patstat, patstat_grant, patstat_family) for n in (
+            "patstat_metadata.parquet", "patstat_reference.parquet", "patstat_citation.parquet",
+            "patstat_citation_trend.parquet", "patstat_disruption.parquet", "patstat_disruption_trend_summary.parquet",
+            "patstat_hit_probability.parquet", "patstat_sb.parquet", "patstat_z_score.parquet",
+            "patstat_inventor.parquet", "patstat_inventor_country.parquet")),
+        f"{PS_BASE}/raw/tls211",
+        patent("patent_metadata.parquet"), patent("patent_citation.parquet"), patent("patent_disruption.parquet"),
+        patent("patent_inventor.parquet"), patent("patent_inventor_country.parquet"),
+    ],
+    # Country distributions of the two patent indices (added 2026-10-01): PatentsView grants, PATSTAT
+    # applications and PATSTAT DOCDB families, side by side.
+    "patent_country_validation": [
+        patent("patent_inventor_country.parquet"), patent("patent_metadata.parquet"),
+        patstat("patstat_inventor_country.parquet"), patstat("patstat_metadata.parquet"),
+        patstat_family("patstat_inventor_country.parquet"), patstat_family("patstat_metadata.parquet"),
         WORLD_GEOJSON,
     ],
     # Citation histories now come from the DOCUMENT-level trends, not a pair-level build.

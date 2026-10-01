@@ -25,6 +25,9 @@ unit is the PATSTAT APPLICATION instead of the US granted utility patent.
     which are the OpenAlex/Dimensions and PatentView kernels verbatim.
   * Three things are NOT equivalent to PatentView and are called out in section 4:
     the unit and universe, the time anchor, and what "examiner / applicant" means.
+  * Three output sets, same notebooks and file names: output/ (applications, filing clock, the
+    default), output_grant/ (applications, grant clock; 4b) and output_family/ (DOCDB families,
+    earliest priority year; 4h).
 
 
 ================================================================================
@@ -60,7 +63,15 @@ unit is the PATSTAT APPLICATION instead of the US granted utility patent.
   ps.bucket_sql() / third_party_sql()  citn_origin -> examiner / applicant / other ; 115, TPO
   ps.wipo_sector_sql()                 techn_field_nr -> sector
   ps.raw('tls212')                     "read_parquet('raw/tls212/part*.parquet')" -- raises if a part is missing
-  ps.connect()                         duckdb: memory_limit 200GB (NB_DUCKDB_MEM), temp in cache/, threads
+  ps.connect()                         duckdb: memory_limit 200GB (NB_DUCKDB_MEM), threads, and a temp folder
+                                       per process (cache/duckdb_tmp/<NB>_<pid>): jobs running at once must
+                                       never share one
+  NB_PS_BASE / NB_PS_SAMPLE            smoke switches: redirect output/ + cache/, keep appln_id % k = 0
+  NB_PS_CLOCK (ps.CLOCK)               filing (output/) | grant (output_grant/); ps.YEAR_COL / ps.AGE_COL name
+                                       the clock's columns, ps.universe_sql() gives (appln_id, clock year)
+  NB_PS_UNIT (ps.UNIT)                 application (default) | family (output_family/, filing clock only);
+                                       ps.KEY is the output key (appln_id | docdb_family_id), ps.UNITS the plural
+                                       for messages, ps.family_map_sql() gives (appln_id, docdb_family_id, fam_year)
   ps.load_table(tls, zip)              stage 0 for one part (unzip -p | pyarrow.csv -> zstd parquet)
   ps.preflight(nb) / ps.summary()      what is present / loaded row counts vs official
 
@@ -81,10 +92,22 @@ unit is the PATSTAT APPLICATION instead of the US granted utility patent.
   patstat_hit_probability      patstat_hit_probability.parquet        pctl_<count col> within sector x filing year
   patstat_z_score              patstat_z_score.parquet, z_score_pair.parquet   CPC-subclass-pair atypicality
   patstat_feg_disruption_trend patstat_feg_disruption_trend.parquet   yearly means
+  patstat_disruption_trend     patstat_disruption_trend.parquet       per (application, year): new + cumulative
+                               (+ _summary.parquet)                   ni/nj/nk, CD, F/E/G (numba, from the CSR cache)
+  patstat_uniqueC_trend        patstat_uniqueC_trend.parquet          uniqueC by year since filing (== the uniqueC
+                                                                      column of patstat_citation_trend, asserted)
+  patstat_inventor             patstat_inventor.parquet               inventor_list (person_id), n_inventors, first/last
+  patstat_inventor_country     patstat_inventor_country.parquet       countries, n_countries, country_inventor_counts,
+                                                                      first_inventor_country, applicant_countries
+  patstat_disruption also appends CD_{3,5,10,all}_pctl / _pctl_cume (filing year x CPC Section), as
+  PatentView's patent_disruption section 6 does.
 
   Order (jobs/PATSTAT/submit_patstat.sh): reference -> metadata -> {citation, disruption, sb,
-  z_score} -> {citation_trend, hit_probability} <- citation ; feg_disruption_trend <- disruption.
+  z_score, inventor} -> {citation_trend, hit_probability} <- citation ; {feg_disruption_trend,
+  disruption_trend} <- disruption ; inventor_country <- inventor ; uniqueC_trend <- citation_trend.
   Run: cd jobs/PATSTAT && sbatch load.sbatch ; then ./submit_patstat.sh  (or `after <arrayjobid>`).
+  Smoke test of the whole chain first: sbatch smoke.sbatch (NB_PS_BASE=PATSTAT/cache/smoke,
+  NB_PS_SAMPLE=20: every 20th application; raw scans stay full-size).
 
 
 ================================================================================
@@ -96,13 +119,25 @@ unit is the PATSTAT APPLICATION instead of the US granted utility patent.
      900,000,000; PATSTAT's 'artificial' applications stand for cited documents it does not
      hold), filing year 1900-2023. About half are never granted; `granted` and `grant_year`
      are in the metadata for a granted-only view. One invention filed in several offices is
-     several applications in one docdb family; `docdb_family_id` is carried so family-level
-     aggregation is a GROUP BY away, and tls228 (family -> family citations) is loaded.
-  b. Time anchor. PatentView: grant year at both ends. Here: FILING year of the application at
+     several applications in one docdb family; `docdb_family_id` is carried in the metadata, and the
+     whole chain is also run on DOCDB families (4h). tls228 (family -> family citations) is loaded
+     but not used: the family edges are built from the application edges, so both units share one
+     citation definition.
+  b. Time anchor. PatentView: grant year at both ends. Here, by default: FILING year of the application at
      both ends (`age = citing_filing_year - cited_filing_year`), the PATSTAT / OECD convention.
      Search reports can cite documents filed later than the citing application, so `age` can
      be negative; such rows are in the edge list and excluded by ps.EDGE_WHERE. The citing
      publication's year is also in the edge list for a publication-based clock.
+     The GRANT clock is available as a second output set (2026-10-01): NB_PS_CLOCK=grant runs the same
+     notebooks with grant years (year of the first publication with publn_first_grant = 'Y') at both
+     ends and only applications that have one, into output_grant/ (cache/grant/, executed notebooks in
+     notebook/grant/); year / age columns become grant_year / yrs_since_grant. Measured on samples:
+     53.7 % of applications are granted, 61.5 % of the filing-clock edges have both ends granted, 1.7 %
+     of those have a negative grant age (excluded by EDGE_WHERE), WO (PCT) applications drop out (4.8 %
+     granted), and grant lags differ by office (mean 2.4 y RU, 3.3 US, 3.5 CN, 4.7 JP, 5.7 EP, 6.8 CA),
+     so a grant-year window or cohort mixes filing vintages differently across offices. The CD
+     percentile cohort stays filing year x CPC Section in both sets, as in PatentView.
+         NB_PS_CLOCK=grant ./submit_patstat.sh        sbatch --export=ALL,NB_PS_CLOCK=grant smoke.sbatch
   c. Provenance. PatentView's `cited by examiner` vs `other` is a US printing convention that
      changed in 2001 and 2013. PATSTAT records the origin of every citation: APP (applicant),
      SEA/ISR/SUP (search reports), PRS/EXA (examination), FOP/CH2, OPP (opposition), 115/TPO
@@ -123,3 +158,49 @@ unit is the PATSTAT APPLICATION instead of the US granted utility patent.
      filing year and the arithmetic is done as DuckDB window sums instead of a Python loop.
      For a subclass with no new application in a year the count is looked up as-of that year
      (ASOF JOIN), which is what the loop's running dictionary holds.
+  h. The family unit (2026-10-01). NB_PS_UNIT=family runs the same notebooks with the DOCDB family
+     as the document, into output_family/ (cache/family/, executed copies in notebook/family/):
+         NB_PS_UNIT=family ./submit_patstat.sh        sbatch --export=ALL,NB_PS_UNIT=family smoke.sbatch
+     - Universe: the DOCDB families of the filing-clock universe (84,914,026 applications ->
+       52,766,567 families, 1.61 per family; 82.4 % have one universe member). Key docdb_family_id.
+     - Year: the family's earliest priority year over its universe members,
+       min(coalesce(NULLIF(earliest_filing_year, 9999), appln_filing_year)); column priority_year,
+       age column yrs_since_priority. The family unit has no grant clock (asserted in ps_common).
+     - Edges: the application edge list mapped to families, one row per distinct (citing family,
+       cited family, bucket) with n_appln_edges = the application edges it collapses. Citations
+       inside a family are dropped (2,132,856 application edges), replenished rows too (they copy a
+       member's citations, which the family already holds). 265,250,641 rows on 238,074,037 distinct
+       pairs; a pair cited under two buckets has a row per bucket, so C counts rows and uniqueC
+       distinct citing families (the impact count, as before).
+     - Metadata, one row per family: priority_year, filing_year and appln_auth / first_appln_id of the
+       earliest-filed member (filing year, then appln_id), n_appln, offices, granted (any member),
+       n_granted, grant_year (first), docdb_family_size, nb_citing_docdb_fam; IPC / CPC main code and
+       WIPO field from the earliest-filed member that has one; cpc_subclass_list = the union over
+       members (also the atypicality input). Persons come from ONE representative member,
+       inv_appln_id (most located inventors, then most inventors, then earliest filing):
+       person_ids differ between offices, so a union over members would count one inventor several
+       times. 48,141,257 families have inventors; 38.9 % of those have a located one (CN and JP
+       first filings rarely carry an address -- validation/patent_country_validation section 1).
+     - Cohorts: hit percentile within WIPO sector x priority year; CD percentile within the earliest
+       member's filing year x CPC Section (pctl_year = filing_year).
+     - Validation: validation/patstat_validation sections 17-18 (identities against the application
+       set, family citations against EPO's nb_citing_docdb_fam, the same invention on both units).
+
+
+================================================================================
+5. HISTORY
+================================================================================
+  2026-09-08  the first chain stalled 24 h in patstat_reference cell 2 and was cancelled
+              (patstat_chain_cancel_20260909.tex): `LEFT JOIN pub pp ON c.cited_pat_publn_id <> 0 AND
+              c.cited_pat_publn_id = pp.pat_publn_id` planned as a BLOCKWISE_NL_JOIN because the
+              one-sided `<> 0` cannot be a hash-join condition. `pub` has no publn id 0, so the
+              predicate was redundant; dropped 2026-10-01 (EXPLAIN now shows two HASH_JOINs).
+  2026-10-01  + disruption_trend, uniqueC_trend, inventor, inventor_country; CD cohort percentiles
+              in patstat_disruption; per-process DuckDB temp folders; smoke switches.
+  2026-10-01  grant clock as a second output set (NB_PS_CLOCK=grant -> output_grant/).
+  2026-10-01  DOCDB family unit as a third output set (NB_PS_UNIT=family -> output_family/), 4h.
+              Smoke (1/20) passed all 13 notebooks; full chain 59850068-80 ran 16:21-17:06
+              (45 min; disruption 28 min, disruption_trend 6 min), every notebook check passes:
+              30,785,709 cited families, CSR 37,623,677 nodes / 234,940,931 edges, CD_5 defined for
+              64.4 % with mean +0.298 (applications +0.302), disruption_trend and uniqueC_trend
+              reproduce every window exactly. 15 files, 10.7 GB.

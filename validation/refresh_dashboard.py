@@ -31,6 +31,14 @@ FAMILIES = [
          'so a difference from the OpenAlex figures is a property of the index, not of the metric. Section numbers follow case_law_validation so the families read side by side; '
          'a section whose Dimensions input has not been written yet is absent rather than empty.')),
  dict(key='patent', prefix='patent_validation', accent=2, title='Patents', chip='PatentsView', nav='Patents', pipeline=True),
+ dict(key='patstat', prefix='patstat_validation', accent=10, title='Patents — PATSTAT', chip='PATSTAT', nav='Patents (PATSTAT)', pipeline=True,
+  intro=('The PatentsView pipeline re-run, kernel for kernel, on PATSTAT Global 2023 Autumn: 84.9 M applications for patents of invention from every office, '
+         '401.6 M resolved citation edges. It is stored three ways: the filing clock (both ends of a citation dated by filing year, every application; the PATSTAT / OECD convention), '
+         'the grant clock (grant years, granted applications only, 44.8 M; PatentsView\'s convention) and the DOCDB family unit (52.8 M families: an invention filed at several offices is one node, '
+         'citations are distinct family-to-family pairs, both ends dated by the earliest priority year; the OECD / EPO convention for counting inventions). '
+         'Sections 1–14 read the filing clock at application level unless a panel says otherwise; §15 compares the two clocks on the same granted applications, '
+         '§16 matches US grants to PatentsView by patent number and §17–18 compare applications with families. '
+         'Inventor-country distributions of PATSTAT and PatentsView are in the <a href="#val-patentcountry">Patent countries</a> gallery.')),
  dict(key='pcs', prefix='pcs_validation', accent=3, title='Patent → paper', chip='Reliance on Science', nav='Patent→paper', pipeline=True),
  dict(key='ppp', prefix='ppp_validation', accent=4, title='Paper–patent pairs', chip='PPP', nav='Patent Paper Pair', pipeline=True),
  dict(key='caselaw', prefix='case_law_validation', accent=5, title='Case law', chip='CASE', nav='Case law', pipeline=True),
@@ -41,12 +49,18 @@ FAMILIES = [
  dict(key='inventorcountry', prefix='inventor_country_validation', accent=9, title='Inventor countries', chip='PatentsView', nav='Inventor countries', pipeline=False,
   intro=('Where the inventors of 8.5 M US utility patents sit: the country of the address printed on the grant, one row per patent in patent_inventor_country.parquet, with the assignee countries beside it. '
          '99.3% of patents are located. The same sections as the author-country gallery, plus inventor-vs-assignee country and the CPC-section mix of each country, and a side-by-side with the paper table.')),
+ dict(key='patentcountry', prefix='patent_country_validation', accent=11, title='Patent countries — PatentsView & PATSTAT', chip='PatentsView · PATSTAT', nav='Patent countries', pipeline=False,
+  intro=('Where patented inventions come from on the two patent indices, under one definition: inventor countries by fractional counting for 8.5 M PatentsView US grants (grant year), '
+         '84.9 M PATSTAT applications (filing year) and 52.8 M PATSTAT DOCDB families (priority year). PATSTAT records an inventor address for essentially every US, EP, WO and DE filing '
+         'but for only about 10% of Chinese and 15% of Japanese first filings, so the family series is also shown filled: an unlocated family takes the country of its national office of first filing. '
+         'PatentsView is the US lens (US inventors 47.6% of 2010–2019 grants); worldwide, the filled family series gives China 49.7%, Japan 16.5%, Korea 9.0% and the US 9.0% of inventive output. '
+         '§8 checks that PATSTAT\'s own US-office grants reproduce the PatentsView shares.')),
  dict(key='crosscheck', prefix='disruption_crosscheck', accent=7, title='Cross-checks', chip='all families', nav='Cross-checks', pipeline=False,
   intro=('An independent transcription of the CD<sub>5</sub> reference algorithm, scored against this pipeline\'s stored disruption values on the identical cached graphs '
          'for papers (OpenAlex) and patents (PatentsView). The reference drops the focal document from the n<sub>k</sub> set, so the prediction is '
          'n<sub>k</sub><sup>ref</sup> = n<sub>k</sub><sup>ours</sup> + 1; the figure reports how often the counting terms agree exactly and how close CD is under both variants.')),
 ]
-ACCENTS = {6: '#b7791f', 7: '#6b7280', 8: '#0f766e', 9: '#7c3aed'}     # --p1..--p5 already live in the page
+ACCENTS = {6: '#b7791f', 7: '#6b7280', 8: '#0f766e', 9: '#7c3aed', 10: '#c026d3', 11: '#4d7c0f'}     # --p1..--p5 already live in the page
 
 # section -> (title, what the figure tests). Existing cards keep the caption written into the
 # page unless their section is listed here; a card created by this script needs an entry or it
@@ -118,6 +132,36 @@ CAPTIONS = {
   '7': ('Papers against patents', 'Coverage, international share and countries-per-document for the OpenAlex author table and the PatentsView inventor table, side by side.'),
   '8': ('World map — output, openness, impact, change', 'The same four Robinson choropleths as the author gallery, on patents: share of world patenting 2015–2020 (log, fractional counting), international co-invention rate, mean citation percentile 1990–2015, and the log₂ change in share since 2000–2005.'),
   '9': ('World map — co-invention flows', 'The 70 largest inventor-country pairs of 2010–2020 as great-circle arcs. Nearly every heavy arc lands in the United States: this is the US patent record.'),
+ },
+ 'patstat': {
+  '1': ('Metric coverage on the two clocks', 'Share of each clock\'s universe with each metric defined: 84.9 M applications on the filing clock, the 44.8 M granted ones on the grant clock. Citation-based metrics cover the cited part only.'),
+  '2': ('Filings, offices, grants and grant lags', 'Applications per filing year with the grant share; the top eight offices\' share of filings; the filing-to-grant lag by office (p10–p90, IQR, median) for filings 1990–2015 — the reason the grant clock is not a uniform shift of the filing clock.'),
+  '3': ('Forward citations — invariants and provenance', 'Nested windows, uniqueC ≤ C and provenance buckets summing to the total are asserted for every cited application; the uniqueC distribution; the examiner / applicant / other share of counted citations by citing year, from the recorded citation origin.'),
+  '4': ('Mean citations by filing year', 'Mean distinct citing applications per application (uncited counted as zero), each window drawn solid only once it has elapsed before 2023; the 5-year count split by provenance.'),
+  '5': ('Citation age profile on both clocks', 'Share of citing applications by age on the filing and the grant clock; per-application profile by filing era; examiner vs applicant citations by age.'),
+  '6': ('Disruption — distribution, trend, composition', 'CD distribution for all cited and ≥ 10-citer applications; mean CD<sub>5</sub> by year on each clock; n<sub>i</sub> / n<sub>j</sub> / n<sub>k</sub> by filing year. Early cohorts are inflated by left-censoring.'),
+  '7': ('F / E / G — 5-year window', 'Foundation / Extension / Generalization shares by filing year (F + E + G = 1 asserted) and the share of citers that also cite the focal application\'s references.'),
+  '8': ('Hit percentile', 'Distribution of the uniqueC<sub>5</sub> percentile within WIPO sector × filing year, cohort sizes, and the top-1% share per sector — zero-inflation shows as the block at the lowest rank.'),
+  '9': ('By WIPO sector and CPC section', 'Mean 10-year citations by WIPO sector and CPC section, and mean CD<sub>5</sub> by section, filings 1990–2013.'),
+  '10': ('Cross-metric correlations', 'Spearman correlations on a 500k sample, including PATSTAT\'s own family-level citing count nb_citing_docdb_fam as an independent check of uniqueC.'),
+  '11': ('Sleeping beauties', 'Beauty coefficient and awakening time for applications with ≥ 50 citations; higher B wakes up later.'),
+  '12': ('Atypicality — Z CDF and the 2×2', 'CPC-subclass pair atypicality (Kim et al. 2016): Z CDF and the hit probability (top 5% uniqueC<sub>5</sub> within sector × filing year) by conventionality × novelty, filings 1980–2018.'),
+  '13': ('Inventors — team size and geography', 'Team-size distribution; the CD<sub>5</sub> percentile by team size pooled, within office × filing year and for USPTO filings — the Wu et al. (2019) decline that PatentsView shows on US grants does not reproduce on this worldwide filing-clock network; international co-invention by office.'),
+  '14': ('Disruption over age and cohort', 'Mean cumulative CD as the window widens, by filing decade, and CD at fixed ages by filing year, from the per-application disruption trend.'),
+  '15': ('Filing clock vs grant clock', 'Counted edges kept by the grant clock (61%); rank agreement of uniqueC for the same granted applications (Spearman 0.94 all-time, 0.86 five-year); CD<sub>5</sub> of the same applications by filing year on each clock (Spearman 0.83).'),
+  '16': ('PATSTAT vs PatentsView — US grants', '7.72 M US grants matched by patent number; grant year agrees on 100% and inventor count on 99.96%. Coverage of PatentsView patents by grant year; 5-year citations from US citers built independently in each pipeline (Spearman 0.99 against PatentsView uniqueC<sub>5</sub>); CD<sub>5</sub> in quantile bins (Spearman 0.77 — the worldwide network compresses CD); inventor-count agreement.'),
+  '17': ('Applications vs DOCDB families — the unit', 'The family set (NB_PS_UNIT=family) against the application set it is built from: one row per family, members summing to the 84.9 M applications and no within-family edge are asserted. 52.8 M families (75% single-member, 2000–2015); family citations against EPO\'s own nb_citing_docdb_fam reach Spearman 0.993 (0.518 at application level); five-year impact rises with family size on the family unit (1.9 → 21.7) and stays flat on the application unit.'),
+  '18': ('Applications vs DOCDB families — citations and disruption', 'Five-year citations per document by year on both units; the CD<sub>5</sub> distribution and its yearly mean (+0.298 on families, +0.302 on applications); the same invention on both units — a single-member family keeps its CD<sub>5</sub> (Spearman 0.972 with its application), a multi-member family does not (0.552), because its citers and references are merged across offices.'),
+ },
+ 'patentcountry': {
+  '1': ('Inventor-country coverage', 'Share of documents with a located inventor by year: PatentsView grants above 99% from 1980; PATSTAT applications and families 22–67%, because the CN and JP offices rarely record an address (10% and 15% of the families first filed there, priorities 2000–2019); 99.9% of families once an unlocated family takes its national first-filing office (dashed). Right: located share by office of first filing.'),
+  '2': ('Patenting by inventor country — volume', 'Documents per year split by inventor country (fractional counting): PatentsView grants by grant year and PATSTAT families by priority year, filled. The eight largest countries are coloured, the rest pooled; the light band on the PATSTAT panel is families with no country (regional first filing and no address). The Chinese filing boom drives the worldwide growth after 2005.'),
+  '3': ('Country shares over time — four ways of counting', 'One panel per country: PatentsView grants, PATSTAT applications and families (located inventors only) and the filled families (dashed). PatentsView against families is the US lens, applications against families is multi-office filing, and families against filled families is the missing-address correction, which matters for China, Japan and Korea.'),
+  '4': ('Country shares 2010–2019 compared', 'Mean 2010–2019 share of located output for the 20 largest countries of the filled family series, the four series side by side on a log scale (hatched = filled families).'),
+  '5': ('World maps — share of world patenting, 2015–2019', 'Robinson choropleths on a shared log scale: PatentsView grants; PATSTAT applications with located inventors only, in which China and Japan nearly vanish; PATSTAT families, filled; and the US lens, log₂(PatentsView share / family share), red where a country is larger in US grants than worldwide. Grey is no value, not zero.'),
+  '6': ('Where filed against where invented', 'PATSTAT families 2010–2019: share of each office\'s located first filings by inventor country. National offices are mostly domestic (KR and JP 99%, DE 89%, US 70%); the EPO and PCT (WO) routes carry the cross-border first filings.'),
+  '7': ('International co-invention', 'Share of documents with at least two located inventors whose inventors sit in two or more countries: by year on the three series, and by inventor country in 2010–2019 on PatentsView grants and PATSTAT families.'),
+  '8': ('Cross-check — the same office in both indices', 'Country shares 2010–2019 of PATSTAT\'s granted US-office applications against PatentsView grants lie on the diagonal (Spearman 0.991 over 89 countries). For contrast, PATSTAT families (filled) against PatentsView: the spread is the US lens, not an error (Spearman 0.929).'),
  },
  'crosscheck': {
   '1': ('CD<sub>5</sub> cross-check — reference algorithm vs this pipeline', 'Sampled papers and patents scored by an independent transcription of the CD index on the same cached graphs; exact agreement of n<sub>i</sub> / n<sub>j</sub> / n<sub>k</sub>, the predicted n<sub>k</sub> + 1 offset, and CD closeness under both focal-handling variants.'),
@@ -206,8 +250,8 @@ def update_inventory_page(soup, inventory):
  n_pipelines = sum(f['pipeline'] for f in FAMILIES)
  soup.select_one('.railfoot').string = f'Inventory checked {checked} (UTC). Figures from saved validation exports.'
  eyebrow = soup.select_one('.eyebrow')
- eyebrow.contents[0].replace_with('Pipeline reference · OpenAlex 2026-01-16 · Dimensions June 2025 ')
- soup.select_one('.band .lede').string = (f'{["Four","Five","Six","Seven"][n_pipelines-4]} research pipelines cover papers on two bibliographic indices (OpenAlex and Dimensions), patents, patent-to-paper citations, paper–patent pairs and court opinions. Explore their inputs, derived tables, metric definitions and validation figures. Coverage and computation choices are stated alongside the results.')
+ eyebrow.contents[0].replace_with('Pipeline reference · OpenAlex 2026-01-16 · Dimensions June 2025 · PATSTAT 2023 Autumn ')
+ soup.select_one('.band .lede').string = (f'{["Four","Five","Six","Seven","Eight"][n_pipelines-4]} research pipelines cover papers on two bibliographic indices (OpenAlex and Dimensions), patents on two patent indices (PatentsView and PATSTAT), patent-to-paper citations, paper–patent pairs and court opinions. Explore their inputs, derived tables, metric definitions and validation figures. Coverage and computation choices are stated alongside the results.')
  kpis = soup.select('.kpi')
  for kpi, value, label, subtitle in [
   (kpis[0], f'{rows / 10**9:.2f} B', 'stored rows', f'across {len(files)} derived tables'),
@@ -221,10 +265,16 @@ def update_inventory_page(soup, inventory):
   papers = next(k for k in kpis if k.select_one('.k').get_text() == 'papers')
   card = BeautifulSoup('<div class="kpi" data-inject="dimension"><div class="v"></div><div class="k">Dimensions publications</div><div class="sub"></div></div>', 'html.parser').div
   papers.insert_after(card); papers.insert_after('\n')
+ # and one for PATSTAT, after the PatentsView patents card
+ if soup.select_one('.kpi[data-inject="patstat"]') is None:
+  patents = next(k for k in soup.select('.kpi') if k.select_one('.k').get_text() == 'patents')
+  card = BeautifulSoup('<div class="kpi" data-inject="patstat"><div class="v"></div><div class="k">PATSTAT applications</div><div class="sub"></div></div>', 'html.parser').div
+  patents.insert_after(card); patents.insert_after('\n')
  for kpi in soup.select('.kpi'):
   label = kpi.select_one('.k').get_text()
   metadata_path = {'papers':'OpenAlex/output/paper_metadata.parquet', 'Dimensions publications':'Dimensions/output/paper_metadata.parquet',
-                   'patents':'PatentView/output/patent_metadata.parquet', 'court opinions':'Case law/output/case_metadata.parquet'}.get(label)
+                   'patents':'PatentView/output/patent_metadata.parquet', 'court opinions':'Case law/output/case_metadata.parquet',
+                   'PATSTAT applications':'PATSTAT/output/patstat_metadata.parquet'}.get(label)
   if metadata_path:
    kpi.select_one('.v').string = f'{by_path[metadata_path]["rows"] / 10**6:.2f} M'
   if label == 'papers':
@@ -238,7 +288,11 @@ def update_inventory_page(soup, inventory):
    kpi.select_one('.sub').string = f'{count / 10**6:.2f} M cited papers'
   elif label == 'court opinions':
    kpi.select_one('.sub').string = '47.5 M citations · 1666–2020'
- soup.select_one('#raw > .intro').string = (f'These source collections supply the {["four","five","six","seven"][n_pipelines-4]} pipelines. Authorship records provide native paper team sizes. SciSciNet is used for external validation only; it is not an input to the derived metrics. Source scales describe the available snapshots and need not equal the eligible sample in a figure.')
+  elif label == 'PATSTAT applications':
+   granted = by_path['PATSTAT/output_grant/patstat_metadata.parquet']['rows']
+   families = by_path['PATSTAT/output_family/patstat_metadata.parquet']['rows']
+   kpi.select_one('.sub').string = f'{granted / 10**6:.2f} M granted · {families / 10**6:.2f} M DOCDB families · 2023 Autumn'
+ soup.select_one('#raw > .intro').string = (f'These source collections supply the {["four","five","six","seven","eight"][n_pipelines-4]} pipelines. Authorship records provide native paper team sizes. SciSciNet is used for external validation only; it is not an input to the derived metrics. Source scales describe the available snapshots and need not equal the eligible sample in a figure.')
  raw_rows = soup.select('#raw tbody tr')
  if soup.select_one('#raw tr[data-inject="dimension"]') is None:
   after = next(r for r in raw_rows if 'OpenAlex author' in r.get_text())
@@ -247,6 +301,15 @@ def update_inventory_page(soup, inventory):
    '<td class="num nowrap">155.5M publications · 2.14B reference edges</td>\n<td><span class="flag info">read-only</span></td>\n'
    '<td class="note">Digital Science BigQuery export: <code>publications</code> (one nested row per publication with references, authors and affiliations, ANZSRC FoR 2020 categories, source), '
    '<code>source_titles</code> and <code>patents</code>. Supplies the Dimensions paper citation graph, metadata, author lists and patent→paper channel.</td></tr>', 'html.parser').tr
+  after.insert_after(row); after.insert_after('\n')
+ if soup.select_one('#raw tr[data-inject="patstat"]') is None:
+  after = next(r for r in soup.select('#raw tbody tr') if 'PatentsView granted bulk' in r.get_text())
+  row = BeautifulSoup(
+   '<tr data-inject="patstat">\n<td><span class="dot p10"></span><b>PATSTAT Global 2023 Autumn</b><br/><code class="path">jevans/PATSTAT/unzipped_data</code></td>\n'
+   '<td class="num nowrap">128.0M applications · 507.5M citations</td>\n<td><span class="flag info">read-only</span></td>\n'
+   '<td class="note">EPO worldwide bibliographic database: 65 zipped CSV parts, loaded once to zstd Parquet under PATSTAT/raw. <code>tls201</code> applications, <code>tls211</code> publications, '
+   '<code>tls212</code> citations with their origin, <code>tls206</code>/<code>tls207</code> persons, <code>tls209</code>/<code>tls224</code> IPC and CPC, <code>tls230</code> WIPO fields. '
+   'Supplies the application-level patent citation graph, metadata and inventors, on a filing clock and a grant clock.</td></tr>', 'html.parser').tr
   after.insert_after(row); after.insert_after('\n')
  for row in soup.select('#raw tbody tr'):
   cells = row.find_all('td', recursive=False)
@@ -262,13 +325,18 @@ def update_inventory_page(soup, inventory):
     cells[3].string = (f'{ppp["distinct_papers"]:,} distinct papers · {ppp["distinct_patents"]:,} distinct patents. The current trend outputs use the {ppp["source_option"]} list, verified against the completed production log and Parquet row counts. Pair-list selection is configurable and must accompany comparisons across runs.')
    else:
     cells[3].string = 'No producing run log matches the current trend output counts. Confirm the source list before interpreting this cohort; configuration alone does not prove output provenance.'
+  elif 'PATSTAT Global 2023 Autumn' in text:
+   cells[3].clear(); cells[3].append(BeautifulSoup(
+    'EPO worldwide bibliographic database: 65 zipped CSV parts, loaded once to zstd Parquet under PATSTAT/raw. <code>tls201</code> applications, <code>tls211</code> publications, '
+    '<code>tls212</code> citations with their origin, <code>tls206</code>/<code>tls207</code> persons, <code>tls209</code>/<code>tls224</code> IPC and CPC, <code>tls230</code> WIPO fields. '
+    'Supplies the patent citation graph, metadata and inventors three ways: applications on a filing clock and on a grant clock, and DOCDB families dated by priority year.', 'html.parser'))
   elif 'OpenAlex snapshot' in text:
    cells[3].string = 'Works, references, locations, topics, concepts and IDs: 14 datasets under works/. This snapshot supplies the paper citation graph and metadata.'
  outputs = soup.find(id='outputs')
  outputs.select_one('.shead .meta').string = f'{len(files)} Parquet files · {checked} UTC'
  intro = outputs.select_one('.intro')
  intro.clear()
- intro.append('Counts come from current Parquet footers; sizes come from the filesystem. Rows have different meanings across tables and must not be summed as unique documents. The inventory includes the legacy team-size table and the Dimensions 1990–2000 atypicality partition (the only one written so far), but excludes backups, dated OpenAlex score partitions already represented by merged files, and sharded reference intermediates. ')
+ intro.append('Counts come from current Parquet footers; sizes come from the filesystem. Rows have different meanings across tables and must not be summed as unique documents. The inventory includes the legacy team-size table, the Dimensions 1990–2000 atypicality partition (the only one written so far) and the three PATSTAT sets (output/, output_grant/ and output_family/, same file names), but excludes backups, dated OpenAlex score partitions already represented by merged files, and sharded reference intermediates. ')
  link = soup.new_tag('a', href='https://github.com/Dawoon-Jeong0523/SciSci#refresh-from-saved-research-outputs')
  link.string = 'How this inventory is refreshed.'
  intro.append(link)
@@ -313,8 +381,15 @@ def update_inventory_page(soup, inventory):
    '<article class="gap warn" data-inject="dimension">\n<div class="gaphead"><span class="flag warn">coverage</span>\n<span class="chip p6">Papers — Dimensions</span></div>\n'
    '<h3>Dimensions atypicality exists for 1990–2000 only</h3><p></p></article>', 'html.parser').article
   gaps.append(card); gaps.append('\n')
+ if soup.select_one('#gaps article[data-inject="patstat"]') is None:
+  card = BeautifulSoup(
+   '<article class="gap info" data-inject="patstat">\n<div class="gaphead"><span class="flag info">definition</span>\n<span class="chip p10">Patents — PATSTAT</span></div>\n'
+   '<h3></h3><p></p></article>', 'html.parser').article
+  gaps.append(card); gaps.append('\n')
+ soup.select_one('#gaps article[data-inject="patstat"] h3').string = 'PATSTAT is stored on two clocks and two units'
+ soup.select_one('#gaps article[data-inject="patstat"] p').string = ('PATSTAT/output dates both ends of a citation by filing year and keeps every application; PATSTAT/output_grant dates them by grant year and keeps granted applications only, as PatentsView does. About 61% of the filing-clock edges have both ends granted, PCT (WO) applications drop out of the grant clock, and grant lags differ by office (about 2–7 years), so a grant-year window covers different filing vintages across offices. PATSTAT/output_family counts a DOCDB family (one invention, however many offices it was filed at) once, dated by its earliest priority year; an application-level count gives a multi-office invention one node per office and splits its citations among them. State the clock and the unit with every PATSTAT result; §15 compares the clocks and §17–18 the units.')
  soup.select_one('#gaps article[data-inject="dimension"] p').string = ('The Dimensions chain has written paper_z_score_1990_2000.parquet and its pair table, not a merged corpus-wide file, so dimension_validation §12 (Z-score CDF and the Uzzi 2×2) is not drawn yet and the Dimensions-vs-OpenAlex comparison in §14 excludes atypicality. Every other Dimensions metric is corpus-wide.')
- soup.select_one('footer p').string = (f'Inventory checked {checked} (UTC) across OpenAlex, Dimensions, PatentView, pcs, PPP and Case law. Row counts and schemas come from Parquet footers; file sizes and modification times come from filesystem metadata. Figures are saved exports from {len(FAMILIES)} validation notebooks. Refreshing this page does not recompute metrics or rerun those notebooks. The inventory snapshot and each figure’s analysis coverage are distinct; earlier atypicality exports remain explicitly labelled.')
+ soup.select_one('footer p').string = (f'Inventory checked {checked} (UTC) across OpenAlex, Dimensions, PatentView, PATSTAT, pcs, PPP and Case law. Row counts and schemas come from Parquet footers; file sizes and modification times come from filesystem metadata. Figures are saved exports from {len(FAMILIES)} validation notebooks. Refreshing this page does not recompute metrics or rerun those notebooks. The inventory snapshot and each figure’s analysis coverage are distinct; earlier atypicality exports remain explicitly labelled.')
  style = soup.style
  css = style.string
  for minimum in [158, 300, 320, 370]:
@@ -359,6 +434,8 @@ def refresh(source=None, output=None):
  for fam in FAMILIES:
   pipe, prefix, accent = fam['key'], fam['prefix'], fam['accent']
   section = ensure_family_scaffold(soup, fam, previous)
+  if fam.get('intro'):
+   intro = section.select_one('.intro'); intro.clear(); intro.append(BeautifulSoup(fam['intro'], 'html.parser'))
   previous = fam
   gallery = section.select_one('.gallery')
   cards = {f.img['alt'].removeprefix(prefix+'_'): f for f in gallery.select('figure')}
@@ -405,7 +482,7 @@ def refresh(source=None, output=None):
  if agreement:
   chart = agreement.select_one('.chartbox')
   if chart:
-   chart.clear(); chart.append(BeautifulSoup('<p class="intro">See the updated <a href="#val-paper">Agreement with SciSciNet figure (§3c)</a> for metric-specific correlations, sample sizes and coverage from the current validation run. Earlier restricted-run atypicality results are shown separately in §9d. The <a href="#val-dimension">Dimensions section</a> (§14) compares the same metrics across the OpenAlex and Dimensions indices, and the <a href="#val-crosscheck">cross-check</a> compares the disruption kernel with an independent implementation.</p>', 'html.parser'))
+   chart.clear(); chart.append(BeautifulSoup('<p class="intro">See the updated <a href="#val-paper">Agreement with SciSciNet figure (§3c)</a> for metric-specific correlations, sample sizes and coverage from the current validation run. Earlier restricted-run atypicality results are shown separately in §9d. The <a href="#val-dimension">Dimensions section</a> (§14) compares the same metrics across the OpenAlex and Dimensions indices, the <a href="#val-patstat">PATSTAT section</a> (§16) matches US grants against PatentsView, and the <a href="#val-crosscheck">cross-check</a> compares the disruption kernel with an independent implementation.</p>', 'html.parser'))
  for article in soup.select('#gaps article'):
   title = article.h3.get_text()
   if 'paper_z_score.parquet' in title or title == 'Atypicality coverage and computation vintage':

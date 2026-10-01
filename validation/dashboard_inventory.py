@@ -17,6 +17,23 @@ import re
 # Explicitly inventory final top-level outputs, including the documented legacy
 # team-size table. Dated partitions, backups, and reference intermediates are not
 # separate final outputs and must not inflate the displayed totals.
+_PATSTAT_TABLES = (
+    "patstat_citation.parquet",
+    "patstat_citation_trend.parquet",
+    "patstat_disruption.parquet",
+    "patstat_disruption_trend.parquet",
+    "patstat_disruption_trend_summary.parquet",
+    "patstat_feg_disruption_trend.parquet",
+    "patstat_hit_probability.parquet",
+    "patstat_inventor.parquet",
+    "patstat_inventor_country.parquet",
+    "patstat_metadata.parquet",
+    "patstat_reference.parquet",
+    "patstat_sb.parquet",
+    "patstat_uniqueC_trend.parquet",
+    "patstat_z_score.parquet",
+    "z_score_pair.parquet",
+)
 CANONICAL_TABLES = {
     "OpenAlex": (
         "paper",
@@ -41,6 +58,7 @@ CANONICAL_TABLES = {
         "dimension",
         (
             "paper_author.parquet",
+            "paper_author_country.parquet",
             "paper_citation.parquet",
             "paper_citation_trend.parquet",
             "paper_disruption.parquet",
@@ -69,6 +87,11 @@ CANONICAL_TABLES = {
             "z_score_pair.parquet",
         ),
     ),
+    # PATSTAT Global 2023 Autumn, three sets: "<directory>:<output folder>" names a further
+    # output folder of the same pipeline (default "output"). Same file names in all three:
+    # filing clock (output), grant clock (output_grant), DOCDB family unit (output_family).
+    **{key: ("patstat", _PATSTAT_TABLES)
+       for key in ("PATSTAT", "PATSTAT:output_grant", "PATSTAT:output_family")},
     "pcs": (
         "pcs",
         (
@@ -125,6 +148,48 @@ GRAINS = {
     ),
     "case_feg_disruption_trend.parquet": (
         "One decision cohort year with aggregate metrics."
+    ),
+    "patstat_metadata.parquet": (
+        "One application (appln_id) in the universe: a patent of invention, a real application, "
+        "filed 1900-2023, with its office, years, family, classification, WIPO sector and persons."
+    ),
+    "patstat_reference.parquet": (
+        "One citation row resolved to (citing application, cited application), with both clock "
+        "years, age, the recorded origin and its examiner / applicant / other bucket, and a "
+        "replenished flag."
+    ),
+    "patstat_citation.parquet": (
+        "One cited application with citation rows (C) and distinct citing applications (uniqueC) "
+        "per window and provenance bucket."
+    ),
+    "patstat_citation_trend.parquet": "One cited application per citing year.",
+    "patstat_uniqueC_trend.parquet": (
+        "One cited application per year since filing (grant) with its new distinct citing applications."
+    ),
+    "patstat_disruption.parquet": (
+        "One application in the citation graph with CD, F / E / G and ni / nj / nk per window, plus "
+        "CD percentiles within filing year x CPC Section."
+    ),
+    "patstat_disruption_trend.parquet": (
+        "One application per year with new and cumulative ni / nj / nk, CD and F / E / G."
+    ),
+    "patstat_disruption_trend_summary.parquet": (
+        "One (cohort year, years since) cell with mean cumulative CD / F / E / G."
+    ),
+    "patstat_feg_disruption_trend.parquet": "One cohort year with aggregate metrics.",
+    "patstat_hit_probability.parquet": (
+        "One application with a WIPO sector: citation percentiles within sector x cohort year."
+    ),
+    "patstat_sb.parquet": "One cited application with its beauty coefficient and awakening time.",
+    "patstat_z_score.parquet": (
+        "One application with at least two CPC subclasses: atypicality z summaries."
+    ),
+    "patstat_inventor.parquet": (
+        "One application with inventors: the person_id list in sequence order, its length, "
+        "first and last (person records, not disambiguated inventors)."
+    ),
+    "patstat_inventor_country.parquet": (
+        "One application with inventors: the ISO2 countries of its inventors and applicants."
     ),
     "ppp_paper_trend.parquet": (
         "One paper-patent linkage pair per citing year with paper-side counts."
@@ -287,8 +352,9 @@ def build_inventory(source_root: Path) -> dict:
     root = Path(source_root)
     files = []
     excluded_files = []
-    for directory, (family, names) in CANONICAL_TABLES.items():
-        output = root / directory / "output"
+    for key, (family, names) in CANONICAL_TABLES.items():
+        directory, _, outdir = key.partition(":")
+        output = root / directory / (outdir or "output")
         for name in names:
             path = output / name
             if not path.is_file():
@@ -325,6 +391,13 @@ def build_inventory(source_root: Path) -> dict:
                 )
             elif name == "paper_author.parquet":
                 row["provenance"] = "OpenAlex/notebook/paper_author.ipynb"
+            if family == "patstat":
+                row["note"] = {
+                    "output_grant": "Grant clock: grant years at both ends, granted applications only.",
+                    "output_family": ("Family unit: one row per DOCDB family (key docdb_family_id), "
+                                      "earliest priority year at both ends, distinct family-to-family "
+                                      "citations; read 'application' in the row meaning as 'family'."),
+                }.get(outdir, "Filing clock: filing years at both ends, every application.")
             elif name == "patent_reference.parquet":
                 row["provenance"] = "PatentView/notebook/patent_reference.ipynb"
                 row["note"] = (

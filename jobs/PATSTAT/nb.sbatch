@@ -17,6 +17,8 @@
 # Knobs (optional, via --export=ALL):
 #   NB_DUCKDB_MEM   DuckDB memory_limit (default 200GB)
 #   NB_WORKERS      DuckDB / numba threads (default = --cpus-per-task)
+#   NB_PS_CLOCK     filing (default, output/) | grant (output_grant/, PatentView's grant-year clock)
+#   NB_PS_UNIT      application (default) | family (DOCDB families, priority year -> output_family/)
 
 : "${NB:?NB must be set (the notebook name, without .ipynb)}"
 
@@ -42,6 +44,16 @@ echo "node    : $(hostname)   cpus $SLURM_CPUS_PER_TASK   mem ${SLURM_MEM_PER_NO
 echo "python  : $(python -V 2>&1)"
 free -g | head -2
 
-srun python "$JOBDIR/run_notebook.py" "$NB.ipynb" --save-outputs
+# The grant clock (NB_PS_CLOCK=grant -> output_grant/) and the family unit (NB_PS_UNIT=family -> output_family/)
+# execute a copy in notebook/grant/ or notebook/family/, so the default run's results saved inside
+# notebook/<NB>.ipynb are not overwritten.
+RUN="$NB.ipynb"; SUB=""
+[ "${NB_PS_CLOCK:-filing}" = "grant" ] && SUB="grant"
+[ "${NB_PS_UNIT:-application}" = "family" ] && SUB="family"
+if [ -n "$SUB" ]; then
+  mkdir -p "$SUB" && cp "$NB.ipynb" "$SUB/$NB.ipynb" && RUN="$SUB/$NB.ipynb"
+fi
+echo "clock   : ${NB_PS_CLOCK:-filing}   unit ${NB_PS_UNIT:-application}   notebook $RUN"
+srun python "$JOBDIR/run_notebook.py" "$RUN" --save-outputs
 
 echo "==================== $NB DONE  $(date) ===================="

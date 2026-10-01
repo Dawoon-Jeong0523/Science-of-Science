@@ -25,13 +25,35 @@ import re
 import subprocess
 import time
 
-BASE   = "/project/jevans/Dawoon/Science of Science/PATSTAT"
+HERE   = "/project/jevans/Dawoon/Science of Science/PATSTAT"
 DUMP   = "/project/jevans/PATSTAT/unzipped_data"        # tlsNNN_partMM.zip, one CSV each
 DOCS   = "/project/jevans/PATSTAT/index_documentation_scripts_PATSTAT_Global_2023_Autumn.zip"
-RAW    = f"{BASE}/raw"                                   # raw/<tls>/partMM.parquet, from load_table()
-OUT    = f"{BASE}/output"                                # every notebook writes its parquet here
-CACHE  = f"{BASE}/cache"                                 # derived graphs / CSR, not results
-TMP    = f"{BASE}/cache/duckdb_tmp"
+RAW    = f"{HERE}/raw"                                   # raw/<tls>/partMM.parquet, from load_table()
+# Smoke tests: NB_PS_BASE redirects output/ and cache/ (raw/ is always the real one) and
+# NB_PS_SAMPLE=k keeps every k-th application (appln_id % k = 0) in the universe.
+BASE   = os.environ.get("NB_PS_BASE", HERE)
+# The clock. 'filing' (default): years and ages are application FILING years, the PATSTAT / OECD convention.
+# 'grant': GRANT years (year of the first publication flagged publn_first_grant = 'Y') and only applications
+# with one -- PatentView's convention. Same notebooks; the grant run writes to output_grant/ and cache/grant/,
+# and names its year / age columns grant_year / yrs_since_grant.
+CLOCK  = os.environ.get("NB_PS_CLOCK", "filing")
+assert CLOCK in ("filing", "grant"), f"NB_PS_CLOCK must be 'filing' or 'grant', not {CLOCK!r}"
+# The unit. 'application' (default): one row per application. 'family': one row per DOCDB family (docdb_family_id) --
+# an invention filed at several offices counted once; citations are distinct family-to-family pairs and the year is
+# the family's earliest priority year (the OECD / EPO convention). The family unit runs on that priority year only.
+UNIT   = os.environ.get("NB_PS_UNIT", "application")
+assert UNIT in ("application", "family"), f"NB_PS_UNIT must be 'application' or 'family', not {UNIT!r}"
+assert not (UNIT == "family" and CLOCK == "grant"), "the family unit is dated by its priority year: leave NB_PS_CLOCK=filing"
+KEY      = "docdb_family_id" if UNIT == "family" else "appln_id"      # the unit's key column in every output
+UNITS    = "families" if UNIT == "family" else "applications"     # for messages
+YEAR_COL = "priority_year" if UNIT == "family" else f"{CLOCK}_year"   # patstat_metadata column holding the clock year
+AGE_COL  = "yrs_since_priority" if UNIT == "family" else f"yrs_since_{CLOCK}"   # age column name in the yearly outputs
+OUT    = (f"{BASE}/output" + ("_grant" if CLOCK == "grant" else "")
+          + ("_family" if UNIT == "family" else ""))                # every notebook writes its parquet here
+CACHE  = (f"{BASE}/cache" + ("/grant" if CLOCK == "grant" else "")
+          + ("/family" if UNIT == "family" else ""))                # derived graphs / CSR, not results
+TMP    = f"{BASE}/cache/duckdb_tmp"                      # one subfolder per process (see connect), both clocks
+SAMPLE = int(os.environ.get("NB_PS_SAMPLE", "0") or 0)
 for _d in (RAW, OUT, CACHE, TMP):
     os.makedirs(_d, exist_ok=True)
 
@@ -46,7 +68,31 @@ SNAP_YEAR = 2023            # the last year with data; the Autumn edition is cut
 ARTIFICIAL_MIN = 900_000_000
 YEAR_MIN, YEAR_MAX = 1900, SNAP_YEAR
 UNIVERSE_WHERE = (f"ipr_type = 'PI' AND appln_id < {ARTIFICIAL_MIN} "
-                  f"AND appln_filing_year BETWEEN {YEAR_MIN} AND {YEAR_MAX}")
+                  f"AND appln_filing_year BETWEEN {YEAR_MIN} AND {YEAR_MAX}"
+                  + (f" AND appln_id % {SAMPLE} = 0" if SAMPLE else ""))
+
+def grant_year_sql() -> str:
+    """(appln_id, grant_year): year of the application's first grant publication (tls211)."""
+    return (f"SELECT appln_id, min(year(publn_date)) AS grant_year FROM {raw('tls211')} "
+            f"WHERE publn_first_grant = 'Y' AND publn_date < DATE '9999-01-01' GROUP BY 1")
+
+
+def universe_sql() -> str:
+    """(appln_id, yr): the universe under the active clock, with its clock year. Filing: UNIVERSE_WHERE on
+    tls201. Grant: the same applications that also have a grant year in YEAR_MIN..YEAR_MAX."""
+    if CLOCK == "filing":
+        return f"SELECT appln_id, appln_filing_year AS yr FROM {raw('tls201')} WHERE {UNIVERSE_WHERE}"
+    return (f"SELECT a.appln_id, g.grant_year AS yr FROM {raw('tls201')} a JOIN ({grant_year_sql()}) g USING (appln_id) "
+            f"WHERE {UNIVERSE_WHERE} AND g.grant_year BETWEEN {YEAR_MIN} AND {YEAR_MAX}")
+
+
+def family_map_sql() -> str:
+    """(appln_id, docdb_family_id, fam_year) for every application of the (filing-clock) universe: its DOCDB family
+    and the family's year, the earliest priority year (falling back to the filing year) over the family's universe
+    members. The family unit's clock."""
+    return (f"SELECT appln_id, docdb_family_id, min(coalesce(NULLIF(earliest_filing_year, 9999), appln_filing_year)) "
+            f"OVER (PARTITION BY docdb_family_id) AS fam_year FROM {raw('tls201')} WHERE {UNIVERSE_WHERE}")
+
 
 # ── Citation provenance (tls212.citn_origin) ───────────────────────────────────────────────
 # PatentView splits citations into examiner / non-examiner / unknown and drops third-party
@@ -165,6 +211,11 @@ NEEDS = {
     'patstat_hit_probability':      ['@patstat_citation.parquet', '@patstat_metadata.parquet'],
     'patstat_z_score':              ['tls224', '@patstat_metadata.parquet'],
     'patstat_feg_disruption_trend': ['@patstat_disruption.parquet', '@patstat_metadata.parquet'],
+    'patstat_disruption_trend':     ['@patstat_disruption.parquet', '@patstat_metadata.parquet'],
+    'patstat_uniqueC_trend':        ['@patstat_reference.parquet', '@patstat_citation.parquet',
+                                     '@patstat_citation_trend.parquet'],
+    'patstat_inventor':             ['tls207', 'tls206', '@patstat_metadata.parquet'],
+    'patstat_inventor_country':     ['tls207', 'tls206', '@patstat_metadata.parquet', '@patstat_inventor.parquet'],
 }
 
 
@@ -209,7 +260,11 @@ def connect(memory: str | None = None, threads: int | None = None):
     con = duckdb.connect()
     mem = memory or os.environ.get('NB_DUCKDB_MEM', '200GB')
     con.execute(f"SET memory_limit='{mem}'")
-    con.execute(f"SET temp_directory='{TMP}'")
+    # One spill folder per process: two DuckDB jobs sharing a temp_directory overwrite each other's
+    # spill files and crash, and the chain runs several notebooks at once.
+    tmp = f"{TMP}/{os.environ.get('NB', 'interactive')}_{os.getpid()}"
+    os.makedirs(tmp, exist_ok=True)
+    con.execute(f"SET temp_directory='{tmp}'")
     con.execute("SET preserve_insertion_order=false")
     thr = threads or int(os.environ.get('NB_WORKERS', os.environ.get('SLURM_CPUS_PER_TASK', '8')))
     con.execute(f"SET threads={thr}")
@@ -282,6 +337,10 @@ def preflight(notebook: str | None = None) -> bool:
     """Report which raw tables / upstream outputs are present. True if all needed are there."""
     names = [notebook] if notebook else sorted(NEEDS)
     print(f"dump   : {DUMP}   ({len(glob.glob(f'{DUMP}/*.zip'))} zip parts, {len(TABLES)} tables registered)")
+    print(f"clock  : {CLOCK}   (years / ages are {CLOCK} years; universe {'with a grant year' if CLOCK == 'grant' else 'as filed'})"
+          f"   unit: {UNIT} (key {KEY}, year {YEAR_COL})")
+    if BASE != HERE or SAMPLE:
+        print(f"*** SMOKE: base {BASE}, universe sample 1/{SAMPLE or 1}")
     print(f"raw    : {RAW}")
     print(f"output : {OUT}\n")
     ok_all = True

@@ -47,6 +47,10 @@ PatentView/Pregranted/
 !OpenAlex/Abstract data/*.csv
 
 # --- SLURM logs and run artefacts --------------------------------------------
+# executed copies of the PATSTAT grant-clock and family runs (nb.sbatch; the
+# run records stay on Midway, the source notebooks are notebook/*.ipynb)
+PATSTAT/notebook/grant/
+PATSTAT/notebook/family/
 **/logs/
 *.out
 *.err

@@ -10,17 +10,19 @@ literatures so results can be compared document for document.
 | Pipeline | Documents | Source | Key | Notebooks |
 |---|---|---|---|---|
 | `OpenAlex/` | papers | OpenAlex snapshot 2026-01-16 (renli_shared) | `paper_id` = `W` + integer | 13 |
-| `Dimensions/` | papers | Dimensions June 2025 dump | `paper_id` = `pub.` + digits | 10 |
+| `Dimensions/` | papers | Dimensions June 2025 dump | `paper_id` = `pub.` + digits | 11 |
 | `PatentView/` | US granted utility patents | PatentsView bulk (granted 2026-05-21, pre-grant 2026-08-28) | `patent_id` | 15 |
-| `PATSTAT/` | patent applications, worldwide | PATSTAT Global 2023 Autumn | `appln_id` | 10 |
+| `PATSTAT/` | patent applications, worldwide, on a filing and a grant clock, and DOCDB families | PATSTAT Global 2023 Autumn | `appln_id` / `docdb_family_id` | 14 |
 | `Case law/` | US court opinions (CAP) | `Edge_list.parquet` (47.5 M citations) + `metadata.csv` (5.18 M cases) | case id | 8 |
 | `pcs/` | patent -> paper citations | Reliance on Science (`pcs_oa_uspto.csv`) | `paper_id` | 3 |
 | `PPP/` | patent-paper pairs | `_patent_paper_pairs_plus.csv` | (`paperid`, `patent`) | 1 |
-| `validation/` | face-validity checks and the metrics dashboard | all of the above | | 10 |
+| `validation/` | face-validity checks and the metrics dashboard | all of the above | | 12 |
 
 Every pipeline writes one tidy parquet per metric, keyed on its id, so the
 outputs of one pipeline are meant to be merged with each other, not read alone.
-There are 45 such tables, about 62 GB.
+There are 91 such tables, about 106 GB (PATSTAT counts three times, same file names:
+`PATSTAT/output/` on the filing clock, `PATSTAT/output_grant/` on the grant clock, and
+`PATSTAT/output_family/` with the DOCDB family as the unit).
 
 The three notebooks at the repository root, `Disruption_Index.ipynb`,
 `Atypical_combinations.ipynb` and `MAG-Disruption-CD5.ipynb`, are the original
@@ -95,6 +97,7 @@ Science of Science/
 │   ├── Readme.txt                          where this index is NOT equivalent to its twin
 │   └── notebook/
 │       ├── paper_author.ipynb
+│       ├── paper_author_country.ipynb          author countries from the dump's authors[] (twin of OpenAlex)
 │       ├── paper_citation.ipynb
 │       ├── paper_citation_trend.ipynb
 │       ├── paper_disruption.ipynb
@@ -117,6 +120,7 @@ Science of Science/
 │   │   ├── patent_disruption_trend.ipynb
 │   │   ├── patent_feg_disruption_trend.ipynb
 │   │   ├── patent_hit_probability.ipynb
+│   │   ├── patent_inventor.ipynb
 │   │   ├── patent_inventor_country.ipynb
 │   │   ├── patent_metadata.ipynb
 │   │   ├── patent_reference.ipynb
@@ -126,19 +130,23 @@ Science of Science/
 │   │   └── Test.ipynb                          scratch
 │   └── Old/                                superseded notebook versions (19 files)
 ├── PATSTAT/                            worldwide applications, PATSTAT Global 2023 Autumn
-│   ├── patstat_chain_cancel_20260909.tex   note on a cancelled PATSTAT chain
-│   ├── ps_common.py                        plays the role of pv_common.py
+│   ├── patstat_chain_cancel_20260909.tex   record of the 2026-09-08 stall (fixed 2026-10-01, Readme §5)
+│   ├── ps_common.py                        plays the role of pv_common.py; NB_PS_CLOCK picks the clock, NB_PS_UNIT the unit
 │   ├── Readme.txt                          where this index is NOT equivalent to its twin
-│   └── notebook/
+│   └── notebook/                           the grant-clock and family runs execute copies in notebook/grant/ and notebook/family/ (not tracked)
 │       ├── patstat_citation.ipynb
 │       ├── patstat_citation_trend.ipynb
-│       ├── patstat_disruption.ipynb
+│       ├── patstat_disruption.ipynb            + CD percentiles within filing year x CPC Section
+│       ├── patstat_disruption_trend.ipynb      per application x year, checked against every window
 │       ├── patstat_feg_disruption_trend.ipynb
 │       ├── patstat_hit_probability.ipynb
+│       ├── patstat_inventor.ipynb              inventor person_ids per application (not disambiguated)
+│       ├── patstat_inventor_country.ipynb      inventor and applicant countries
 │       ├── patstat_load.ipynb
 │       ├── patstat_metadata.ipynb
 │       ├── patstat_reference.ipynb
 │       ├── patstat_sb.ipynb
+│       ├── patstat_uniqueC_trend.ipynb         == patstat_citation_trend.uniqueC by construction (asserted)
 │       └── patstat_z_score.ipynb
 ├── Case law/                           US court opinions, Caselaw Access Project
 │   ├── cl_common.py                        CAP paths, id codec, graph caches
@@ -181,16 +189,18 @@ Science of Science/
 │   ├── paper_validation.ipynb.pre-update
 │   ├── patent_validation.ipynb
 │   ├── patent_validation.ipynb.pre-feg5
+│   ├── patent_country_validation.ipynb     8 figures: inventor-country distributions of PatentsView, PATSTAT applications and families
+│   ├── patstat_validation.ipynb            18 figures: both clocks, filing vs grant, PATSTAT vs PatentsView, applications vs families
 │   ├── pcs_validation.ipynb
 │   ├── ppp_validation.ipynb
 │   ├── refresh_dashboard.py                rebuild metrics_dashboard.html from Figures/ + the inventory
-│   ├── val_common.py                       V.init / V.save / V.paper / V.patent / V.dim / NEEDS / NB_FIG_DIR
+│   ├── val_common.py                       V.init / V.save / V.paper / V.patent / V.dim / V.patstat(_grant, _family) / NEEDS / NB_FIG_DIR
 │   ├── val_common.py.pre-caselaw
 │   ├── data/
-│   │   ├── inventory.json                      local diagnostic report of the 45 derived tables
+│   │   ├── inventory.json                      local diagnostic report of the 91 derived tables
 │   │   ├── world_countries.geojson             Natural Earth 1:50m Admin 0, trimmed (the maps need it)
 │   │   └── world_countries.source.json         its provenance
-│   ├── Figures/                            figure exports, <notebook>_<section>.{jpg,pdf} (238 files)
+│   ├── Figures/                            figure exports, <notebook>_<section>.{jpg,pdf} (292 files)
 │   └── Old/                                superseded notebook versions (20 files)
 ├── jobs/                               SLURM: one folder per pipeline
 │   ├── Case law/
@@ -210,14 +220,16 @@ Science of Science/
 │   ├── PatentView/
 │   │   ├── disruption_trend.sbatch             the long disruption-trajectory job
 │   │   ├── nb.sbatch                           run ONE notebook on a jevans node
+│   │   ├── patent_inventor.sbatch              patent_inventor with the cell outputs written back into the notebook
 │   │   ├── run_notebook.py                     per-pipeline copy of the runner
 │   │   ├── submit_patentview.sh                submit the chain with afterok dependencies (`plan` prints the order)
 │   │   ├── verify_dedup.py                     checks the citation de-duplication
 │   │   └── verify_dedup.sbatch
 │   ├── PATSTAT/
 │   │   ├── load.sbatch                         array job: 21 PATSTAT zip parts -> raw/
-│   │   ├── nb.sbatch                           run ONE notebook on a jevans node
+│   │   ├── nb.sbatch                           run ONE notebook on a jevans node (NB_PS_CLOCK=grant -> output_grant/, NB_PS_UNIT=family -> output_family/)
 │   │   ├── run_notebook.py                     per-pipeline copy of the runner
+│   │   ├── smoke.sbatch                        the whole chain on a 1/20 sample into a scratch base (~5 min)
 │   │   └── submit_patstat.sh                   submit the chain with afterok dependencies (`plan` prints the order)
 │   ├── pcs/
 │   │   ├── nb.sbatch                           run ONE notebook on a jevans node
@@ -251,8 +263,9 @@ against one index reads unchanged against its twin.
 ## Metrics
 
 Notation shared by all pipelines: `P` is the focal document, `y_X` its year
-(papers: publication year; PatentsView: grant year; PATSTAT: filing year; case
-law: decision year), `W` a citation window of 3 / 5 / 10 / all years, written as
+(papers: publication year; PatentsView: grant year; PATSTAT: filing year in
+`PATSTAT/output/`, grant year in `PATSTAT/output_grant/`, the family's earliest priority year in
+`PATSTAT/output_family/`; case law: decision year), `W` a citation window of 3 / 5 / 10 / all years, written as
 column suffixes `_3`, `_5`, `_10`, `_all`.
 
 | Metric | Output | Definition |
@@ -265,8 +278,8 @@ column suffixes `_3`, `_5`, `_10`, `_all`.
 | Sleeping beauty | `*_sb` | Ke et al. (2015) beauty coefficient `SB_B` and awakening time `SB_T` from the yearly citation histogram. |
 | Hit probability | `*_hit_probability` | Percentile of each count column within its cohort: (field, year) for papers, (WIPO sector, year) for patents, (jurisdiction, year) for case law. `pctl >= 0.99` is the top 1 %. |
 | Citation trajectory | `*_citation_trend` | One row per (document, citing year), with years since publication or grant and the citation channel (paper -> paper, patent -> paper by examiner / applicant, patent -> patent). |
-| Team size / authors | `paper_author`, `paper_team_size` | Author lists and team size from OpenAlex `works_au_affs` or Dimensions `authors[]`. |
-| Geography | `paper_author_country`, `patent_inventor_country` | ISO2 countries of a document's authors or inventors: the sorted distinct set, the per-country head counts, whether the document is international, and (papers) the first and last author's own countries. Papers take the country of the institution an affiliation resolved to; patents take the address printed on the grant, with the assignee countries beside it. |
+| Team size / authors | `paper_author`, `paper_team_size`, `patent_inventor`, `patstat_inventor` | Author (inventor) lists in author order, team size, and the first and last author (inventor), from OpenAlex `works_au_affs`, Dimensions `authors[]` or PatentsView `g_inventor_disambiguated`. Patents de-duplicate on (patent, inventor id); `n_inventors` is `team_size` under its PatentView name. PATSTAT lists inventor `person_id`s from `tls207` (a named person once per application, an unnamed placeholder record once per slot); they are not disambiguated across applications. |
+| Geography | `paper_author_country` (OpenAlex, Dimensions), `patent_inventor_country`, `patstat_inventor_country` | ISO2 countries of a document's authors or inventors: the sorted distinct set, the per-country head counts, whether the document is international, and (papers) the first and last author's own countries. Papers take the country of the institution an affiliation resolved to; patents take the address printed on the grant, with the assignee countries beside it. |
 | FEG trend | `*_feg_disruption_trend` | Per-year means of CD / F / E / G / ni / nj / nk. |
 
 Where the literatures differ in a way that matters (field taxonomy, what counts
@@ -301,11 +314,16 @@ Run orders:
   `patent_disruption_app_add` have no dependency; then `patent_z_score`,
   `patent_feg_disruption_trend`, `patent_hit_probability`,
   `patent_disruption_app_compare`, `patent_disruption_trend`,
-  `patent_uniqueC_trend`, `patent_inventor_country`.
+  `patent_uniqueC_trend`, `patent_inventor_country`, `patent_inventor`.
 - PATSTAT: `sbatch load.sbatch` (array of 21 zip parts to `raw/`), then
-  `submit_patstat.sh`: `patstat_reference` -> `patstat_metadata` -> counting
-  notebooks -> `patstat_citation_trend`, `patstat_hit_probability`,
-  `patstat_feg_disruption_trend`.
+  `submit_patstat.sh`: `patstat_reference` -> `patstat_metadata` ->
+  `patstat_citation`, `patstat_disruption`, `patstat_sb`, `patstat_z_score`,
+  `patstat_inventor` -> `patstat_citation_trend`, `patstat_hit_probability`,
+  `patstat_feg_disruption_trend`, `patstat_disruption_trend`,
+  `patstat_inventor_country` -> `patstat_uniqueC_trend` (13 jobs, about 70 min).
+  `NB_PS_CLOCK=grant ./submit_patstat.sh` runs the same chain on the grant clock
+  into `PATSTAT/output_grant/` (about 35 min), and `NB_PS_UNIT=family ./submit_patstat.sh`
+  on DOCDB families into `PATSTAT/output_family/` (about 45 min).
 - Case law: `case_metadata` first (it builds the graph and CSR caches), then
   `case_citation`, `case_citation_trend`, `case_sb`, `case_disruption`; then
   `case_hit_probability` (after citation) and `case_feg_disruption_trend`
@@ -326,8 +344,11 @@ runs them on a real kernel and writes the outputs back, so the committed
 `.ipynb` is the record of the last real run.
 
 Smoke tests: the Dimensions notebooks honour `NB_DIM_BASE=<scratch>`,
-`NB_FILE_LIMIT=12` and `NB_Z_YEARS=a:b`; PATSTAT honours `NB_DUCKDB_MEM`;
-`patent_inventor_country` honours `NB_ROW_LIMIT` and `NB_OUT_DIR`;
+`NB_FILE_LIMIT=12` and `NB_Z_YEARS=a:b`; PATSTAT honours `NB_DUCKDB_MEM`,
+`NB_PS_BASE=<scratch>` and `NB_PS_SAMPLE=k` (every k-th application), and
+`jobs/PATSTAT/smoke.sbatch` runs its whole chain that way (on either clock, or on families
+with `NB_PS_UNIT=family`);
+`patent_inventor` and `patent_inventor_country` honour `NB_ROW_LIMIT` and `NB_OUT_DIR`;
 `paper_author_country` honours `NB_AU_AFFS_SRC`, `NB_OUT_DIR` and
 `NB_FORCE_PASS1`; the two country validation notebooks honour `NB_BASE_FP` and
 `NB_BASE_LIMIT`, and `jobs/validation/smoke_country.sbatch` runs both against a
@@ -338,14 +359,19 @@ overwrite `validation/Figures/`.
 
 `validation/` holds one face-validity notebook per literature
 (`paper_validation`, `patent_validation`, `dimension_validation`,
-`case_law_validation`, `pcs_validation`, `ppp_validation`), two geography
-notebooks (`author_country_validation`, `inventor_country_validation`), and
+`patstat_validation`, `case_law_validation`, `pcs_validation`, `ppp_validation`), three geography
+notebooks (`author_country_validation`, `inventor_country_validation`, and
+`patent_country_validation`, which sets the inventor-country distributions of PatentsView
+grants, PATSTAT applications and PATSTAT DOCDB families side by side), and
 `disruption_crosscheck`. There is no external gold standard for most metrics, so
 the checks are internal consistency (`C3 <= C5 <= C10 <= C_all`, `F + E + G = 1`,
 `CD` in `[-1, 1]`), expected artefacts (citation truncation in recent years,
 left-censoring at the start of a citation record) and, where it exists,
 agreement with an independent index — SciSciNet for the paper metrics,
-Dimensions for the author countries.
+Dimensions for the author countries, PatentsView for PATSTAT's US grants
+(matched by patent number: grant year and inventor count agree exactly, citation
+and CD ranks closely; `patstat_validation` §16), and EPO's own family citation count for
+the PATSTAT family set (`patstat_validation` §17).
 
 Figures go to `validation/Figures/<notebook>_<section>.{jpg,pdf}` at 600 dpi;
 the section is the number of the markdown heading the plot sits under.
@@ -408,8 +434,16 @@ every file, its columns, the metric definitions and the reading caveats.
 - The Uzzi 2x2 (conventionality x novelty) does not reproduce on the 2000-2005
   paper data; Z agreement with SciSciNet is only moderate while pair counts
   agree almost exactly. Resolve before interpreting.
-- PATSTAT uses the filing year at both ends and its own citation-origin codes;
-  it is not a drop-in for PatentsView numbers. See `PATSTAT/Readme.txt` §4.
+- PATSTAT is stored on two clocks. `PATSTAT/output/` uses the filing year at
+  both ends and every application; `PATSTAT/output_grant/` uses grant years and
+  granted applications only (about 61 % of the filing-clock edges survive, PCT
+  applications drop out, and grant lags differ by office). State the clock with
+  every result. Neither is a drop-in for PatentsView numbers: PATSTAT is
+  worldwide and records its own citation origins. See `PATSTAT/Readme.txt` §4.
+- PATSTAT inventor `person_id`s are person records, not disambiguated
+  inventors, and inventor countries are nearly absent for applications filed
+  at the Chinese and Japanese offices; about 120 malformed `person_ctry_code`
+  values are read as unknown.
 - Dimensions fields are ANZSRC FoR 2020 divisions, not OpenAlex fields, and
   its patent -> paper channel carries no examiner tag. See `Dimensions/Readme.txt` §4.
 - Author country coverage is a property of OpenAlex's affiliation matching, not

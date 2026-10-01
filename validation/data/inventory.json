@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "source_project": "Science of Science",
-  "generated_utc": "2026-09-18T16:18:15.911122Z",
+  "generated_utc": "2026-10-01T22:14:57.690620Z",
   "method": "Parquet footers and filesystem metadata only for table inventories; small provenance JSON and run logs for provenance. No table data pages or large raw inputs are scanned.",
   "count_unit": "Stored rows across derived tables; not unique documents.",
   "files": [
@@ -520,7 +520,7 @@
       "path": "OpenAlex/output/paper_metadata.parquet",
       "family": "paper",
       "rows": 372655605,
-      "bytes": 8984140325,
+      "bytes": 11275748280,
       "columns": [
         "paper_id",
         "year",
@@ -534,6 +534,10 @@
         "domain",
         "primary_topic_field",
         "primary_topic_subfield",
+        "primary_topic_topic",
+        "field",
+        "subfield",
+        "topic",
         "cited_by_count",
         "is_retracted"
       ],
@@ -599,6 +603,26 @@
           "nullable": true
         },
         {
+          "name": "primary_topic_topic",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "field",
+          "type": "list<element: string>",
+          "nullable": true
+        },
+        {
+          "name": "subfield",
+          "type": "list<element: string>",
+          "nullable": true
+        },
+        {
+          "name": "topic",
+          "type": "list<element: string>",
+          "nullable": true
+        },
+        {
           "name": "cited_by_count",
           "type": "int64",
           "nullable": true
@@ -609,8 +633,8 @@
           "nullable": true
         }
       ],
-      "row_groups": 356,
-      "modified_utc": "2026-09-14T17:40:28.036441Z",
+      "row_groups": 1334,
+      "modified_utc": "2026-10-01T18:28:34.181782Z",
       "grain": "One document."
     },
     {
@@ -835,6 +859,73 @@
       "modified_utc": "2026-09-07T17:08:58.593994Z",
       "grain": "One work_id with ordered, deduplicated author IDs and team_size.",
       "provenance": "OpenAlex/notebook/paper_author.ipynb"
+    },
+    {
+      "path": "Dimensions/output/paper_author_country.parquet",
+      "family": "dimension",
+      "rows": 142431518,
+      "bytes": 763040740,
+      "columns": [
+        "paper_id",
+        "team_size",
+        "n_located",
+        "countries",
+        "n_countries",
+        "country_author_counts",
+        "first_author_country",
+        "last_author_country",
+        "is_international"
+      ],
+      "schema": [
+        {
+          "name": "paper_id",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "team_size",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "n_located",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "countries",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "n_countries",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "country_author_counts",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "first_author_country",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "last_author_country",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "is_international",
+          "type": "bool",
+          "nullable": true
+        }
+      ],
+      "row_groups": 143,
+      "modified_utc": "2026-10-01T16:00:50.222520Z",
+      "grain": "One work with the ISO2 countries of its authors' institutions: the sorted distinct set, the per-country author counts, and the first and last author's own countries."
     },
     {
       "path": "Dimensions/output/paper_citation.parquet",
@@ -3164,6 +3255,5112 @@
       "grain": "One CPC-subclass pair per cohort year."
     },
     {
+      "path": "PATSTAT/output/patstat_citation.parquet",
+      "family": "patstat",
+      "rows": 40901611,
+      "bytes": 467140635,
+      "columns": [
+        "appln_id",
+        "C_3",
+        "C_examiner_3",
+        "C_applicant_3",
+        "C_other_3",
+        "C_5",
+        "C_examiner_5",
+        "C_applicant_5",
+        "C_other_5",
+        "C_10",
+        "C_examiner_10",
+        "C_applicant_10",
+        "C_other_10",
+        "C_all",
+        "C_examiner_all",
+        "C_applicant_all",
+        "C_other_all",
+        "uniqueC_3",
+        "uniqueC_examiner_3",
+        "uniqueC_applicant_3",
+        "uniqueC_other_3",
+        "uniqueC_5",
+        "uniqueC_examiner_5",
+        "uniqueC_applicant_5",
+        "uniqueC_other_5",
+        "uniqueC_10",
+        "uniqueC_examiner_10",
+        "uniqueC_applicant_10",
+        "uniqueC_other_10",
+        "uniqueC_all",
+        "uniqueC_examiner_all",
+        "uniqueC_applicant_all",
+        "uniqueC_other_all"
+      ],
+      "schema": [
+        {
+          "name": "appln_id",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_3",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_examiner_3",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_applicant_3",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_other_3",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_5",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_examiner_5",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_applicant_5",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_other_5",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_10",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_examiner_10",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_applicant_10",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_other_10",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_all",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_examiner_all",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_applicant_all",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_other_all",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_3",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_examiner_3",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_applicant_3",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_other_3",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_5",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_examiner_5",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_applicant_5",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_other_5",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_10",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_examiner_10",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_applicant_10",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_other_10",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_all",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_examiner_all",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_applicant_all",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_other_all",
+          "type": "int64",
+          "nullable": true
+        }
+      ],
+      "row_groups": 333,
+      "modified_utc": "2026-10-01T16:37:50.292606Z",
+      "grain": "One cited application with citation rows (C) and distinct citing applications (uniqueC) per window and provenance bucket.",
+      "note": "Filing clock: filing years at both ends, every application."
+    },
+    {
+      "path": "PATSTAT/output/patstat_citation_trend.parquet",
+      "family": "patstat",
+      "rows": 157842642,
+      "bytes": 523450209,
+      "columns": [
+        "appln_id",
+        "filing_year",
+        "cite_year",
+        "yrs_since_filing",
+        "C",
+        "C_examiner",
+        "C_applicant",
+        "C_other",
+        "uniqueC"
+      ],
+      "schema": [
+        {
+          "name": "appln_id",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "filing_year",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "cite_year",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "yrs_since_filing",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "C",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_examiner",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_applicant",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_other",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC",
+          "type": "int64",
+          "nullable": true
+        }
+      ],
+      "row_groups": 1285,
+      "modified_utc": "2026-10-01T16:38:38.261306Z",
+      "grain": "One cited application per citing year.",
+      "note": "Filing clock: filing years at both ends, every application."
+    },
+    {
+      "path": "PATSTAT/output/patstat_disruption.parquet",
+      "family": "patstat",
+      "rows": 54330212,
+      "bytes": 1859233040,
+      "columns": [
+        "appln_id",
+        "CD_3",
+        "F_3",
+        "E_3",
+        "G_3",
+        "ni_3",
+        "nj_3",
+        "nk_3",
+        "CD_5",
+        "F_5",
+        "E_5",
+        "G_5",
+        "ni_5",
+        "nj_5",
+        "nk_5",
+        "CD_10",
+        "F_10",
+        "E_10",
+        "G_10",
+        "ni_10",
+        "nj_10",
+        "nk_10",
+        "CD_all",
+        "F_all",
+        "E_all",
+        "G_all",
+        "ni_all",
+        "nj_all",
+        "nk_all",
+        "pctl_year",
+        "pctl_group",
+        "CD_3_pctl",
+        "CD_3_pctl_cume",
+        "CD_5_pctl",
+        "CD_5_pctl_cume",
+        "CD_10_pctl",
+        "CD_10_pctl_cume",
+        "CD_all_pctl",
+        "CD_all_pctl_cume"
+      ],
+      "schema": [
+        {
+          "name": "appln_id",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "CD_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "F_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "E_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "G_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "ni_3",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "nj_3",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "nk_3",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "CD_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "F_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "E_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "G_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "ni_5",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "nj_5",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "nk_5",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "CD_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "F_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "E_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "G_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "ni_10",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "nj_10",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "nk_10",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "CD_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "F_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "E_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "G_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "ni_all",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "nj_all",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "nk_all",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "pctl_year",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "pctl_group",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "CD_3_pctl",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "CD_3_pctl_cume",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "CD_5_pctl",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "CD_5_pctl_cume",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "CD_10_pctl",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "CD_10_pctl_cume",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "CD_all_pctl",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "CD_all_pctl_cume",
+          "type": "double",
+          "nullable": true
+        }
+      ],
+      "row_groups": 443,
+      "modified_utc": "2026-10-01T17:24:49.610400Z",
+      "grain": "One application in the citation graph with CD, F / E / G and ni / nj / nk per window, plus CD percentiles within filing year x CPC Section.",
+      "note": "Filing clock: filing years at both ends, every application."
+    },
+    {
+      "path": "PATSTAT/output/patstat_disruption_trend.parquet",
+      "family": "patstat",
+      "rows": 349993893,
+      "bytes": 2627494295,
+      "columns": [
+        "appln_id",
+        "filing_year",
+        "cite_year",
+        "yrs_since_filing",
+        "ni_new",
+        "nj_new",
+        "nk_new",
+        "ni",
+        "nj",
+        "nk",
+        "CD",
+        "F",
+        "E",
+        "G"
+      ],
+      "schema": [
+        {
+          "name": "appln_id",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "filing_year",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "cite_year",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "yrs_since_filing",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "ni_new",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "nj_new",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "nk_new",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "ni",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "nj",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "nk",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "CD",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "F",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "E",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "G",
+          "type": "float",
+          "nullable": true
+        }
+      ],
+      "row_groups": 354,
+      "modified_utc": "2026-10-01T17:38:55.559050Z",
+      "grain": "One application per year with new and cumulative ni / nj / nk, CD and F / E / G.",
+      "note": "Filing clock: filing years at both ends, every application."
+    },
+    {
+      "path": "PATSTAT/output/patstat_disruption_trend_summary.parquet",
+      "family": "patstat",
+      "rows": 7319,
+      "bytes": 367907,
+      "columns": [
+        "filing_year",
+        "yrs_since_filing",
+        "n_CD",
+        "CD_mean",
+        "n_F",
+        "F_mean",
+        "n_E",
+        "E_mean",
+        "n_G",
+        "G_mean"
+      ],
+      "schema": [
+        {
+          "name": "filing_year",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "yrs_since_filing",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "n_CD",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "CD_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "n_F",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "F_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "n_E",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "E_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "n_G",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "G_mean",
+          "type": "double",
+          "nullable": true
+        }
+      ],
+      "row_groups": 1,
+      "modified_utc": "2026-10-01T17:38:55.678757Z",
+      "grain": "One (cohort year, years since) cell with mean cumulative CD / F / E / G.",
+      "note": "Filing clock: filing years at both ends, every application."
+    },
+    {
+      "path": "PATSTAT/output/patstat_feg_disruption_trend.parquet",
+      "family": "patstat",
+      "rows": 124,
+      "bytes": 51840,
+      "columns": [
+        "year",
+        "n",
+        "CD_3_mean",
+        "F_3_mean",
+        "E_3_mean",
+        "G_3_mean",
+        "ni_3_mean",
+        "nj_3_mean",
+        "nk_3_mean",
+        "njfrac_3_mean",
+        "CD_5_mean",
+        "F_5_mean",
+        "E_5_mean",
+        "G_5_mean",
+        "ni_5_mean",
+        "nj_5_mean",
+        "nk_5_mean",
+        "njfrac_5_mean",
+        "CD_10_mean",
+        "F_10_mean",
+        "E_10_mean",
+        "G_10_mean",
+        "ni_10_mean",
+        "nj_10_mean",
+        "nk_10_mean",
+        "njfrac_10_mean",
+        "CD_all_mean",
+        "F_all_mean",
+        "E_all_mean",
+        "G_all_mean",
+        "ni_all_mean",
+        "nj_all_mean",
+        "nk_all_mean",
+        "njfrac_all_mean"
+      ],
+      "schema": [
+        {
+          "name": "year",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "n",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "CD_3_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "F_3_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "E_3_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "G_3_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "ni_3_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "nj_3_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "nk_3_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "njfrac_3_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "CD_5_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "F_5_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "E_5_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "G_5_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "ni_5_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "nj_5_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "nk_5_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "njfrac_5_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "CD_10_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "F_10_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "E_10_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "G_10_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "ni_10_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "nj_10_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "nk_10_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "njfrac_10_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "CD_all_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "F_all_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "E_all_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "G_all_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "ni_all_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "nj_all_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "nk_all_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "njfrac_all_mean",
+          "type": "double",
+          "nullable": true
+        }
+      ],
+      "row_groups": 1,
+      "modified_utc": "2026-10-01T17:26:15.029057Z",
+      "grain": "One cohort year with aggregate metrics.",
+      "note": "Filing clock: filing years at both ends, every application."
+    },
+    {
+      "path": "PATSTAT/output/patstat_hit_probability.parquet",
+      "family": "patstat",
+      "rows": 81731311,
+      "bytes": 599586087,
+      "columns": [
+        "appln_id",
+        "wipo_sector",
+        "filing_year",
+        "pctl_C_3",
+        "pctl_C_examiner_3",
+        "pctl_C_applicant_3",
+        "pctl_C_other_3",
+        "pctl_C_5",
+        "pctl_C_examiner_5",
+        "pctl_C_applicant_5",
+        "pctl_C_other_5",
+        "pctl_C_10",
+        "pctl_C_examiner_10",
+        "pctl_C_applicant_10",
+        "pctl_C_other_10",
+        "pctl_C_all",
+        "pctl_C_examiner_all",
+        "pctl_C_applicant_all",
+        "pctl_C_other_all",
+        "pctl_uniqueC_3",
+        "pctl_uniqueC_examiner_3",
+        "pctl_uniqueC_applicant_3",
+        "pctl_uniqueC_other_3",
+        "pctl_uniqueC_5",
+        "pctl_uniqueC_examiner_5",
+        "pctl_uniqueC_applicant_5",
+        "pctl_uniqueC_other_5",
+        "pctl_uniqueC_10",
+        "pctl_uniqueC_examiner_10",
+        "pctl_uniqueC_applicant_10",
+        "pctl_uniqueC_other_10",
+        "pctl_uniqueC_all",
+        "pctl_uniqueC_examiner_all",
+        "pctl_uniqueC_applicant_all",
+        "pctl_uniqueC_other_all",
+        "pctl_c3",
+        "pctl_c5",
+        "pctl_c10",
+        "pctl_call"
+      ],
+      "schema": [
+        {
+          "name": "appln_id",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "wipo_sector",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "filing_year",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_examiner_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_applicant_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_other_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_examiner_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_applicant_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_other_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_examiner_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_applicant_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_other_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_examiner_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_applicant_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_other_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_examiner_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_applicant_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_other_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_examiner_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_applicant_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_other_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_examiner_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_applicant_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_other_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_examiner_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_applicant_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_other_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_c3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_c5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_c10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_call",
+          "type": "float",
+          "nullable": true
+        }
+      ],
+      "row_groups": 667,
+      "modified_utc": "2026-10-01T16:45:17.906879Z",
+      "grain": "One application with a WIPO sector: citation percentiles within sector x cohort year.",
+      "note": "Filing clock: filing years at both ends, every application."
+    },
+    {
+      "path": "PATSTAT/output/patstat_inventor.parquet",
+      "family": "patstat",
+      "rows": 75617406,
+      "bytes": 1385154225,
+      "columns": [
+        "appln_id",
+        "inventor_list",
+        "n_inventors",
+        "first_inventor",
+        "last_inventor"
+      ],
+      "schema": [
+        {
+          "name": "appln_id",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "inventor_list",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "n_inventors",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "first_inventor",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "last_inventor",
+          "type": "int64",
+          "nullable": true
+        }
+      ],
+      "row_groups": 76,
+      "modified_utc": "2026-10-01T16:40:09.368580Z",
+      "grain": "One application with inventors: the person_id list in sequence order, its length, first and last (person records, not disambiguated inventors).",
+      "note": "Filing clock: filing years at both ends, every application."
+    },
+    {
+      "path": "PATSTAT/output/patstat_inventor_country.parquet",
+      "family": "patstat",
+      "rows": 75617406,
+      "bytes": 235130345,
+      "columns": [
+        "appln_id",
+        "n_inventors",
+        "n_located",
+        "countries",
+        "n_countries",
+        "country_inventor_counts",
+        "first_inventor_country",
+        "is_international",
+        "applicant_countries"
+      ],
+      "schema": [
+        {
+          "name": "appln_id",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "n_inventors",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "n_located",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "countries",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "n_countries",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "country_inventor_counts",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "first_inventor_country",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "is_international",
+          "type": "bool",
+          "nullable": true
+        },
+        {
+          "name": "applicant_countries",
+          "type": "string",
+          "nullable": true
+        }
+      ],
+      "row_groups": 76,
+      "modified_utc": "2026-10-01T17:49:03.663950Z",
+      "grain": "One application with inventors: the ISO2 countries of its inventors and applicants.",
+      "note": "Filing clock: filing years at both ends, every application."
+    },
+    {
+      "path": "PATSTAT/output/patstat_metadata.parquet",
+      "family": "patstat",
+      "rows": 84914026,
+      "bytes": 4572200919,
+      "columns": [
+        "appln_id",
+        "appln_auth",
+        "appln_kind",
+        "appln_nr",
+        "filing_year",
+        "filing_date",
+        "priority_year",
+        "publn_year",
+        "grant_year",
+        "granted",
+        "docdb_family_id",
+        "docdb_family_size",
+        "inpadoc_family_id",
+        "nb_citing_docdb_fam",
+        "nb_applicants",
+        "nb_inventors",
+        "ref_count",
+        "npl_ref_count",
+        "ipc_main",
+        "cpc_code",
+        "cpc_code_list",
+        "cpc_subclass_list",
+        "techn_field_nr",
+        "wipo_sector",
+        "inventor_list",
+        "applicant_list",
+        "inventor_ctry_list",
+        "applicant_ctry_list",
+        "applicant_sector"
+      ],
+      "schema": [
+        {
+          "name": "appln_id",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "appln_auth",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "appln_kind",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "appln_nr",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "filing_year",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "filing_date",
+          "type": "date32[day]",
+          "nullable": true
+        },
+        {
+          "name": "priority_year",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "publn_year",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "grant_year",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "granted",
+          "type": "bool",
+          "nullable": true
+        },
+        {
+          "name": "docdb_family_id",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "docdb_family_size",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "inpadoc_family_id",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "nb_citing_docdb_fam",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "nb_applicants",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "nb_inventors",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "ref_count",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "npl_ref_count",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "ipc_main",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "cpc_code",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "cpc_code_list",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "cpc_subclass_list",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "techn_field_nr",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "wipo_sector",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "inventor_list",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "applicant_list",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "inventor_ctry_list",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "applicant_ctry_list",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "applicant_sector",
+          "type": "string",
+          "nullable": true
+        }
+      ],
+      "row_groups": 693,
+      "modified_utc": "2026-10-01T17:46:11.437583Z",
+      "grain": "One application (appln_id) in the universe: a patent of invention, a real application, filed 1900-2023, with its office, years, family, classification, WIPO sector and persons.",
+      "note": "Filing clock: filing years at both ends, every application."
+    },
+    {
+      "path": "PATSTAT/output/patstat_reference.parquet",
+      "family": "patstat",
+      "rows": 401559169,
+      "bytes": 5240072606,
+      "columns": [
+        "citing_id",
+        "cited_id",
+        "citing_publn_id",
+        "cited_publn_id",
+        "citing_year",
+        "cited_year",
+        "age",
+        "citing_publn_year",
+        "citn_origin",
+        "bucket",
+        "replenished",
+        "resolved"
+      ],
+      "schema": [
+        {
+          "name": "citing_id",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "cited_id",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "citing_publn_id",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "cited_publn_id",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "citing_year",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "cited_year",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "age",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "citing_publn_year",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "citn_origin",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "bucket",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "replenished",
+          "type": "bool",
+          "nullable": true
+        },
+        {
+          "name": "resolved",
+          "type": "string",
+          "nullable": true
+        }
+      ],
+      "row_groups": 3270,
+      "modified_utc": "2026-10-01T16:27:13.755453Z",
+      "grain": "One citation row resolved to (citing application, cited application), with both clock years, age, the recorded origin and its examiner / applicant / other bucket, and a replenished flag.",
+      "note": "Filing clock: filing years at both ends, every application."
+    },
+    {
+      "path": "PATSTAT/output/patstat_sb.parquet",
+      "family": "patstat",
+      "rows": 40901611,
+      "bytes": 315945166,
+      "columns": [
+        "appln_id",
+        "SB_B",
+        "SB_T",
+        "n_cite"
+      ],
+      "schema": [
+        {
+          "name": "appln_id",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "SB_B",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "SB_T",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "n_cite",
+          "type": "int64",
+          "nullable": true
+        }
+      ],
+      "row_groups": 40,
+      "modified_utc": "2026-10-01T16:37:55.867702Z",
+      "grain": "One cited application with its beauty coefficient and awakening time.",
+      "note": "Filing clock: filing years at both ends, every application."
+    },
+    {
+      "path": "PATSTAT/output/patstat_uniqueC_trend.parquet",
+      "family": "patstat",
+      "rows": 157842642,
+      "bytes": 367614241,
+      "columns": [
+        "appln_id",
+        "filing_year",
+        "cite_year",
+        "yrs_since_filing",
+        "uniqueC"
+      ],
+      "schema": [
+        {
+          "name": "appln_id",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "filing_year",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "cite_year",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "yrs_since_filing",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC",
+          "type": "int64",
+          "nullable": true
+        }
+      ],
+      "row_groups": 158,
+      "modified_utc": "2026-10-01T16:43:27.301510Z",
+      "grain": "One cited application per year since filing (grant) with its new distinct citing applications.",
+      "note": "Filing clock: filing years at both ends, every application."
+    },
+    {
+      "path": "PATSTAT/output/patstat_z_score.parquet",
+      "family": "patstat",
+      "rows": 34273274,
+      "bytes": 512270209,
+      "columns": [
+        "appln_id",
+        "Z_median",
+        "Z_10pct",
+        "Z_min",
+        "n_pairs"
+      ],
+      "schema": [
+        {
+          "name": "appln_id",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "Z_median",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "Z_10pct",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "Z_min",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "n_pairs",
+          "type": "int64",
+          "nullable": true
+        }
+      ],
+      "row_groups": 279,
+      "modified_utc": "2026-10-01T16:38:51.238874Z",
+      "grain": "One application with at least two CPC subclasses: atypicality z summaries.",
+      "note": "Filing clock: filing years at both ends, every application."
+    },
+    {
+      "path": "PATSTAT/output/z_score_pair.parquet",
+      "family": "patstat",
+      "rows": 2629983,
+      "bytes": 22728884,
+      "columns": [
+        "code_1",
+        "code_2",
+        "year",
+        "Z_score"
+      ],
+      "schema": [
+        {
+          "name": "code_1",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "code_2",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "year",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "Z_score",
+          "type": "double",
+          "nullable": true
+        }
+      ],
+      "row_groups": 22,
+      "modified_utc": "2026-10-01T16:38:37.727764Z",
+      "grain": "One CPC-subclass pair per cohort year.",
+      "note": "Filing clock: filing years at both ends, every application."
+    },
+    {
+      "path": "PATSTAT/output_grant/patstat_citation.parquet",
+      "family": "patstat",
+      "rows": 21181671,
+      "bytes": 249959419,
+      "columns": [
+        "appln_id",
+        "C_3",
+        "C_examiner_3",
+        "C_applicant_3",
+        "C_other_3",
+        "C_5",
+        "C_examiner_5",
+        "C_applicant_5",
+        "C_other_5",
+        "C_10",
+        "C_examiner_10",
+        "C_applicant_10",
+        "C_other_10",
+        "C_all",
+        "C_examiner_all",
+        "C_applicant_all",
+        "C_other_all",
+        "uniqueC_3",
+        "uniqueC_examiner_3",
+        "uniqueC_applicant_3",
+        "uniqueC_other_3",
+        "uniqueC_5",
+        "uniqueC_examiner_5",
+        "uniqueC_applicant_5",
+        "uniqueC_other_5",
+        "uniqueC_10",
+        "uniqueC_examiner_10",
+        "uniqueC_applicant_10",
+        "uniqueC_other_10",
+        "uniqueC_all",
+        "uniqueC_examiner_all",
+        "uniqueC_applicant_all",
+        "uniqueC_other_all"
+      ],
+      "schema": [
+        {
+          "name": "appln_id",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_3",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_examiner_3",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_applicant_3",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_other_3",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_5",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_examiner_5",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_applicant_5",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_other_5",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_10",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_examiner_10",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_applicant_10",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_other_10",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_all",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_examiner_all",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_applicant_all",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_other_all",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_3",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_examiner_3",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_applicant_3",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_other_3",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_5",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_examiner_5",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_applicant_5",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_other_5",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_10",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_examiner_10",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_applicant_10",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_other_10",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_all",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_examiner_all",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_applicant_all",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_other_all",
+          "type": "int64",
+          "nullable": true
+        }
+      ],
+      "row_groups": 173,
+      "modified_utc": "2026-10-01T19:06:01.793691Z",
+      "grain": "One cited application with citation rows (C) and distinct citing applications (uniqueC) per window and provenance bucket.",
+      "note": "Grant clock: grant years at both ends, granted applications only."
+    },
+    {
+      "path": "PATSTAT/output_grant/patstat_citation_trend.parquet",
+      "family": "patstat",
+      "rows": 90032716,
+      "bytes": 323077380,
+      "columns": [
+        "appln_id",
+        "grant_year",
+        "cite_year",
+        "yrs_since_grant",
+        "C",
+        "C_examiner",
+        "C_applicant",
+        "C_other",
+        "uniqueC"
+      ],
+      "schema": [
+        {
+          "name": "appln_id",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "grant_year",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "cite_year",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "yrs_since_grant",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "C",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_examiner",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_applicant",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_other",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC",
+          "type": "int64",
+          "nullable": true
+        }
+      ],
+      "row_groups": 733,
+      "modified_utc": "2026-10-01T19:06:58.455063Z",
+      "grain": "One cited application per citing year.",
+      "note": "Grant clock: grant years at both ends, granted applications only."
+    },
+    {
+      "path": "PATSTAT/output_grant/patstat_disruption.parquet",
+      "family": "patstat",
+      "rows": 28949742,
+      "bytes": 1022538843,
+      "columns": [
+        "appln_id",
+        "CD_3",
+        "F_3",
+        "E_3",
+        "G_3",
+        "ni_3",
+        "nj_3",
+        "nk_3",
+        "CD_5",
+        "F_5",
+        "E_5",
+        "G_5",
+        "ni_5",
+        "nj_5",
+        "nk_5",
+        "CD_10",
+        "F_10",
+        "E_10",
+        "G_10",
+        "ni_10",
+        "nj_10",
+        "nk_10",
+        "CD_all",
+        "F_all",
+        "E_all",
+        "G_all",
+        "ni_all",
+        "nj_all",
+        "nk_all",
+        "pctl_year",
+        "pctl_group",
+        "CD_3_pctl",
+        "CD_3_pctl_cume",
+        "CD_5_pctl",
+        "CD_5_pctl_cume",
+        "CD_10_pctl",
+        "CD_10_pctl_cume",
+        "CD_all_pctl",
+        "CD_all_pctl_cume"
+      ],
+      "schema": [
+        {
+          "name": "appln_id",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "CD_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "F_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "E_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "G_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "ni_3",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "nj_3",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "nk_3",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "CD_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "F_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "E_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "G_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "ni_5",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "nj_5",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "nk_5",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "CD_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "F_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "E_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "G_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "ni_10",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "nj_10",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "nk_10",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "CD_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "F_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "E_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "G_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "ni_all",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "nj_all",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "nk_all",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "pctl_year",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "pctl_group",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "CD_3_pctl",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "CD_3_pctl_cume",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "CD_5_pctl",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "CD_5_pctl_cume",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "CD_10_pctl",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "CD_10_pctl_cume",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "CD_all_pctl",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "CD_all_pctl_cume",
+          "type": "double",
+          "nullable": true
+        }
+      ],
+      "row_groups": 236,
+      "modified_utc": "2026-10-01T19:27:07.384717Z",
+      "grain": "One application in the citation graph with CD, F / E / G and ni / nj / nk per window, plus CD percentiles within filing year x CPC Section.",
+      "note": "Grant clock: grant years at both ends, granted applications only."
+    },
+    {
+      "path": "PATSTAT/output_grant/patstat_disruption_trend.parquet",
+      "family": "patstat",
+      "rows": 194798395,
+      "bytes": 1487624988,
+      "columns": [
+        "appln_id",
+        "grant_year",
+        "cite_year",
+        "yrs_since_grant",
+        "ni_new",
+        "nj_new",
+        "nk_new",
+        "ni",
+        "nj",
+        "nk",
+        "CD",
+        "F",
+        "E",
+        "G"
+      ],
+      "schema": [
+        {
+          "name": "appln_id",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "grant_year",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "cite_year",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "yrs_since_grant",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "ni_new",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "nj_new",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "nk_new",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "ni",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "nj",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "nk",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "CD",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "F",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "E",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "G",
+          "type": "float",
+          "nullable": true
+        }
+      ],
+      "row_groups": 199,
+      "modified_utc": "2026-10-01T19:35:11.602027Z",
+      "grain": "One application per year with new and cumulative ni / nj / nk, CD and F / E / G.",
+      "note": "Grant clock: grant years at both ends, granted applications only."
+    },
+    {
+      "path": "PATSTAT/output_grant/patstat_disruption_trend_summary.parquet",
+      "family": "patstat",
+      "rows": 6774,
+      "bytes": 326206,
+      "columns": [
+        "grant_year",
+        "yrs_since_grant",
+        "n_CD",
+        "CD_mean",
+        "n_F",
+        "F_mean",
+        "n_E",
+        "E_mean",
+        "n_G",
+        "G_mean"
+      ],
+      "schema": [
+        {
+          "name": "grant_year",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "yrs_since_grant",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "n_CD",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "CD_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "n_F",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "F_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "n_E",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "E_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "n_G",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "G_mean",
+          "type": "double",
+          "nullable": true
+        }
+      ],
+      "row_groups": 1,
+      "modified_utc": "2026-10-01T19:35:11.689605Z",
+      "grain": "One (cohort year, years since) cell with mean cumulative CD / F / E / G.",
+      "note": "Grant clock: grant years at both ends, granted applications only."
+    },
+    {
+      "path": "PATSTAT/output_grant/patstat_feg_disruption_trend.parquet",
+      "family": "patstat",
+      "rows": 124,
+      "bytes": 48425,
+      "columns": [
+        "year",
+        "n",
+        "CD_3_mean",
+        "F_3_mean",
+        "E_3_mean",
+        "G_3_mean",
+        "ni_3_mean",
+        "nj_3_mean",
+        "nk_3_mean",
+        "njfrac_3_mean",
+        "CD_5_mean",
+        "F_5_mean",
+        "E_5_mean",
+        "G_5_mean",
+        "ni_5_mean",
+        "nj_5_mean",
+        "nk_5_mean",
+        "njfrac_5_mean",
+        "CD_10_mean",
+        "F_10_mean",
+        "E_10_mean",
+        "G_10_mean",
+        "ni_10_mean",
+        "nj_10_mean",
+        "nk_10_mean",
+        "njfrac_10_mean",
+        "CD_all_mean",
+        "F_all_mean",
+        "E_all_mean",
+        "G_all_mean",
+        "ni_all_mean",
+        "nj_all_mean",
+        "nk_all_mean",
+        "njfrac_all_mean"
+      ],
+      "schema": [
+        {
+          "name": "year",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "n",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "CD_3_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "F_3_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "E_3_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "G_3_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "ni_3_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "nj_3_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "nk_3_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "njfrac_3_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "CD_5_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "F_5_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "E_5_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "G_5_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "ni_5_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "nj_5_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "nk_5_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "njfrac_5_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "CD_10_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "F_10_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "E_10_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "G_10_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "ni_10_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "nj_10_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "nk_10_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "njfrac_10_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "CD_all_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "F_all_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "E_all_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "G_all_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "ni_all_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "nj_all_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "nk_all_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "njfrac_all_mean",
+          "type": "double",
+          "nullable": true
+        }
+      ],
+      "row_groups": 1,
+      "modified_utc": "2026-10-01T19:27:44.134154Z",
+      "grain": "One cohort year with aggregate metrics.",
+      "note": "Grant clock: grant years at both ends, granted applications only."
+    },
+    {
+      "path": "PATSTAT/output_grant/patstat_hit_probability.parquet",
+      "family": "patstat",
+      "rows": 42992764,
+      "bytes": 343915230,
+      "columns": [
+        "appln_id",
+        "wipo_sector",
+        "grant_year",
+        "pctl_C_3",
+        "pctl_C_examiner_3",
+        "pctl_C_applicant_3",
+        "pctl_C_other_3",
+        "pctl_C_5",
+        "pctl_C_examiner_5",
+        "pctl_C_applicant_5",
+        "pctl_C_other_5",
+        "pctl_C_10",
+        "pctl_C_examiner_10",
+        "pctl_C_applicant_10",
+        "pctl_C_other_10",
+        "pctl_C_all",
+        "pctl_C_examiner_all",
+        "pctl_C_applicant_all",
+        "pctl_C_other_all",
+        "pctl_uniqueC_3",
+        "pctl_uniqueC_examiner_3",
+        "pctl_uniqueC_applicant_3",
+        "pctl_uniqueC_other_3",
+        "pctl_uniqueC_5",
+        "pctl_uniqueC_examiner_5",
+        "pctl_uniqueC_applicant_5",
+        "pctl_uniqueC_other_5",
+        "pctl_uniqueC_10",
+        "pctl_uniqueC_examiner_10",
+        "pctl_uniqueC_applicant_10",
+        "pctl_uniqueC_other_10",
+        "pctl_uniqueC_all",
+        "pctl_uniqueC_examiner_all",
+        "pctl_uniqueC_applicant_all",
+        "pctl_uniqueC_other_all",
+        "pctl_c3",
+        "pctl_c5",
+        "pctl_c10",
+        "pctl_call"
+      ],
+      "schema": [
+        {
+          "name": "appln_id",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "wipo_sector",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "grant_year",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_examiner_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_applicant_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_other_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_examiner_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_applicant_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_other_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_examiner_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_applicant_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_other_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_examiner_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_applicant_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_other_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_examiner_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_applicant_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_other_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_examiner_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_applicant_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_other_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_examiner_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_applicant_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_other_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_examiner_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_applicant_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_other_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_c3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_c5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_c10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_call",
+          "type": "float",
+          "nullable": true
+        }
+      ],
+      "row_groups": 351,
+      "modified_utc": "2026-10-01T19:09:47.690260Z",
+      "grain": "One application with a WIPO sector: citation percentiles within sector x cohort year.",
+      "note": "Grant clock: grant years at both ends, granted applications only."
+    },
+    {
+      "path": "PATSTAT/output_grant/patstat_inventor.parquet",
+      "family": "patstat",
+      "rows": 39284673,
+      "bytes": 711813137,
+      "columns": [
+        "appln_id",
+        "inventor_list",
+        "n_inventors",
+        "first_inventor",
+        "last_inventor"
+      ],
+      "schema": [
+        {
+          "name": "appln_id",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "inventor_list",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "n_inventors",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "first_inventor",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "last_inventor",
+          "type": "int64",
+          "nullable": true
+        }
+      ],
+      "row_groups": 40,
+      "modified_utc": "2026-10-01T19:06:31.804479Z",
+      "grain": "One application with inventors: the person_id list in sequence order, its length, first and last (person records, not disambiguated inventors).",
+      "note": "Grant clock: grant years at both ends, granted applications only."
+    },
+    {
+      "path": "PATSTAT/output_grant/patstat_inventor_country.parquet",
+      "family": "patstat",
+      "rows": 39284673,
+      "bytes": 128979772,
+      "columns": [
+        "appln_id",
+        "n_inventors",
+        "n_located",
+        "countries",
+        "n_countries",
+        "country_inventor_counts",
+        "first_inventor_country",
+        "is_international",
+        "applicant_countries"
+      ],
+      "schema": [
+        {
+          "name": "appln_id",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "n_inventors",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "n_located",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "countries",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "n_countries",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "country_inventor_counts",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "first_inventor_country",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "is_international",
+          "type": "bool",
+          "nullable": true
+        },
+        {
+          "name": "applicant_countries",
+          "type": "string",
+          "nullable": true
+        }
+      ],
+      "row_groups": 40,
+      "modified_utc": "2026-10-01T19:08:07.696664Z",
+      "grain": "One application with inventors: the ISO2 countries of its inventors and applicants.",
+      "note": "Grant clock: grant years at both ends, granted applications only."
+    },
+    {
+      "path": "PATSTAT/output_grant/patstat_metadata.parquet",
+      "family": "patstat",
+      "rows": 44819975,
+      "bytes": 2437666064,
+      "columns": [
+        "appln_id",
+        "appln_auth",
+        "appln_kind",
+        "appln_nr",
+        "filing_year",
+        "filing_date",
+        "priority_year",
+        "publn_year",
+        "grant_year",
+        "granted",
+        "docdb_family_id",
+        "docdb_family_size",
+        "inpadoc_family_id",
+        "nb_citing_docdb_fam",
+        "nb_applicants",
+        "nb_inventors",
+        "ref_count",
+        "npl_ref_count",
+        "ipc_main",
+        "cpc_code",
+        "cpc_code_list",
+        "cpc_subclass_list",
+        "techn_field_nr",
+        "wipo_sector",
+        "inventor_list",
+        "applicant_list",
+        "inventor_ctry_list",
+        "applicant_ctry_list",
+        "applicant_sector"
+      ],
+      "schema": [
+        {
+          "name": "appln_id",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "appln_auth",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "appln_kind",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "appln_nr",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "filing_year",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "filing_date",
+          "type": "date32[day]",
+          "nullable": true
+        },
+        {
+          "name": "priority_year",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "publn_year",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "grant_year",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "granted",
+          "type": "bool",
+          "nullable": true
+        },
+        {
+          "name": "docdb_family_id",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "docdb_family_size",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "inpadoc_family_id",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "nb_citing_docdb_fam",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "nb_applicants",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "nb_inventors",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "ref_count",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "npl_ref_count",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "ipc_main",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "cpc_code",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "cpc_code_list",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "cpc_subclass_list",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "techn_field_nr",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "wipo_sector",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "inventor_list",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "applicant_list",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "inventor_ctry_list",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "applicant_ctry_list",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "applicant_sector",
+          "type": "string",
+          "nullable": true
+        }
+      ],
+      "row_groups": 366,
+      "modified_utc": "2026-10-01T19:04:56.236519Z",
+      "grain": "One application (appln_id) in the universe: a patent of invention, a real application, filed 1900-2023, with its office, years, family, classification, WIPO sector and persons.",
+      "note": "Grant clock: grant years at both ends, granted applications only."
+    },
+    {
+      "path": "PATSTAT/output_grant/patstat_reference.parquet",
+      "family": "patstat",
+      "rows": 244099237,
+      "bytes": 3258140984,
+      "columns": [
+        "citing_id",
+        "cited_id",
+        "citing_publn_id",
+        "cited_publn_id",
+        "citing_year",
+        "cited_year",
+        "age",
+        "citing_publn_year",
+        "citn_origin",
+        "bucket",
+        "replenished",
+        "resolved"
+      ],
+      "schema": [
+        {
+          "name": "citing_id",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "cited_id",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "citing_publn_id",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "cited_publn_id",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "citing_year",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "cited_year",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "age",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "citing_publn_year",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "citn_origin",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "bucket",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "replenished",
+          "type": "bool",
+          "nullable": true
+        },
+        {
+          "name": "resolved",
+          "type": "string",
+          "nullable": true
+        }
+      ],
+      "row_groups": 1988,
+      "modified_utc": "2026-10-01T19:00:08.079633Z",
+      "grain": "One citation row resolved to (citing application, cited application), with both clock years, age, the recorded origin and its examiner / applicant / other bucket, and a replenished flag.",
+      "note": "Grant clock: grant years at both ends, granted applications only."
+    },
+    {
+      "path": "PATSTAT/output_grant/patstat_sb.parquet",
+      "family": "patstat",
+      "rows": 21181671,
+      "bytes": 167984532,
+      "columns": [
+        "appln_id",
+        "SB_B",
+        "SB_T",
+        "n_cite"
+      ],
+      "schema": [
+        {
+          "name": "appln_id",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "SB_B",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "SB_T",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "n_cite",
+          "type": "int64",
+          "nullable": true
+        }
+      ],
+      "row_groups": 21,
+      "modified_utc": "2026-10-01T19:06:05.031579Z",
+      "grain": "One cited application with its beauty coefficient and awakening time.",
+      "note": "Grant clock: grant years at both ends, granted applications only."
+    },
+    {
+      "path": "PATSTAT/output_grant/patstat_uniqueC_trend.parquet",
+      "family": "patstat",
+      "rows": 90032716,
+      "bytes": 236738644,
+      "columns": [
+        "appln_id",
+        "grant_year",
+        "cite_year",
+        "yrs_since_grant",
+        "uniqueC"
+      ],
+      "schema": [
+        {
+          "name": "appln_id",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "grant_year",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "cite_year",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "yrs_since_grant",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC",
+          "type": "int64",
+          "nullable": true
+        }
+      ],
+      "row_groups": 90,
+      "modified_utc": "2026-10-01T19:07:25.812822Z",
+      "grain": "One cited application per year since filing (grant) with its new distinct citing applications.",
+      "note": "Grant clock: grant years at both ends, granted applications only."
+    },
+    {
+      "path": "PATSTAT/output_grant/patstat_z_score.parquet",
+      "family": "patstat",
+      "rows": 18033300,
+      "bytes": 302676005,
+      "columns": [
+        "appln_id",
+        "Z_median",
+        "Z_10pct",
+        "Z_min",
+        "n_pairs"
+      ],
+      "schema": [
+        {
+          "name": "appln_id",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "Z_median",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "Z_10pct",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "Z_min",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "n_pairs",
+          "type": "int64",
+          "nullable": true
+        }
+      ],
+      "row_groups": 147,
+      "modified_utc": "2026-10-01T19:06:03.604033Z",
+      "grain": "One application with at least two CPC subclasses: atypicality z summaries.",
+      "note": "Grant clock: grant years at both ends, granted applications only."
+    },
+    {
+      "path": "PATSTAT/output_grant/z_score_pair.parquet",
+      "family": "patstat",
+      "rows": 2483215,
+      "bytes": 21526052,
+      "columns": [
+        "code_1",
+        "code_2",
+        "year",
+        "Z_score"
+      ],
+      "schema": [
+        {
+          "name": "code_1",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "code_2",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "year",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "Z_score",
+          "type": "double",
+          "nullable": true
+        }
+      ],
+      "row_groups": 21,
+      "modified_utc": "2026-10-01T19:05:57.163015Z",
+      "grain": "One CPC-subclass pair per cohort year.",
+      "note": "Grant clock: grant years at both ends, granted applications only."
+    },
+    {
+      "path": "PATSTAT/output_family/patstat_citation.parquet",
+      "family": "patstat",
+      "rows": 30785709,
+      "bytes": 350638667,
+      "columns": [
+        "docdb_family_id",
+        "C_3",
+        "C_examiner_3",
+        "C_applicant_3",
+        "C_other_3",
+        "C_5",
+        "C_examiner_5",
+        "C_applicant_5",
+        "C_other_5",
+        "C_10",
+        "C_examiner_10",
+        "C_applicant_10",
+        "C_other_10",
+        "C_all",
+        "C_examiner_all",
+        "C_applicant_all",
+        "C_other_all",
+        "uniqueC_3",
+        "uniqueC_examiner_3",
+        "uniqueC_applicant_3",
+        "uniqueC_other_3",
+        "uniqueC_5",
+        "uniqueC_examiner_5",
+        "uniqueC_applicant_5",
+        "uniqueC_other_5",
+        "uniqueC_10",
+        "uniqueC_examiner_10",
+        "uniqueC_applicant_10",
+        "uniqueC_other_10",
+        "uniqueC_all",
+        "uniqueC_examiner_all",
+        "uniqueC_applicant_all",
+        "uniqueC_other_all"
+      ],
+      "schema": [
+        {
+          "name": "docdb_family_id",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_3",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_examiner_3",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_applicant_3",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_other_3",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_5",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_examiner_5",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_applicant_5",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_other_5",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_10",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_examiner_10",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_applicant_10",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_other_10",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_all",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_examiner_all",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_applicant_all",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_other_all",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_3",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_examiner_3",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_applicant_3",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_other_3",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_5",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_examiner_5",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_applicant_5",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_other_5",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_10",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_examiner_10",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_applicant_10",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_other_10",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_all",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_examiner_all",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_applicant_all",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC_other_all",
+          "type": "int64",
+          "nullable": true
+        }
+      ],
+      "row_groups": 251,
+      "modified_utc": "2026-10-01T21:31:31.281755Z",
+      "grain": "One cited application with citation rows (C) and distinct citing applications (uniqueC) per window and provenance bucket.",
+      "note": "Family unit: one row per DOCDB family (key docdb_family_id), earliest priority year at both ends, distinct family-to-family citations; read 'application' in the row meaning as 'family'."
+    },
+    {
+      "path": "PATSTAT/output_family/patstat_citation_trend.parquet",
+      "family": "patstat",
+      "rows": 122852652,
+      "bytes": 408382930,
+      "columns": [
+        "docdb_family_id",
+        "priority_year",
+        "cite_year",
+        "yrs_since_priority",
+        "C",
+        "C_examiner",
+        "C_applicant",
+        "C_other",
+        "uniqueC"
+      ],
+      "schema": [
+        {
+          "name": "docdb_family_id",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "priority_year",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "cite_year",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "yrs_since_priority",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "C",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_examiner",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_applicant",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "C_other",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC",
+          "type": "int64",
+          "nullable": true
+        }
+      ],
+      "row_groups": 1000,
+      "modified_utc": "2026-10-01T21:32:12.633132Z",
+      "grain": "One cited application per citing year.",
+      "note": "Family unit: one row per DOCDB family (key docdb_family_id), earliest priority year at both ends, distinct family-to-family citations; read 'application' in the row meaning as 'family'."
+    },
+    {
+      "path": "PATSTAT/output_family/patstat_disruption.parquet",
+      "family": "patstat",
+      "rows": 37623677,
+      "bytes": 1381396509,
+      "columns": [
+        "docdb_family_id",
+        "CD_3",
+        "F_3",
+        "E_3",
+        "G_3",
+        "ni_3",
+        "nj_3",
+        "nk_3",
+        "CD_5",
+        "F_5",
+        "E_5",
+        "G_5",
+        "ni_5",
+        "nj_5",
+        "nk_5",
+        "CD_10",
+        "F_10",
+        "E_10",
+        "G_10",
+        "ni_10",
+        "nj_10",
+        "nk_10",
+        "CD_all",
+        "F_all",
+        "E_all",
+        "G_all",
+        "ni_all",
+        "nj_all",
+        "nk_all",
+        "pctl_year",
+        "pctl_group",
+        "CD_3_pctl",
+        "CD_3_pctl_cume",
+        "CD_5_pctl",
+        "CD_5_pctl_cume",
+        "CD_10_pctl",
+        "CD_10_pctl_cume",
+        "CD_all_pctl",
+        "CD_all_pctl_cume"
+      ],
+      "schema": [
+        {
+          "name": "docdb_family_id",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "CD_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "F_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "E_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "G_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "ni_3",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "nj_3",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "nk_3",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "CD_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "F_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "E_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "G_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "ni_5",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "nj_5",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "nk_5",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "CD_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "F_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "E_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "G_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "ni_10",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "nj_10",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "nk_10",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "CD_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "F_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "E_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "G_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "ni_all",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "nj_all",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "nk_all",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "pctl_year",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "pctl_group",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "CD_3_pctl",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "CD_3_pctl_cume",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "CD_5_pctl",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "CD_5_pctl_cume",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "CD_10_pctl",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "CD_10_pctl_cume",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "CD_all_pctl",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "CD_all_pctl_cume",
+          "type": "double",
+          "nullable": true
+        }
+      ],
+      "row_groups": 307,
+      "modified_utc": "2026-10-01T21:59:04.191055Z",
+      "grain": "One application in the citation graph with CD, F / E / G and ni / nj / nk per window, plus CD percentiles within filing year x CPC Section.",
+      "note": "Family unit: one row per DOCDB family (key docdb_family_id), earliest priority year at both ends, distinct family-to-family citations; read 'application' in the row meaning as 'family'."
+    },
+    {
+      "path": "PATSTAT/output_family/patstat_disruption_trend.parquet",
+      "family": "patstat",
+      "rows": 272955667,
+      "bytes": 2109852724,
+      "columns": [
+        "docdb_family_id",
+        "priority_year",
+        "cite_year",
+        "yrs_since_priority",
+        "ni_new",
+        "nj_new",
+        "nk_new",
+        "ni",
+        "nj",
+        "nk",
+        "CD",
+        "F",
+        "E",
+        "G"
+      ],
+      "schema": [
+        {
+          "name": "docdb_family_id",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "priority_year",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "cite_year",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "yrs_since_priority",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "ni_new",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "nj_new",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "nk_new",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "ni",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "nj",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "nk",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "CD",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "F",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "E",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "G",
+          "type": "float",
+          "nullable": true
+        }
+      ],
+      "row_groups": 275,
+      "modified_utc": "2026-10-01T22:06:21.840702Z",
+      "grain": "One application per year with new and cumulative ni / nj / nk, CD and F / E / G.",
+      "note": "Family unit: one row per DOCDB family (key docdb_family_id), earliest priority year at both ends, distinct family-to-family citations; read 'application' in the row meaning as 'family'."
+    },
+    {
+      "path": "PATSTAT/output_family/patstat_disruption_trend_summary.parquet",
+      "family": "patstat",
+      "rows": 7626,
+      "bytes": 373149,
+      "columns": [
+        "priority_year",
+        "yrs_since_priority",
+        "n_CD",
+        "CD_mean",
+        "n_F",
+        "F_mean",
+        "n_E",
+        "E_mean",
+        "n_G",
+        "G_mean"
+      ],
+      "schema": [
+        {
+          "name": "priority_year",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "yrs_since_priority",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "n_CD",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "CD_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "n_F",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "F_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "n_E",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "E_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "n_G",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "G_mean",
+          "type": "double",
+          "nullable": true
+        }
+      ],
+      "row_groups": 1,
+      "modified_utc": "2026-10-01T22:06:21.943602Z",
+      "grain": "One (cohort year, years since) cell with mean cumulative CD / F / E / G.",
+      "note": "Family unit: one row per DOCDB family (key docdb_family_id), earliest priority year at both ends, distinct family-to-family citations; read 'application' in the row meaning as 'family'."
+    },
+    {
+      "path": "PATSTAT/output_family/patstat_feg_disruption_trend.parquet",
+      "family": "patstat",
+      "rows": 124,
+      "bytes": 52457,
+      "columns": [
+        "year",
+        "n",
+        "CD_3_mean",
+        "F_3_mean",
+        "E_3_mean",
+        "G_3_mean",
+        "ni_3_mean",
+        "nj_3_mean",
+        "nk_3_mean",
+        "njfrac_3_mean",
+        "CD_5_mean",
+        "F_5_mean",
+        "E_5_mean",
+        "G_5_mean",
+        "ni_5_mean",
+        "nj_5_mean",
+        "nk_5_mean",
+        "njfrac_5_mean",
+        "CD_10_mean",
+        "F_10_mean",
+        "E_10_mean",
+        "G_10_mean",
+        "ni_10_mean",
+        "nj_10_mean",
+        "nk_10_mean",
+        "njfrac_10_mean",
+        "CD_all_mean",
+        "F_all_mean",
+        "E_all_mean",
+        "G_all_mean",
+        "ni_all_mean",
+        "nj_all_mean",
+        "nk_all_mean",
+        "njfrac_all_mean"
+      ],
+      "schema": [
+        {
+          "name": "year",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "n",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "CD_3_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "F_3_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "E_3_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "G_3_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "ni_3_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "nj_3_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "nk_3_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "njfrac_3_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "CD_5_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "F_5_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "E_5_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "G_5_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "ni_5_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "nj_5_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "nk_5_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "njfrac_5_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "CD_10_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "F_10_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "E_10_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "G_10_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "ni_10_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "nj_10_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "nk_10_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "njfrac_10_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "CD_all_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "F_all_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "E_all_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "G_all_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "ni_all_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "nj_all_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "nk_all_mean",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "njfrac_all_mean",
+          "type": "double",
+          "nullable": true
+        }
+      ],
+      "row_groups": 1,
+      "modified_utc": "2026-10-01T21:59:28.736390Z",
+      "grain": "One cohort year with aggregate metrics.",
+      "note": "Family unit: one row per DOCDB family (key docdb_family_id), earliest priority year at both ends, distinct family-to-family citations; read 'application' in the row meaning as 'family'."
+    },
+    {
+      "path": "PATSTAT/output_family/patstat_hit_probability.parquet",
+      "family": "patstat",
+      "rows": 50024906,
+      "bytes": 402941138,
+      "columns": [
+        "docdb_family_id",
+        "wipo_sector",
+        "priority_year",
+        "pctl_C_3",
+        "pctl_C_examiner_3",
+        "pctl_C_applicant_3",
+        "pctl_C_other_3",
+        "pctl_C_5",
+        "pctl_C_examiner_5",
+        "pctl_C_applicant_5",
+        "pctl_C_other_5",
+        "pctl_C_10",
+        "pctl_C_examiner_10",
+        "pctl_C_applicant_10",
+        "pctl_C_other_10",
+        "pctl_C_all",
+        "pctl_C_examiner_all",
+        "pctl_C_applicant_all",
+        "pctl_C_other_all",
+        "pctl_uniqueC_3",
+        "pctl_uniqueC_examiner_3",
+        "pctl_uniqueC_applicant_3",
+        "pctl_uniqueC_other_3",
+        "pctl_uniqueC_5",
+        "pctl_uniqueC_examiner_5",
+        "pctl_uniqueC_applicant_5",
+        "pctl_uniqueC_other_5",
+        "pctl_uniqueC_10",
+        "pctl_uniqueC_examiner_10",
+        "pctl_uniqueC_applicant_10",
+        "pctl_uniqueC_other_10",
+        "pctl_uniqueC_all",
+        "pctl_uniqueC_examiner_all",
+        "pctl_uniqueC_applicant_all",
+        "pctl_uniqueC_other_all",
+        "pctl_c3",
+        "pctl_c5",
+        "pctl_c10",
+        "pctl_call"
+      ],
+      "schema": [
+        {
+          "name": "docdb_family_id",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "wipo_sector",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "priority_year",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_examiner_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_applicant_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_other_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_examiner_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_applicant_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_other_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_examiner_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_applicant_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_other_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_examiner_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_applicant_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_C_other_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_examiner_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_applicant_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_other_3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_examiner_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_applicant_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_other_5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_examiner_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_applicant_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_other_10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_examiner_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_applicant_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_uniqueC_other_all",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_c3",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_c5",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_c10",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "pctl_call",
+          "type": "float",
+          "nullable": true
+        }
+      ],
+      "row_groups": 409,
+      "modified_utc": "2026-10-01T21:34:54.392750Z",
+      "grain": "One application with a WIPO sector: citation percentiles within sector x cohort year.",
+      "note": "Family unit: one row per DOCDB family (key docdb_family_id), earliest priority year at both ends, distinct family-to-family citations; read 'application' in the row meaning as 'family'."
+    },
+    {
+      "path": "PATSTAT/output_family/patstat_inventor.parquet",
+      "family": "patstat",
+      "rows": 48141257,
+      "bytes": 882152556,
+      "columns": [
+        "docdb_family_id",
+        "inventor_list",
+        "n_inventors",
+        "first_inventor",
+        "last_inventor"
+      ],
+      "schema": [
+        {
+          "name": "docdb_family_id",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "inventor_list",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "n_inventors",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "first_inventor",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "last_inventor",
+          "type": "int64",
+          "nullable": true
+        }
+      ],
+      "row_groups": 49,
+      "modified_utc": "2026-10-01T21:31:59.777928Z",
+      "grain": "One application with inventors: the person_id list in sequence order, its length, first and last (person records, not disambiguated inventors).",
+      "note": "Family unit: one row per DOCDB family (key docdb_family_id), earliest priority year at both ends, distinct family-to-family citations; read 'application' in the row meaning as 'family'."
+    },
+    {
+      "path": "PATSTAT/output_family/patstat_inventor_country.parquet",
+      "family": "patstat",
+      "rows": 48141257,
+      "bytes": 129559531,
+      "columns": [
+        "docdb_family_id",
+        "n_inventors",
+        "n_located",
+        "countries",
+        "n_countries",
+        "country_inventor_counts",
+        "first_inventor_country",
+        "is_international",
+        "applicant_countries"
+      ],
+      "schema": [
+        {
+          "name": "docdb_family_id",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "n_inventors",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "n_located",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "countries",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "n_countries",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "country_inventor_counts",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "first_inventor_country",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "is_international",
+          "type": "bool",
+          "nullable": true
+        },
+        {
+          "name": "applicant_countries",
+          "type": "string",
+          "nullable": true
+        }
+      ],
+      "row_groups": 49,
+      "modified_utc": "2026-10-01T21:33:09.825548Z",
+      "grain": "One application with inventors: the ISO2 countries of its inventors and applicants.",
+      "note": "Family unit: one row per DOCDB family (key docdb_family_id), earliest priority year at both ends, distinct family-to-family citations; read 'application' in the row meaning as 'family'."
+    },
+    {
+      "path": "PATSTAT/output_family/patstat_metadata.parquet",
+      "family": "patstat",
+      "rows": 52766567,
+      "bytes": 1600638606,
+      "columns": [
+        "docdb_family_id",
+        "priority_year",
+        "filing_year",
+        "n_appln",
+        "offices",
+        "first_appln_id",
+        "appln_auth",
+        "granted",
+        "n_granted",
+        "grant_year",
+        "docdb_family_size",
+        "nb_citing_docdb_fam",
+        "ipc_main",
+        "cpc_code",
+        "techn_field_nr",
+        "wipo_sector",
+        "inv_appln_id",
+        "ref_count",
+        "npl_ref_count",
+        "cpc_subclass_list",
+        "inventor_list",
+        "applicant_list",
+        "inventor_ctry_list",
+        "applicant_ctry_list",
+        "applicant_sector"
+      ],
+      "schema": [
+        {
+          "name": "docdb_family_id",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "priority_year",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "filing_year",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "n_appln",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "offices",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "first_appln_id",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "appln_auth",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "granted",
+          "type": "bool",
+          "nullable": true
+        },
+        {
+          "name": "n_granted",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "grant_year",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "docdb_family_size",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "nb_citing_docdb_fam",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "ipc_main",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "cpc_code",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "techn_field_nr",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "wipo_sector",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "inv_appln_id",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "ref_count",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "npl_ref_count",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "cpc_subclass_list",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "inventor_list",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "applicant_list",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "inventor_ctry_list",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "applicant_ctry_list",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "applicant_sector",
+          "type": "string",
+          "nullable": true
+        }
+      ],
+      "row_groups": 430,
+      "modified_utc": "2026-10-01T21:30:10.256845Z",
+      "grain": "One application (appln_id) in the universe: a patent of invention, a real application, filed 1900-2023, with its office, years, family, classification, WIPO sector and persons.",
+      "note": "Family unit: one row per DOCDB family (key docdb_family_id), earliest priority year at both ends, distinct family-to-family citations; read 'application' in the row meaning as 'family'."
+    },
+    {
+      "path": "PATSTAT/output_family/patstat_reference.parquet",
+      "family": "patstat",
+      "rows": 265250641,
+      "bytes": 2717349514,
+      "columns": [
+        "citing_id",
+        "cited_id",
+        "citing_year",
+        "cited_year",
+        "age",
+        "citing_publn_year",
+        "bucket",
+        "replenished",
+        "n_appln_edges"
+      ],
+      "schema": [
+        {
+          "name": "citing_id",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "cited_id",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "citing_year",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "cited_year",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "age",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "citing_publn_year",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "bucket",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "replenished",
+          "type": "bool",
+          "nullable": true
+        },
+        {
+          "name": "n_appln_edges",
+          "type": "int32",
+          "nullable": true
+        }
+      ],
+      "row_groups": 2160,
+      "modified_utc": "2026-10-01T21:22:38.035932Z",
+      "grain": "One citation row resolved to (citing application, cited application), with both clock years, age, the recorded origin and its examiner / applicant / other bucket, and a replenished flag.",
+      "note": "Family unit: one row per DOCDB family (key docdb_family_id), earliest priority year at both ends, distinct family-to-family citations; read 'application' in the row meaning as 'family'."
+    },
+    {
+      "path": "PATSTAT/output_family/patstat_sb.parquet",
+      "family": "patstat",
+      "rows": 30785709,
+      "bytes": 235375558,
+      "columns": [
+        "docdb_family_id",
+        "SB_B",
+        "SB_T",
+        "n_cite"
+      ],
+      "schema": [
+        {
+          "name": "docdb_family_id",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "SB_B",
+          "type": "float",
+          "nullable": true
+        },
+        {
+          "name": "SB_T",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "n_cite",
+          "type": "int64",
+          "nullable": true
+        }
+      ],
+      "row_groups": 30,
+      "modified_utc": "2026-10-01T21:31:33.992449Z",
+      "grain": "One cited application with its beauty coefficient and awakening time.",
+      "note": "Family unit: one row per DOCDB family (key docdb_family_id), earliest priority year at both ends, distinct family-to-family citations; read 'application' in the row meaning as 'family'."
+    },
+    {
+      "path": "PATSTAT/output_family/patstat_uniqueC_trend.parquet",
+      "family": "patstat",
+      "rows": 122852652,
+      "bytes": 294638001,
+      "columns": [
+        "docdb_family_id",
+        "priority_year",
+        "cite_year",
+        "yrs_since_priority",
+        "uniqueC"
+      ],
+      "schema": [
+        {
+          "name": "docdb_family_id",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "priority_year",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "cite_year",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "yrs_since_priority",
+          "type": "int32",
+          "nullable": true
+        },
+        {
+          "name": "uniqueC",
+          "type": "int64",
+          "nullable": true
+        }
+      ],
+      "row_groups": 123,
+      "modified_utc": "2026-10-01T21:32:32.953584Z",
+      "grain": "One cited application per year since filing (grant) with its new distinct citing applications.",
+      "note": "Family unit: one row per DOCDB family (key docdb_family_id), earliest priority year at both ends, distinct family-to-family citations; read 'application' in the row meaning as 'family'."
+    },
+    {
+      "path": "PATSTAT/output_family/patstat_z_score.parquet",
+      "family": "patstat",
+      "rows": 14037567,
+      "bytes": 203659343,
+      "columns": [
+        "docdb_family_id",
+        "Z_median",
+        "Z_10pct",
+        "Z_min",
+        "n_pairs"
+      ],
+      "schema": [
+        {
+          "name": "docdb_family_id",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "Z_median",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "Z_10pct",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "Z_min",
+          "type": "double",
+          "nullable": true
+        },
+        {
+          "name": "n_pairs",
+          "type": "int64",
+          "nullable": true
+        }
+      ],
+      "row_groups": 115,
+      "modified_utc": "2026-10-01T21:31:29.964448Z",
+      "grain": "One application with at least two CPC subclasses: atypicality z summaries.",
+      "note": "Family unit: one row per DOCDB family (key docdb_family_id), earliest priority year at both ends, distinct family-to-family citations; read 'application' in the row meaning as 'family'."
+    },
+    {
+      "path": "PATSTAT/output_family/z_score_pair.parquet",
+      "family": "patstat",
+      "rows": 2235964,
+      "bytes": 19453135,
+      "columns": [
+        "code_1",
+        "code_2",
+        "year",
+        "Z_score"
+      ],
+      "schema": [
+        {
+          "name": "code_1",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "code_2",
+          "type": "string",
+          "nullable": true
+        },
+        {
+          "name": "year",
+          "type": "int64",
+          "nullable": true
+        },
+        {
+          "name": "Z_score",
+          "type": "double",
+          "nullable": true
+        }
+      ],
+      "row_groups": 19,
+      "modified_utc": "2026-10-01T21:31:25.487317Z",
+      "grain": "One CPC-subclass pair per cohort year.",
+      "note": "Family unit: one row per DOCDB family (key docdb_family_id), earliest priority year at both ends, distinct family-to-family citations; read 'application' in the row meaning as 'family'."
+    },
+    {
       "path": "pcs/output/pcs_citation.parquet",
       "family": "pcs",
       "rows": 5106527,
@@ -4190,12 +9387,14 @@
       "grain": "One document."
     }
   ],
-  "total_files": 45,
-  "total_rows": 5026032516,
-  "total_bytes": 62665179544,
+  "total_files": 91,
+  "total_rows": 8702270284,
+  "total_bytes": 105877748346,
   "excluded_files": [
     "OpenAlex/output/paper_disruption_trend.parquet",
     "OpenAlex/output/paper_disruption_trend_summary.parquet",
+    "OpenAlex/output/paper_topics.parquet",
+    "OpenAlex/output/paper_topics_long.parquet",
     "OpenAlex/output/paper_z_score_1980_1984.parquet",
     "OpenAlex/output/paper_z_score_1985_1989.parquet",
     "OpenAlex/output/paper_z_score_1990_2000.parquet",
@@ -4236,6 +9435,7 @@
     "PatentView/output/patent_disruption_trend.parquet",
     "PatentView/output/patent_disruption_trend_summary.parquet",
     "PatentView/output/patent_hit_probability_old.parquet",
+    "PatentView/output/patent_inventor.parquet",
     "PatentView/output/patent_uniqueC_trend.parquet"
   ],
   "excluded_datasets": [
