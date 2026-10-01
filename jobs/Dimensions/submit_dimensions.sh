@@ -41,6 +41,7 @@ if [ "${1:-}" = "plan" ]; then
   6  paper_z_score             <- 4        (default range 1990-2000; see header)
   7  paper_citation_trend      <- 4
   8  paper_hit_probability     <- 1, 3
+  9  paper_author_country      <- 2        (rereads authors[] from the dump; cross-checks paper_author)
 MSG
   exit 0
 fi
@@ -67,6 +68,7 @@ J5=$(sub paper_sb              "$J4")
 J6=$(sub paper_z_score         "$J4")
 J7=$(sub paper_citation_trend  "$J4")
 J8=$(sub paper_hit_probability "$J1" "$J3")
+J9=$(sub paper_author_country  "$J2")
 
 cat <<'MSG'
 

@@ -14,11 +14,13 @@ are visible when the notebook is opened. It is opt-in precisely because of the t
 above -- and even then each cell's stream output is capped at STREAM_CAP bytes, so a runaway
 progress bar cannot bloat the file. Output still streams to stdout as it always did, so the
 SLURM log stays live and unchanged; the notebook is written once at the end, or after a
-failure with the traceback stored in the cell that raised.
+failure with the traceback stored in the cell that raised. Figures are embedded too: under
+--save-outputs, plt.show() captures every open matplotlib figure as an inline PNG (INLINE_DPI).
 """
 import argparse, io, json, os, sys, time, traceback
 
 STREAM_CAP = 200_000        # bytes of stdout kept per cell when --save-outputs is on
+INLINE_DPI = 100            # resolution of the figures embedded in the .ipynb by --save-outputs
 
 
 class _Tee(io.TextIOBase):
@@ -111,6 +113,30 @@ def main() -> int:
     import builtins
     if not hasattr(builtins, "display"):
         builtins.display = display if a.save_outputs else print
+
+    # Figures: a kernel with `%matplotlib inline` embeds every figure at plt.show(); a plain
+    # interpreter under Agg draws nothing. With --save-outputs, plt.show() is replaced by a
+    # capture of every open figure as an inline PNG (the notebooks still write their own
+    # 300/600-dpi files through save_fig), so the .ipynb shows the figures next to the tables.
+    if a.save_outputs:
+        try:
+            import base64, matplotlib
+            matplotlib.use('Agg')
+            import matplotlib.pyplot as plt
+
+            def show(*args, **kwargs):
+                flush_stream()
+                for num in plt.get_fignums():
+                    fig = plt.figure(num)
+                    png = io.BytesIO()
+                    fig.savefig(png, format='png', dpi=INLINE_DPI, bbox_inches='tight')
+                    w, h = (int(round(v * INLINE_DPI)) for v in fig.get_size_inches())
+                    outs.append({'output_type': 'display_data', 'metadata': {'image/png': {'width': w, 'height': h}},
+                                 'data': {'image/png': base64.b64encode(png.getvalue()).decode('ascii'),
+                                          'text/plain': f'<Figure size {w}x{h}>'}})
+            plt.show = show
+        except ImportError:
+            pass
 
     def save():
         """Write the notebook back atomically, so an interrupted write cannot truncate it."""

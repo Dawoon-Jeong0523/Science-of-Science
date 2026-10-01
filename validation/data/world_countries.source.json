@@ -8,5 +8,14 @@
   "continent": "CONTINENT"
  },
  "processing": "Antarctica and features without a 2-letter ISO code dropped; geometry simplified with a 0.05-degree tolerance (invisible at world scale).",
- "countries": 238
+ "features": 238,
+ "distinct_iso2": 236,
+ "duplicate_iso2": {
+  "AU": [
+   "Australia",
+   "Indian Ocean Territories",
+   "Ashmore and Cartier Islands"
+  ]
+ },
+ "note": "ISO_A2_EH gives the same code to a country and its dependencies. All features are kept so the choropleths paint every polygon; load_world() anchors each code on its largest polygon across features, so a flow-map arc to AU lands on the mainland and not on Ashmore Reef."
 }

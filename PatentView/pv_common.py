@@ -59,6 +59,7 @@ NEEDS = {
     "patent_inventor_country":    ["g_patent.tsv.zip", "g_inventor_disambiguated.tsv.zip",
                                    "g_assignee_disambiguated.tsv.zip",
                                    "g_location_disambiguated.tsv.zip"],
+    "patent_inventor":            ["g_patent.tsv.zip", "g_inventor_disambiguated.tsv.zip"],
     "patent_disruption_app_compare": [],     # reads only this folder's own output
     "patent_feg_disruption_trend":   [],     # ditto
 }

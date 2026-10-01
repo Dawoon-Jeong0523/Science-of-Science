@@ -161,6 +161,7 @@ compute the same quantity on two indices and can be compared paper for paper via
                              paper_z_score_merge promotes the partitions)
   7. paper_citation_trend    graph + patents folder
   8. paper_hit_probability   needs 1 and 3
+  9. paper_author_country    rereads authors[] from the dump; cross-checked against 2
 
   Smoke test (everything into a scratch folder, twelve files of the dump):
     NB_DIM_BASE=/some/scratch NB_FILE_LIMIT=12 NB_Z_YEARS=1900:2025 \
