@@ -239,6 +239,75 @@ def refresh_accent_css(soup):
   pipebar.append(soup.new_tag('i'))
 
 
+def with_code(soup, parent, text):
+ # `backticked` spans of a description become <code>
+ for i, part in enumerate(text.split('`')):
+  if i % 2:
+   code = soup.new_tag('code'); code.string = part; parent.append(code)
+  elif part:
+   parent.append(part)
+
+
+def column_dictionary(soup, schema):
+ # one dt (name, Arrow type) and one dd (description, example) per column
+ dl = soup.new_tag('dl', attrs={'class':'coldoc'})
+ for field in schema:
+  dt = soup.new_tag('dt')
+  name = soup.new_tag('code'); name.string = field['name']; dt.append(name)
+  kind = soup.new_tag('span', attrs={'class':'ctype'}); kind.string = field['type']; dt.append(kind)
+  dd = soup.new_tag('dd')
+  with_code(soup, dd, field.get('description') or 'Not described yet.')
+  example = soup.new_tag('span', attrs={'class':'cex'})
+  if field.get('example_withheld'):
+   example.string = 'Example withheld: the values carry people’s names.'
+  elif field.get('example') is None:
+   example.string = 'No non-null value in the first rows.'
+  else:
+   example.append('e.g. '); value = soup.new_tag('code'); value.string = field['example']; example.append(value)
+  dd.append(example)
+  dl.append(dt); dl.append(dd)
+ return dl
+
+
+COLDOC_CSS = '''/* column dictionary */
+#outputs dl.coldoc { display:grid; grid-template-columns:minmax(9rem, max-content) minmax(0, 1fr); gap:0 14px; margin:8px 0 2px; }
+#outputs dl.coldoc dt, #outputs dl.coldoc dd { margin:0; padding:7px 0; border-top:1px solid var(--hair); }
+#outputs dl.coldoc dt { display:flex; flex-direction:column; gap:2px; }
+#outputs dl.coldoc dt code { color:var(--ink); }
+#outputs dl.coldoc .ctype { font-family:"IBM Plex Mono",monospace; font-size:10.5px; color:var(--ink-3); }
+#outputs dl.coldoc dd { color:var(--ink-2); }
+#outputs dl.coldoc .cex { display:block; margin-top:3px; font-size:11.5px; color:var(--ink-3); }
+@media (max-width:640px) {
+  /* each inventory row stacks: name, rows and size on one line, the row meaning and columns full width below */
+  #outputs thead { display:none; }
+  #outputs table, #outputs tbody { display:block; }
+  #outputs tbody tr { display:grid; grid-template-columns:minmax(0, 1fr) auto auto; gap:2px 12px; padding:12px 14px; border-bottom:1px solid var(--hair); }
+  #outputs tbody td { padding:0; border:none; }
+  #outputs tbody td.cols { grid-column:1 / -1; margin-top:6px; }
+  #outputs dl.coldoc { grid-template-columns:minmax(0, 1fr); }
+  #outputs dl.coldoc dd { border-top:none; padding-top:0; }
+}
+/* end column dictionary */'''
+
+# F / E / G (Foundation, Extension, Generalization) is the decomposition of Fang & Evans (2025)
+FEG_DEF = ('Foundation, Extension, Generalization — the three-way decomposition of the disruption index introduced by '
+           'Fang &amp; Evans (2025), <a href="https://arxiv.org/abs/2510.03240">arXiv:2510.03240</a>. Each citer is compared on '
+           'how many of the focal work\'s references it also cites and how many of the focal work\'s other citers it cites: '
+           'more citers is Foundation, more references is Extension, neither is Generalization, and a tie counts half to each.')
+REFERENCES = ('References: Funk &amp; Owen-Smith (2017) disruption · Fang &amp; Evans (2025) Foundation / Extension / '
+              'Generalization, <i>Generalization and the Rise of System-level Creativity in Science</i>, '
+              '<a href="https://arxiv.org/abs/2510.03240">arXiv:2510.03240</a> · Wu, Wang &amp; Evans (2019) team size · '
+              'Uzzi, Mukherjee, Stringer &amp; Jones (2013) atypicality · Kim, Cerigo, Jeong &amp; Youn (2016) technological '
+              'novelty · Ke, Ferrara, Radicchi &amp; Flammini (2015) sleeping beauties · Marx &amp; Fuegi (2022) Reliance on Science.')
+
+
+def cite_feg(soup):
+ card = next(a for a in soup.select('#metrics article.metric') if a.h3.get_text(strip=True) == 'F / E / G')
+ definition = card.select_one('.def'); definition.clear(); definition.append(BeautifulSoup(FEG_DEF, 'html.parser'))
+ references = next(p for p in soup.select('footer p') if p.get_text().startswith('References:'))
+ references.clear(); references.append(BeautifulSoup(REFERENCES, 'html.parser'))
+
+
 def update_inventory_page(soup, inventory):
  files = inventory['files']
  by_path = {item['path']: item for item in files}
@@ -336,7 +405,7 @@ def update_inventory_page(soup, inventory):
  outputs.select_one('.shead .meta').string = f'{len(files)} Parquet files · {checked} UTC'
  intro = outputs.select_one('.intro')
  intro.clear()
- intro.append('Counts come from current Parquet footers; sizes come from the filesystem. Rows have different meanings across tables and must not be summed as unique documents. The inventory includes the legacy team-size table, the Dimensions 1990–2000 atypicality partition (the only one written so far) and the three PATSTAT sets (output/, output_grant/ and output_family/, same file names), but excludes backups, dated OpenAlex score partitions already represented by merged files, and sharded reference intermediates. ')
+ intro.append('Counts come from current Parquet footers; sizes come from the filesystem. Rows have different meanings across tables and must not be summed as unique documents. The inventory includes the legacy team-size table, the Dimensions 1990–2000 atypicality partition (the only one written so far) and the three PATSTAT sets (output/, output_grant/ and output_family/, same file names), but excludes backups, dated OpenAlex score partitions already represented by merged files, and sharded reference intermediates. Open a table\'s column list for each column\'s type, meaning and one example value from the table\'s first rows; columns that carry people\'s names show no example. ')
  link = soup.new_tag('a', href='https://github.com/Dawoon-Jeong0523/SciSci#refresh-from-saved-research-outputs')
  link.string = 'How this inventory is refreshed.'
  intro.append(link)
@@ -367,8 +436,8 @@ def update_inventory_page(soup, inventory):
   for note in notes:
    p = soup.new_tag('p'); p.string = note; td.append(p)
   details = soup.new_tag('details')
-  summary = soup.new_tag('summary'); summary.string = f'{len(item["columns"])} columns'; details.append(summary)
-  column_text = soup.new_tag('span'); column_text.string = ', '.join(item['columns']); details.append(column_text)
+  summary = soup.new_tag('summary'); summary.string = f'{len(item["columns"])} columns · meaning and example'; details.append(summary)
+  details.append(column_dictionary(soup, item['schema']))
   td.append(details); tr.append(td); table.tbody.append(tr)
  soup.select_one('#val-ppp > .intro').string = ('The 548,315-pair plus list links scientific and technological contributions. These validation figures join the document-level paper and patent citation histories, then apply figure-specific eligibility filters; the average cumulative trajectory in §5b covers 107,260 pairs. The separately inventoried PPP trend files are pair-level outputs. The hypothesis under test is that the paper side is convex and the patent side concave.')
  for article in soup.select('#gaps article'):
@@ -389,14 +458,16 @@ def update_inventory_page(soup, inventory):
  soup.select_one('#gaps article[data-inject="patstat"] h3').string = 'PATSTAT is stored on two clocks and two units'
  soup.select_one('#gaps article[data-inject="patstat"] p').string = ('PATSTAT/output dates both ends of a citation by filing year and keeps every application; PATSTAT/output_grant dates them by grant year and keeps granted applications only, as PatentsView does. About 61% of the filing-clock edges have both ends granted, PCT (WO) applications drop out of the grant clock, and grant lags differ by office (about 2–7 years), so a grant-year window covers different filing vintages across offices. PATSTAT/output_family counts a DOCDB family (one invention, however many offices it was filed at) once, dated by its earliest priority year; an application-level count gives a multi-office invention one node per office and splits its citations among them. State the clock and the unit with every PATSTAT result; §15 compares the clocks and §17–18 the units.')
  soup.select_one('#gaps article[data-inject="dimension"] p').string = ('The Dimensions chain has written paper_z_score_1990_2000.parquet and its pair table, not a merged corpus-wide file, so dimension_validation §12 (Z-score CDF and the Uzzi 2×2) is not drawn yet and the Dimensions-vs-OpenAlex comparison in §14 excludes atypicality. Every other Dimensions metric is corpus-wide.')
- soup.select_one('footer p').string = (f'Inventory checked {checked} (UTC) across OpenAlex, Dimensions, PatentView, PATSTAT, pcs, PPP and Case law. Row counts and schemas come from Parquet footers; file sizes and modification times come from filesystem metadata. Figures are saved exports from {len(FAMILIES)} validation notebooks. Refreshing this page does not recompute metrics or rerun those notebooks. The inventory snapshot and each figure’s analysis coverage are distinct; earlier atypicality exports remain explicitly labelled.')
+ soup.select_one('footer p').string = (f'Inventory checked {checked} (UTC) across OpenAlex, Dimensions, PatentView, PATSTAT, pcs, PPP and Case law. Row counts and schemas come from Parquet footers and column examples from the first rows of each table; file sizes and modification times come from filesystem metadata. Figures are saved exports from {len(FAMILIES)} validation notebooks. Refreshing this page does not recompute metrics or rerun those notebooks. The inventory snapshot and each figure’s analysis coverage are distinct; earlier atypicality exports remain explicitly labelled.')
  style = soup.style
  css = style.string
  for minimum in [158, 300, 320, 370]:
   css = css.replace(f'minmax({minimum}px,1fr)', f'minmax(min(100%,{minimum}px),1fr)')
  if '/* responsive inventory */' not in css:
   css += '\n/* responsive inventory */\n.card, .metric, .gap { min-width:0; overflow-wrap:anywhere; }\n#outputs td { overflow-wrap:anywhere; }\n#outputs details { margin-top:6px; }\n#outputs summary { cursor:pointer; color:var(--accent); }\n.pipebar i:nth-child(5) { background:var(--p5); }\n'
- style.string = css
+ # the column-dictionary block is replaced on every run, so edits to COLDOC_CSS reach the page
+ css = re.sub(r'\n+/\* column dictionary \*/.*?/\* end column dictionary \*/', '', css, flags=re.S)
+ style.string = css + '\n' + COLDOC_CSS
 
 
 def standard_document(soup):
@@ -427,6 +498,9 @@ def refresh(source=None, output=None):
  source_html = VAL / 'metrics_dashboard.html'
  old = source_html.read_text(encoding='utf-8')
  inventory = build_inventory(VAL.parent)
+ missing = [f'{item["path"]}:{field["name"]}' for item in inventory['files'] for field in item['schema'] if not field.get('description')]
+ if missing:
+  print(f'{len(missing)} columns have no description in dashboard_columns.py: {", ".join(missing)}')
  soup = BeautifulSoup(old, 'html.parser')
  total = 0
  previous = None
@@ -499,6 +573,7 @@ def refresh(source=None, output=None):
    article.h3.string = 'Citation-network choice changes trajectory shape'
    article.p.string = 'Granted-only and extended networks can produce different convexity classifications. Sections 15 and 21–26 show the comparisons; state the citation network with every result.'
  update_inventory_page(soup, inventory)
+ cite_feg(soup)
  result = standard_document(soup)
  result = result.replace('Generated 1 Sep 2026', 'Updated 6 Sep 2026')
  result = result.replace('Built from the four validation notebooks', 'Built from the five validation notebooks')

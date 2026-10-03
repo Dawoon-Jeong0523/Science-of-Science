@@ -1,17 +1,22 @@
 """Collect the public dashboard's derived-table inventory without scanning tables.
 
 ``build_inventory(source_root)`` reads Parquet footers, filesystem metadata, and
-small provenance documents under the local Science of Science project. Returned
-paths are relative to that project; its private absolute location is not exposed.
-Importing this module does not read files or build an inventory.
+small provenance documents under the local Science of Science project, plus the
+first rows of each table for one example value per column. Column descriptions
+come from ``dashboard_columns``. Returned paths are relative to that project; its
+private absolute location is not exposed. Importing this module does not read
+files or build an inventory.
 """
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from pathlib import Path
 import json
+import math
 import re
+
+from dashboard_columns import describe, is_personal
 
 
 # Explicitly inventory final top-level outputs, including the documented legacy
@@ -231,6 +236,54 @@ def _grain(name: str, family: str) -> str:
     return "One document."
 
 
+def _usable(value) -> bool:
+    return value is not None and value != [] and not (isinstance(value, float) and math.isnan(value))
+
+
+def _example_text(value, limit: int = 96) -> str | None:
+    """One cell as page text: floats to 6 significant digits, lists to their first three items."""
+    if not _usable(value):
+        return None
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    if isinstance(value, float):
+        return f"{value:.6g}"
+    if isinstance(value, (date, datetime)):
+        return value.isoformat()
+    if isinstance(value, (list, tuple)):
+        items = [_example_text(item, 32) or "null" for item in value[:3]]
+        more = f", … (+{len(value) - 3})" if len(value) > 3 else ""
+        return "[" + ", ".join(items) + more + "]"
+    if isinstance(value, dict):
+        value = json.dumps(value, default=str)
+    text = str(value)
+    return text if len(text) <= limit else text[: limit - 1] + "…"
+
+
+def _examples(parquet, batch_rows: int = 4096, max_batches: int = 100) -> dict:
+    """One example value per column from the first rows of a table.
+
+    Values come from one representative row where possible (the first row of the first
+    batch with the most non-null values), so a table's examples belong together; a column
+    that is null there takes its first non-null value in the first ``max_batches`` batches.
+    """
+    found = {}
+    for number, batch in enumerate(parquet.iter_batches(batch_size=batch_rows)):
+        columns = {name: batch.column(i).to_pylist() for i, name in enumerate(batch.schema.names)}
+        if number == 0:
+            scores = [sum(_usable(values[i]) for values in columns.values()) for i in range(batch.num_rows)]
+            row = scores.index(max(scores)) if scores else 0
+            found = {name: values[row] for name, values in columns.items() if values and _usable(values[row])}
+        for name, values in columns.items():
+            if name not in found:
+                value = next((v for v in values if _usable(v)), None)
+                if value is not None:
+                    found[name] = value
+        if len(found) == len(columns) or number + 1 >= max_batches:
+            break
+    return {name: _example_text(value) for name, value in found.items()}
+
+
 def _paper_provenance(root: Path, paper_rows: int) -> dict:
     relative_path = "OpenAlex/output/paper_z_score_provenance.json"
     result = {
@@ -344,8 +397,8 @@ def build_inventory(source_root: Path) -> dict:
 
     Raises FileNotFoundError for a missing canonical file and RuntimeError if a
     file changes during its footer read. Rows are stored records, not unique
-    documents summed across tables. Neither Parquet data pages nor large raw
-    inputs are read.
+    documents summed across tables. Only the first rows of each table are read
+    (for the column examples); large raw inputs are not read.
     """
     import pyarrow.parquet as pq
 
@@ -364,16 +417,25 @@ def build_inventory(source_root: Path) -> dict:
             try:
                 metadata = parquet.metadata
                 schema = parquet.schema_arrow
+                relative = path.relative_to(root).as_posix()
+                examples = _examples(parquet)
+                fields = []
+                for field in schema:
+                    entry = {"name": field.name, "type": str(field.type), "nullable": field.nullable,
+                             "description": describe(relative, field.name)}
+                    # columns that carry people's names are described but get no example
+                    if is_personal(relative, field.name):
+                        entry["example_withheld"] = True
+                    else:
+                        entry["example"] = examples.get(field.name)
+                    fields.append(entry)
                 row = {
-                    "path": path.relative_to(root).as_posix(),
+                    "path": relative,
                     "family": family,
                     "rows": metadata.num_rows,
                     "bytes": before.st_size,
                     "columns": schema.names,
-                    "schema": [
-                        {"name": field.name, "type": str(field.type), "nullable": field.nullable}
-                        for field in schema
-                    ],
+                    "schema": fields,
                     "row_groups": metadata.num_row_groups,
                     "modified_utc": _utc(before.st_mtime),
                     "grain": _grain(name, family),
@@ -430,9 +492,10 @@ def build_inventory(source_root: Path) -> dict:
         "source_project": "Science of Science",
         "generated_utc": _utc(),
         "method": (
-            "Parquet footers and filesystem metadata only for table inventories; "
-            "small provenance JSON and run logs for provenance. No table data "
-            "pages or large raw inputs are scanned."
+            "Parquet footers and filesystem metadata for table inventories, plus the "
+            "first rows of each table for one example value per column; small "
+            "provenance JSON and run logs for provenance. No table is scanned in "
+            "full and no large raw input is read."
         ),
         "count_unit": "Stored rows across derived tables; not unique documents.",
         "files": files,

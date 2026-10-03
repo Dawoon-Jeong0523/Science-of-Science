@@ -1,7 +1,7 @@
 # Science of Science
 
 Metric pipelines for the science of science: forward citations, the CD disruption
-index with its F/E/G citer profile, atypicality (Uzzi journal-pair z-scores for
+index with its F/E/G citer profile (Fang & Evans 2025), atypicality (Uzzi journal-pair z-scores for
 papers, Kim et al. CPC-subclass z-scores for patents), sleeping-beauty
 coefficients, cohort hit probability, author and inventor geography, and yearly
 citation and disruption trajectories. The same kernels run over several
@@ -16,7 +16,7 @@ literatures so results can be compared document for document.
 | `Case law/` | US court opinions (CAP) | `Edge_list.parquet` (47.5 M citations) + `metadata.csv` (5.18 M cases) | case id | 8 |
 | `pcs/` | patent -> paper citations | Reliance on Science (`pcs_oa_uspto.csv`) | `paper_id` | 3 |
 | `PPP/` | patent-paper pairs | `_patent_paper_pairs_plus.csv` | (`paperid`, `patent`) | 1 |
-| `validation/` | face-validity checks and the metrics dashboard | all of the above | | 12 |
+| `validation/` | face-validity checks and the metrics dashboard | all of the above | | 13 |
 
 Every pipeline writes one tidy parquet per metric, keyed on its id, so the
 outputs of one pipeline are meant to be merged with each other, not read alone.
@@ -178,7 +178,8 @@ Science of Science/
 │   ├── author_country_validation.ipynb     10 figures incl. world maps
 │   ├── case_law_validation.ipynb
 │   ├── case_law_validation.ipynb.pre-feg5
-│   ├── dashboard_inventory.py              row counts and schemas from parquet footers
+│   ├── dashboard_columns.py                meaning of every inventoried column (the dashboard's column dictionary)
+│   ├── dashboard_inventory.py              row counts and schemas from parquet footers, one example value per column
 │   ├── dashboard_update.ipynb              legacy Case-law injector; last cell calls refresh_dashboard.py
 │   ├── dimension_validation.ipynb
 │   ├── disruption_crosscheck.ipynb         independent CD_5 transcription vs ours
@@ -193,11 +194,12 @@ Science of Science/
 │   ├── patstat_validation.ipynb            18 figures: both clocks, filing vs grant, PATSTAT vs PatentsView, applications vs families
 │   ├── pcs_validation.ipynb
 │   ├── ppp_validation.ipynb
+│   ├── recent_data_inspection.ipynb        columns, row counts and first rows of the files updated since a date
 │   ├── refresh_dashboard.py                rebuild metrics_dashboard.html from Figures/ + the inventory
 │   ├── val_common.py                       V.init / V.save / V.paper / V.patent / V.dim / V.patstat(_grant, _family) / NEEDS / NB_FIG_DIR
 │   ├── val_common.py.pre-caselaw
 │   ├── data/
-│   │   ├── inventory.json                      local diagnostic report of the 91 derived tables
+│   │   ├── inventory.json                      local diagnostic report of the 91 derived tables, with column descriptions and examples
 │   │   ├── world_countries.geojson             Natural Earth 1:50m Admin 0, trimmed (the maps need it)
 │   │   └── world_countries.source.json         its provenance
 │   ├── Figures/                            figure exports, <notebook>_<section>.{jpg,pdf} (292 files)
@@ -271,7 +273,7 @@ column suffixes `_3`, `_5`, `_10`, `_all`.
 | Metric | Output | Definition |
 |---|---|---|
 | Forward citations | `*_citation` | `C_W = #{c cites P : 0 <= y_c - y_P <= W}`. Patents split by who submitted the reference (`C_examiner`, `C_non_examiner`, `C_unknown`), add application-stage citations `appC`, and `uniqueC` = de-duplicated union of granted and application citations. |
-| Disruption | `*_disruption` | `CD_W = (n_i - n_j) / (n_i + n_j + n_k)` with `n_j` = citers of P that also cite a reference of P, `n_i` = citers of P only, `n_k` = citers of P's references only. F/E/G = per-citer Foundation / Extension / Generalization shares, `F + E + G = 1`. |
+| Disruption | `*_disruption` | `CD_W = (n_i - n_j) / (n_i + n_j + n_k)` with `n_j` = citers of P that also cite a reference of P, `n_i` = citers of P only, `n_k` = citers of P's references only. F/E/G = per-citer Foundation / Extension / Generalization shares, `F + E + G = 1`: the decomposition of Fang & Evans (2025), *Generalization and the Rise of System-level Creativity in Science*, [arXiv:2510.03240](https://arxiv.org/abs/2510.03240). A citer of P that cites more of P's other citers than of P's references is Foundation, one that cites more of P's references is Extension, one that cites neither is Generalization, and a tie counts half to each. |
 | Disruption trajectory | `*_disruption_trend` | One row per document x year with cumulative `ni/nj/nk/CD/F/E/G` and per-year `ni_new/nj_new/nk_new`. Prefix sums reproduce the windowed table exactly. `*_summary` holds cohort means. |
 | Atypicality, papers | `paper_z_score`, `z_score_pair` | Uzzi et al. (2013): journal-pair co-occurrence z-scores against a cited-year-preserving shuffle null (10 shuffles). Per paper `Z_median`, `Z_10pct`, `Z_min`, `n_pairs`. |
 | Atypicality, patents | `patent_z_score`, `patstat_z_score` | Kim et al. (2016): analytic hypergeometric null on CPC-subclass pairs over the cumulative patent set. `z < 0` is atypical. |
@@ -280,7 +282,7 @@ column suffixes `_3`, `_5`, `_10`, `_all`.
 | Citation trajectory | `*_citation_trend` | One row per (document, citing year), with years since publication or grant and the citation channel (paper -> paper, patent -> paper by examiner / applicant, patent -> patent). |
 | Team size / authors | `paper_author`, `paper_team_size`, `patent_inventor`, `patstat_inventor` | Author (inventor) lists in author order, team size, and the first and last author (inventor), from OpenAlex `works_au_affs`, Dimensions `authors[]` or PatentsView `g_inventor_disambiguated`. Patents de-duplicate on (patent, inventor id); `n_inventors` is `team_size` under its PatentView name. PATSTAT lists inventor `person_id`s from `tls207` (a named person once per application, an unnamed placeholder record once per slot); they are not disambiguated across applications. |
 | Geography | `paper_author_country` (OpenAlex, Dimensions), `patent_inventor_country`, `patstat_inventor_country` | ISO2 countries of a document's authors or inventors: the sorted distinct set, the per-country head counts, whether the document is international, and (papers) the first and last author's own countries. Papers take the country of the institution an affiliation resolved to; patents take the address printed on the grant, with the assignee countries beside it. |
-| FEG trend | `*_feg_disruption_trend` | Per-year means of CD / F / E / G / ni / nj / nk. |
+| FEG trend | `*_feg_disruption_trend` | Per-year means of CD / F / E / G (Fang & Evans 2025) / ni / nj / nk. |
 
 Where the literatures differ in a way that matters (field taxonomy, what counts
 as a journal, the time anchor, what "examiner" means, left-censoring of the
@@ -390,7 +392,15 @@ The second copies the referenced figures into the public
 [SciSci](https://github.com/Dawoon-Jeong0523/SciSci) repository, whose `main`
 branch deploys to
 [the live dashboard](https://dawoon-jeong0523.github.io/SciSci/metrics_dashboard.html).
-Keep `SciSci/scripts/` in sync with the two scripts here after editing them.
+Keep `SciSci/scripts/` in sync with the three scripts here after editing them.
+
+The Derived tables section lists, for every inventoried table, each column's Arrow type, its meaning and one
+example value. The meanings live in `dashboard_columns.py` (written from the producing notebooks; when a
+pipeline adds or changes a column, edit it there: the refresh prints every column that has no description).
+The examples come from the first rows of each table, read by `dashboard_inventory.py`; columns that carry
+people's names (PatentsView `inventor_list`, case names) are described but show no example.
+`recent_data_inspection.ipynb` is the quick local counterpart: the columns, row counts and first rows of every
+output modified since a date, read from footers and first row groups only (under a minute on the login node).
 
 The world maps need `validation/data/world_countries.geojson` (Natural Earth
 1:50m Admin 0, public domain, trimmed to `iso2`/`name`/`continent` and
@@ -422,10 +432,10 @@ every file, its columns, the metric definitions and the reading caveats.
 - OpenAlex publication years 2023 to 2025 are incomplete in the 2026-01-16
   snapshot. Trends ending there measure ingestion, not science, and each window
   `w` must stop at `last year - w`.
-- Paper atypicality on OpenAlex is computed for selected year ranges only
-  (2000-2005, 2007-2011, 1990-2000, single years 2012-2020); there is no
-  corpus-wide `paper_z_score.parquet`. Files suffixed `_old` come from a
-  superseded null model and are not a baseline.
+- Paper atypicality on OpenAlex covers 1980-2020 only: `paper_z_score.parquet`
+  (41,425,041 papers) merges 14 year-range partitions, as recorded in
+  `paper_z_score_provenance.json`; 1900-1979 was never run. Files suffixed
+  `_old` come from a superseded null model and are not a baseline.
 - PatentsView `citation_category` changed coding in 2001 and 2013, so any
   examiner-share trend crossing those years measures the coding change.
 - PatentsView citations are recorded only from patents granted 1976 onwards, so
