@@ -1,4 +1,39 @@
 ================================================================================
+2026-10-08: THE SOURCE IS NOW THE OFFICIAL 2026-09-23 RELEASE (read this first)
+================================================================================
+Since 2026-10-08 every notebook reads
+
+    /project/jevans/OpenAlex_shared/OpenAlex_2026_Sep_23_flat/     (179 GB, read-only)
+
+a flattening of OpenAlex's own parquet export, release 2026-09-23
+(/project/jevans/OpenAlex_shared/OpenAlex_2026_Sep_23, 771 GB, verified against the
+manifest), written by flatten_snapshot.py into the same table layout renli's
+conversion had, so the notebooks run unchanged:
+
+    works/{works, works_semantic, topics, primary_locations, locations,
+           referenced_works, authorships}/part_NNNN.parquet   2,040 parts each;
+                                    part i of every table = input file i of the
+                                    sorted manifest (partition-aligned)
+    topics.csv.gz, sources.csv.gz   entity lookups (4,516 topics; 256,981 sources,
+                                    207,379 journals)
+
+476,196,327 works (no duplicate ids), 3,136,444,178 reference edges
+(3,135,366,611 after dropping self-citations), 1,322,384,943 author slots.
+works/authorships (one row per author slot) replaces works_au_affs_fixed.csv.gz;
+paper_author and paper_author_country read it.
+
+Why: renli's conversion (below) had lost 104M of the snapshot's 477M works. It
+named each output part after the input file's basename, so same-numbered files
+from different updated_date= folders overwrote one another (81.3M works), and
+301 failed input files were never retried (23.0M). The outputs built on it are
+kept in output_Renly/ (caches in cache_Renly/); notebook/output_comparison.ipynb
+and notebook/snapshot_comparison.ipynb compare the two versions.
+
+The rest of this file was written for renli's 2026-01-16 conversion. Its notes on
+how OpenAlex differs from MAG/SciSciNet (fields, journal types, reference counts)
+still hold; its counts, paths and partition numbers are those of the old source.
+
+================================================================================
 ADAPTING notebook/*.ipynb TO renli's OpenAlex SNAPSHOT
 ================================================================================
 Written 2026-08-28.

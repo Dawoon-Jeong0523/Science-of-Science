@@ -80,3 +80,11 @@ PPP/*.pdf
 Readme.txt
 !*/Readme.txt
 !*/*/Readme.txt
+
+# --- 2026-10-08 OpenAlex Sep-23 rebuild: Renly-era copies live on Midway only --------
+# (data, figure and notebook copies made before the reruns; git history already holds the old code)
+OpenAlex/output_Renly/
+OpenAlex/cache_Renly/
+**/Old/pre_sep23_2026-10-08/
+OpenAlex/Old/pre_selfcite_2026-10-03/
+OpenAlex/figures/*_preview.*

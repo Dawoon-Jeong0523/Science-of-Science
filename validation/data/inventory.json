@@ -1,15 +1,15 @@
 {
   "schema_version": 1,
   "source_project": "Science of Science",
-  "generated_utc": "2026-10-03T18:41:28.381501Z",
+  "generated_utc": "2026-10-09T09:12:30.991653Z",
   "method": "Parquet footers and filesystem metadata for table inventories, plus the first rows of each table for one example value per column; small provenance JSON and run logs for provenance. No table is scanned in full and no large raw input is read.",
   "count_unit": "Stored rows across derived tables; not unique documents.",
   "files": [
     {
       "path": "OpenAlex/output/paper_author.parquet",
       "family": "paper",
-      "rows": 251654553,
-      "bytes": 7118734604,
+      "rows": 292400769,
+      "bytes": 7735081982,
       "columns": [
         "work_id",
         "author_list",
@@ -22,7 +22,7 @@
           "name": "work_id",
           "type": "string",
           "nullable": true,
-          "description": "OpenAlex work id ('W' + digits, URL prefix stripped); the same values as paper_id in the sibling tables, under a different column name. One row per work with at least one author id in works_au_affs_fixed (251.7M works).",
+          "description": "OpenAlex work id ('W' + digits, URL prefix stripped); the same values as paper_id in the sibling tables, under a different column name. One row per work with at least one author id in works/authorships (292.4M works).",
           "example": "W100000002"
         },
         {
@@ -54,16 +54,16 @@
           "example": "A5006412880"
         }
       ],
-      "row_groups": 252,
-      "modified_utc": "2026-09-03T13:35:43.610014Z",
+      "row_groups": 292,
+      "modified_utc": "2026-10-08T16:17:03.816040Z",
       "grain": "One work_id with ordered, deduplicated author IDs and team_size.",
       "provenance": "OpenAlex/notebook/paper_author.ipynb"
     },
     {
       "path": "OpenAlex/output/paper_author_country.parquet",
       "family": "paper",
-      "rows": 251654553,
-      "bytes": 1582666211,
+      "rows": 292400769,
+      "bytes": 1769847860,
       "columns": [
         "paper_id",
         "team_size",
@@ -80,7 +80,7 @@
           "name": "paper_id",
           "type": "string",
           "nullable": true,
-          "description": "OpenAlex work id as a string: 'W' followed by digits (e.g. W3002427681), URL prefix stripped; joins every other OpenAlex/output table. Same 251.7M works as paper_author (which calls the column work_id).",
+          "description": "OpenAlex work id as a string: 'W' followed by digits (e.g. W3002427681), URL prefix stripped; joins every other OpenAlex/output table. Same 292.4M works as paper_author (which calls the column work_id).",
           "example": "W100000002"
         },
         {
@@ -101,7 +101,7 @@
           "name": "countries",
           "type": "string",
           "nullable": true,
-          "description": "Sorted, ';'-joined distinct ISO 3166-1 alpha-2 codes over all located authors (e.g. 'CN;US'); null when no author is located (55% of works). Namibia is 'NA', not a missing value. Coverage rises strongly over time, so take shares over located works.",
+          "description": "Sorted, ';'-joined distinct ISO 3166-1 alpha-2 codes over all located authors (e.g. 'CN;US'); null when no author is located (53.5% of works). Namibia is 'NA', not a missing value. Coverage rises strongly over time, so take shares over located works.",
           "example": "US"
         },
         {
@@ -140,15 +140,15 @@
           "example": "false"
         }
       ],
-      "row_groups": 252,
-      "modified_utc": "2026-09-13T17:36:49.372913Z",
+      "row_groups": 292,
+      "modified_utc": "2026-10-08T20:56:05.608270Z",
       "grain": "One work with the ISO2 countries of its authors' institutions: the sorted distinct set, the per-country author counts, and the first and last author's own countries."
     },
     {
       "path": "OpenAlex/output/paper_citation.parquet",
       "family": "paper",
-      "rows": 348939837,
-      "bytes": 2379289066,
+      "rows": 460476133,
+      "bytes": 3145820944,
       "columns": [
         "paper_id",
         "C_3",
@@ -161,47 +161,47 @@
           "name": "paper_id",
           "type": "string",
           "nullable": true,
-          "description": "OpenAlex work id as a string: 'W' followed by digits (e.g. W3002427681), URL prefix stripped; joins every other OpenAlex/output table. One row per work with a usable publication year (348.9M), cited or not.",
-          "example": "W15"
+          "description": "OpenAlex work id as a string: 'W' followed by digits (e.g. W3002427681), URL prefix stripped; joins every other OpenAlex/output table. One row per work with a usable publication year (460.5M), cited or not.",
+          "example": "W9"
         },
         {
           "name": "C_3",
           "type": "int64",
           "nullable": true,
-          "description": "Number of citations received within 3 years of publication, publication year counted as year 0: incoming reference edges from OpenAlex works with 0 <= citing year - cited year <= 3 (calendar years), over the OpenAlex works/referenced_works graph (2026-01-16 snapshot), edges kept when both ends have a publication year in 1000-2030. 0 for uncited documents; cohorts less than 3 years before the snapshot are right-truncated.",
+          "description": "Number of citations received within 3 years of publication, publication year counted as year 0: incoming reference edges from OpenAlex works with 0 <= citing year - cited year <= 3 (calendar years), over the OpenAlex works/referenced_works graph (2026-09-23 release), edges kept when both ends have a publication year in 1000-2030. 0 for uncited documents; cohorts less than 3 years before the snapshot are right-truncated.",
           "example": "0"
         },
         {
           "name": "C_5",
           "type": "int64",
           "nullable": true,
-          "description": "Number of citations received within 5 years of publication, publication year counted as year 0: incoming reference edges from OpenAlex works with 0 <= citing year - cited year <= 5 (calendar years), over the OpenAlex works/referenced_works graph (2026-01-16 snapshot), edges kept when both ends have a publication year in 1000-2030. 0 for uncited documents; cohorts less than 5 years before the snapshot are right-truncated.",
+          "description": "Number of citations received within 5 years of publication, publication year counted as year 0: incoming reference edges from OpenAlex works with 0 <= citing year - cited year <= 5 (calendar years), over the OpenAlex works/referenced_works graph (2026-09-23 release), edges kept when both ends have a publication year in 1000-2030. 0 for uncited documents; cohorts less than 5 years before the snapshot are right-truncated.",
           "example": "0"
         },
         {
           "name": "C_10",
           "type": "int64",
           "nullable": true,
-          "description": "Number of citations received within 10 years of publication, publication year counted as year 0: incoming reference edges from OpenAlex works with 0 <= citing year - cited year <= 10 (calendar years), over the OpenAlex works/referenced_works graph (2026-01-16 snapshot), edges kept when both ends have a publication year in 1000-2030. 0 for uncited documents; cohorts less than 10 years before the snapshot are right-truncated.",
+          "description": "Number of citations received within 10 years of publication, publication year counted as year 0: incoming reference edges from OpenAlex works with 0 <= citing year - cited year <= 10 (calendar years), over the OpenAlex works/referenced_works graph (2026-09-23 release), edges kept when both ends have a publication year in 1000-2030. 0 for uncited documents; cohorts less than 10 years before the snapshot are right-truncated.",
           "example": "0"
         },
         {
           "name": "C_all",
           "type": "int64",
           "nullable": true,
-          "description": "Number of citations received from works published in or after the focal year (citing year - cited year >= 0, no upper bound), over the OpenAlex works/referenced_works graph (2026-01-16 snapshot), edges kept when both ends have a publication year in 1000-2030. Citations from works dated earlier than the focal document are dropped. 0 for uncited documents.",
+          "description": "Number of citations received from works published in or after the focal year (citing year - cited year >= 0, no upper bound), over the OpenAlex works/referenced_works graph (2026-09-23 release), edges kept when both ends have a publication year in 1000-2030. Citations from works dated earlier than the focal document are dropped. 0 for uncited documents.",
           "example": "0"
         }
       ],
-      "row_groups": 333,
-      "modified_utc": "2026-08-29T09:52:56.534508Z",
+      "row_groups": 440,
+      "modified_utc": "2026-10-08T17:37:47.764918Z",
       "grain": "One document."
     },
     {
       "path": "OpenAlex/output/paper_citation_trend.parquet",
       "family": "paper",
-      "rows": 584136859,
-      "bytes": 2218980207,
+      "rows": 737457185,
+      "bytes": 2779438027,
       "columns": [
         "paper_id",
         "pub_year",
@@ -262,15 +262,15 @@
           "example": "0"
         }
       ],
-      "row_groups": 558,
-      "modified_utc": "2026-08-31T16:07:53.796203Z",
+      "row_groups": 704,
+      "modified_utc": "2026-10-08T17:48:02.588515Z",
       "grain": "One document per citing year."
     },
     {
       "path": "OpenAlex/output/paper_disruption.parquet",
       "family": "paper",
-      "rows": 348939837,
-      "bytes": 6381320053,
+      "rows": 460476133,
+      "bytes": 8060166654,
       "columns": [
         "paper_id",
         "CD_3",
@@ -317,14 +317,14 @@
           "name": "paper_id",
           "type": "string",
           "nullable": true,
-          "description": "OpenAlex work id as a string: 'W' followed by digits (e.g. W3002427681), URL prefix stripped; joins every other OpenAlex/output table. One row per work with a usable publication year (348.9M), same rows as paper_citation.",
-          "example": "W7048716654"
+          "description": "OpenAlex work id as a string: 'W' followed by digits (e.g. W3002427681), URL prefix stripped; joins every other OpenAlex/output table. One row per work with a usable publication year (460.5M), same rows as paper_citation.",
+          "example": "W2480871224"
         },
         {
           "name": "CD_3",
           "type": "float",
           "nullable": true,
-          "description": "Funk & Owen-Smith CD (disruption) index for window '3': (ni - nj) / (ni + nj + nk), counting only papers with 0 <= year(citer) - year(focal) <= 3, publication year counted as year 0. Nominal range [-1, 1] (+1 disruptive, -1 consolidating). Null when the paper has no citers at all, or when neither a citer nor a paper citing its references falls in the window; 0 (not null) when the window has no citer but has papers citing the focal references. OpenAlex artefact: for roughly 0.1M papers per window that list themselves among their own references (self-citation edges), nk comes out negative, so CD can fall below -1 (minimum -2; about 30k papers for CD_all) or be null despite defined counts (about 80k for CD_all).",
+          "description": "Funk & Owen-Smith CD (disruption) index for window '3': (ni - nj) / (ni + nj + nk), counting only papers with 0 <= year(citer) - year(focal) <= 3, publication year counted as year 0. Nominal range [-1, 1] (+1 disruptive, -1 consolidating). Null when the paper has no citers at all, or when neither a citer nor a paper citing its references falls in the window; 0 (not null) when the window has no citer but has papers citing the focal references. Self-citation edges are dropped from the graph, so CD stays within [-1, 1].",
           "example": "1"
         },
         {
@@ -353,27 +353,27 @@
           "type": "int32",
           "nullable": true,
           "description": "Count of citers in window '3' (0 <= year(citer) - year(focal) <= 3, publication year counted as year 0) that cite none of the focal paper's references. -1 is a sentinel: the paper has no citers at all, or the window holds neither a citer nor a paper citing its references.",
-          "example": "-1"
+          "example": "1"
         },
         {
           "name": "nj_3",
           "type": "int32",
           "nullable": true,
           "description": "Count of citers in window '3' that also cite at least one of the focal paper's references. -1 sentinel as for ni.",
-          "example": "-1"
+          "example": "0"
         },
         {
           "name": "nk_3",
           "type": "int32",
           "nullable": true,
-          "description": "Count of papers (other than the focal one) published in window '3' (0 <= year(citer) - year(focal) <= 3, publication year counted as year 0) that cite at least one of the focal paper's references but not the focal paper itself. -1 sentinel as for ni. OpenAlex artefact: about 0.1M papers have a computed nk of -1 (self-citation edges: the paper is in its own reference list), distinguishable from the sentinel because ni/nj are >= 0 there.",
-          "example": "-1"
+          "description": "Count of papers (other than the focal one) published in window '3' (0 <= year(citer) - year(focal) <= 3, publication year counted as year 0) that cite at least one of the focal paper's references but not the focal paper itself. -1 sentinel as for ni. Self-citation edges are dropped from the graph, so -1 is only ever the sentinel.",
+          "example": "0"
         },
         {
           "name": "CD_5",
           "type": "float",
           "nullable": true,
-          "description": "Funk & Owen-Smith CD (disruption) index for window '5': (ni - nj) / (ni + nj + nk), counting only papers with 0 <= year(citer) - year(focal) <= 5, publication year counted as year 0. Nominal range [-1, 1] (+1 disruptive, -1 consolidating). Null when the paper has no citers at all, or when neither a citer nor a paper citing its references falls in the window; 0 (not null) when the window has no citer but has papers citing the focal references. OpenAlex artefact: for roughly 0.1M papers per window that list themselves among their own references (self-citation edges), nk comes out negative, so CD can fall below -1 (minimum -2; about 30k papers for CD_all) or be null despite defined counts (about 80k for CD_all).",
+          "description": "Funk & Owen-Smith CD (disruption) index for window '5': (ni - nj) / (ni + nj + nk), counting only papers with 0 <= year(citer) - year(focal) <= 5, publication year counted as year 0. Nominal range [-1, 1] (+1 disruptive, -1 consolidating). Null when the paper has no citers at all, or when neither a citer nor a paper citing its references falls in the window; 0 (not null) when the window has no citer but has papers citing the focal references. Self-citation edges are dropped from the graph, so CD stays within [-1, 1].",
           "example": "1"
         },
         {
@@ -402,27 +402,27 @@
           "type": "int32",
           "nullable": true,
           "description": "Count of citers in window '5' (0 <= year(citer) - year(focal) <= 5, publication year counted as year 0) that cite none of the focal paper's references. -1 is a sentinel: the paper has no citers at all, or the window holds neither a citer nor a paper citing its references.",
-          "example": "-1"
+          "example": "1"
         },
         {
           "name": "nj_5",
           "type": "int32",
           "nullable": true,
           "description": "Count of citers in window '5' that also cite at least one of the focal paper's references. -1 sentinel as for ni.",
-          "example": "-1"
+          "example": "0"
         },
         {
           "name": "nk_5",
           "type": "int32",
           "nullable": true,
-          "description": "Count of papers (other than the focal one) published in window '5' (0 <= year(citer) - year(focal) <= 5, publication year counted as year 0) that cite at least one of the focal paper's references but not the focal paper itself. -1 sentinel as for ni. OpenAlex artefact: about 0.1M papers have a computed nk of -1 (self-citation edges: the paper is in its own reference list), distinguishable from the sentinel because ni/nj are >= 0 there.",
-          "example": "-1"
+          "description": "Count of papers (other than the focal one) published in window '5' (0 <= year(citer) - year(focal) <= 5, publication year counted as year 0) that cite at least one of the focal paper's references but not the focal paper itself. -1 sentinel as for ni. Self-citation edges are dropped from the graph, so -1 is only ever the sentinel.",
+          "example": "0"
         },
         {
           "name": "CD_10",
           "type": "float",
           "nullable": true,
-          "description": "Funk & Owen-Smith CD (disruption) index for window '10': (ni - nj) / (ni + nj + nk), counting only papers with 0 <= year(citer) - year(focal) <= 10, publication year counted as year 0. Nominal range [-1, 1] (+1 disruptive, -1 consolidating). Null when the paper has no citers at all, or when neither a citer nor a paper citing its references falls in the window; 0 (not null) when the window has no citer but has papers citing the focal references. OpenAlex artefact: for roughly 0.1M papers per window that list themselves among their own references (self-citation edges), nk comes out negative, so CD can fall below -1 (minimum -2; about 30k papers for CD_all) or be null despite defined counts (about 80k for CD_all).",
+          "description": "Funk & Owen-Smith CD (disruption) index for window '10': (ni - nj) / (ni + nj + nk), counting only papers with 0 <= year(citer) - year(focal) <= 10, publication year counted as year 0. Nominal range [-1, 1] (+1 disruptive, -1 consolidating). Null when the paper has no citers at all, or when neither a citer nor a paper citing its references falls in the window; 0 (not null) when the window has no citer but has papers citing the focal references. Self-citation edges are dropped from the graph, so CD stays within [-1, 1].",
           "example": "1"
         },
         {
@@ -451,27 +451,27 @@
           "type": "int32",
           "nullable": true,
           "description": "Count of citers in window '10' (0 <= year(citer) - year(focal) <= 10, publication year counted as year 0) that cite none of the focal paper's references. -1 is a sentinel: the paper has no citers at all, or the window holds neither a citer nor a paper citing its references.",
-          "example": "-1"
+          "example": "1"
         },
         {
           "name": "nj_10",
           "type": "int32",
           "nullable": true,
           "description": "Count of citers in window '10' that also cite at least one of the focal paper's references. -1 sentinel as for ni.",
-          "example": "-1"
+          "example": "0"
         },
         {
           "name": "nk_10",
           "type": "int32",
           "nullable": true,
-          "description": "Count of papers (other than the focal one) published in window '10' (0 <= year(citer) - year(focal) <= 10, publication year counted as year 0) that cite at least one of the focal paper's references but not the focal paper itself. -1 sentinel as for ni. OpenAlex artefact: about 0.1M papers have a computed nk of -1 (self-citation edges: the paper is in its own reference list), distinguishable from the sentinel because ni/nj are >= 0 there.",
-          "example": "-1"
+          "description": "Count of papers (other than the focal one) published in window '10' (0 <= year(citer) - year(focal) <= 10, publication year counted as year 0) that cite at least one of the focal paper's references but not the focal paper itself. -1 sentinel as for ni. Self-citation edges are dropped from the graph, so -1 is only ever the sentinel.",
+          "example": "0"
         },
         {
           "name": "CD_all",
           "type": "float",
           "nullable": true,
-          "description": "Funk & Owen-Smith CD (disruption) index for window 'all': (ni - nj) / (ni + nj + nk), counting only papers with year(citer) - year(focal) >= 0, no upper bound. Nominal range [-1, 1] (+1 disruptive, -1 consolidating). Null when the paper has no citers at all, or when neither a citer nor a paper citing its references falls in the window; 0 (not null) when the window has no citer but has papers citing the focal references. OpenAlex artefact: for roughly 0.1M papers per window that list themselves among their own references (self-citation edges), nk comes out negative, so CD can fall below -1 (minimum -2; about 30k papers for CD_all) or be null despite defined counts (about 80k for CD_all).",
+          "description": "Funk & Owen-Smith CD (disruption) index for window 'all': (ni - nj) / (ni + nj + nk), counting only papers with year(citer) - year(focal) >= 0, no upper bound. Nominal range [-1, 1] (+1 disruptive, -1 consolidating). Null when the paper has no citers at all, or when neither a citer nor a paper citing its references falls in the window; 0 (not null) when the window has no citer but has papers citing the focal references. Self-citation edges are dropped from the graph, so CD stays within [-1, 1].",
           "example": "1"
         },
         {
@@ -513,7 +513,7 @@
           "name": "nk_all",
           "type": "int32",
           "nullable": true,
-          "description": "Count of papers (other than the focal one) published in window 'all' (year(citer) - year(focal) >= 0, no upper bound) that cite at least one of the focal paper's references but not the focal paper itself. -1 sentinel as for ni. OpenAlex artefact: about 0.1M papers have a computed nk of -1 (self-citation edges: the paper is in its own reference list), distinguishable from the sentinel because ni/nj are >= 0 there.",
+          "description": "Count of papers (other than the focal one) published in window 'all' (year(citer) - year(focal) >= 0, no upper bound) that cite at least one of the focal paper's references but not the focal paper itself. -1 sentinel as for ni. Self-citation edges are dropped from the graph, so -1 is only ever the sentinel.",
           "example": "0"
         },
         {
@@ -521,14 +521,14 @@
           "type": "double",
           "nullable": true,
           "description": "Cohort year for the CD percentiles: paper_metadata.year (publication year, stored as a double); present on every row.",
-          "example": "1558"
+          "example": "1846"
         },
         {
           "name": "pctl_group",
           "type": "string",
           "nullable": true,
-          "description": "Cohort field for the CD percentiles: the first field listed in paper_metadata.FoS_0, i.e. the OpenAlex field of the work's top-scoring topic (= FoS_rep). Null when the work has no topic (about 25%), and then every CD_*_pctl is null.",
-          "example": "Engineering"
+          "description": "Cohort field for the CD percentiles: the first field listed in paper_metadata.FoS_0, i.e. the OpenAlex field of the work's top-scoring topic (= FoS_rep). Null when the work has no topic (about 21%), and then every CD_*_pctl is null.",
+          "example": "Health Professions"
         },
         {
           "name": "CD_3_pctl",
@@ -577,7 +577,7 @@
           "type": "double",
           "nullable": true,
           "description": "Minimum-rank percentile (0-1] of CD_all within its (pctl_year, pctl_group) cohort among papers with a non-null CD_all: rank() / n, ties share the lowest rank. Null when CD_all or pctl_group is null. CD has large tie blocks (e.g. CD = 1), so use CD_all_pctl_cume for top-x% thresholds.",
-          "example": "1"
+          "example": "0.0243902"
         },
         {
           "name": "CD_all_pctl_cume",
@@ -587,15 +587,15 @@
           "example": "1"
         }
       ],
-      "row_groups": 2841,
-      "modified_utc": "2026-09-14T23:49:03.917502Z",
+      "row_groups": 3752,
+      "modified_utc": "2026-10-09T04:43:44.611212Z",
       "grain": "One document."
     },
     {
       "path": "OpenAlex/output/paper_hit_probability.parquet",
       "family": "paper",
-      "rows": 262469628,
-      "bytes": 3192603800,
+      "rows": 364258640,
+      "bytes": 2883138987,
       "columns": [
         "paper_id",
         "FoS",
@@ -610,61 +610,61 @@
           "name": "paper_id",
           "type": "string",
           "nullable": true,
-          "description": "OpenAlex work id as a string: 'W' followed by digits (e.g. W3002427681), URL prefix stripped; joins every other OpenAlex/output table. Only works that have both a field (topic) and a publication year (262.5M).",
-          "example": "W18956409"
+          "description": "OpenAlex work id as a string: 'W' followed by digits (e.g. W3002427681), URL prefix stripped; joins every other OpenAlex/output table. Only works that have both a field (topic) and a publication year (364.3M).",
+          "example": "W4251303992"
         },
         {
           "name": "FoS",
           "type": "string",
           "nullable": true,
           "description": "Cohort field: OpenAlex field name (one of 26, e.g. 'Medicine') of the work's highest-scoring topic (paper_metadata.FoS_rep, else the first entry of FoS_0). Not comparable with Dimensions FoR divisions.",
-          "example": "Earth and Planetary Sciences"
+          "example": "Agricultural and Biological Sciences"
         },
         {
           "name": "year",
           "type": "int64",
           "nullable": true,
           "description": "Cohort year: the work's publication year (paper_metadata.year cast to integer; 1000-2030 in the file).",
-          "example": "2013"
+          "example": "1485"
         },
         {
           "name": "pctl_c3",
           "type": "float",
           "nullable": true,
           "description": "Percentile (0-1] of the document's C_3 (paper_citation) within its (FoS, year) cohort: pandas rank(pct=True, method='min') = (number of cohort members with strictly fewer citations + 1) / cohort size. Uncited documents share the lowest value (1/cohort size); pctl >= 0.99 marks roughly the top 1%.",
-          "example": "0.769895"
+          "example": "0.5"
         },
         {
           "name": "pctl_c5",
           "type": "float",
           "nullable": true,
           "description": "Percentile (0-1] of the document's C_5 (paper_citation) within its (FoS, year) cohort: pandas rank(pct=True, method='min') = (number of cohort members with strictly fewer citations + 1) / cohort size. Uncited documents share the lowest value (1/cohort size); pctl >= 0.99 marks roughly the top 1%.",
-          "example": "0.735841"
+          "example": "0.5"
         },
         {
           "name": "pctl_c10",
           "type": "float",
           "nullable": true,
           "description": "Percentile (0-1] of the document's C_10 (paper_citation) within its (FoS, year) cohort: pandas rank(pct=True, method='min') = (number of cohort members with strictly fewer citations + 1) / cohort size. Uncited documents share the lowest value (1/cohort size); pctl >= 0.99 marks roughly the top 1%.",
-          "example": "0.78191"
+          "example": "0.5"
         },
         {
           "name": "pctl_call",
           "type": "float",
           "nullable": true,
           "description": "Percentile (0-1] of the document's C_all (paper_citation) within its (FoS, year) cohort: pandas rank(pct=True, method='min') = (number of cohort members with strictly fewer citations + 1) / cohort size. Uncited documents share the lowest value (1/cohort size); pctl >= 0.99 marks roughly the top 1%.",
-          "example": "0.817987"
+          "example": "0.5"
         }
       ],
-      "row_groups": 251,
-      "modified_utc": "2026-08-31T16:10:01.767198Z",
+      "row_groups": 2966,
+      "modified_utc": "2026-10-09T08:39:48.108832Z",
       "grain": "One document."
     },
     {
       "path": "OpenAlex/output/paper_metadata.parquet",
       "family": "paper",
-      "rows": 372655605,
-      "bytes": 11275748280,
+      "rows": 476196327,
+      "bytes": 13676163156,
       "columns": [
         "paper_id",
         "year",
@@ -690,15 +690,15 @@
           "name": "paper_id",
           "type": "string",
           "nullable": true,
-          "description": "OpenAlex work id as a string: 'W' followed by digits (e.g. W3002427681), URL prefix stripped; joins every other OpenAlex/output table. One row per work of works/works in the snapshot (372.7M), in snapshot order; one placeholder id 'W-1' is present.",
-          "example": "W3002427681"
+          "description": "OpenAlex work id as a string: 'W' followed by digits (e.g. W3002427681), URL prefix stripped; joins every other OpenAlex/output table. One row per work of works/works in the 2026-09-23 release (476.2M), in partition order.",
+          "example": "W414088417"
         },
         {
           "name": "year",
           "type": "double",
           "nullable": true,
-          "description": "OpenAlex publication_year stored as float64 (null for 6.4% of works). Raw value, not range checked (1000-2050 in the file); the graph-based tables only keep works dated 1000-2030.",
-          "example": "2020"
+          "description": "OpenAlex publication_year stored as float64 (null for 3.3% of works). Raw value, not range checked (1007-2050 in the file); the graph-based tables only keep works dated 1000-2030.",
+          "example": "1989"
         },
         {
           "name": "doctype",
@@ -712,14 +712,14 @@
           "type": "int32",
           "nullable": true,
           "description": "Number of references the work lists in OpenAlex works/referenced_works (its rows in the referenced_works_w_year edge table), i.e. references to other OpenAlex works within this snapshot; 0 when none. Not comparable with SciSciNet or Dimensions counts.",
-          "example": "44"
+          "example": "0"
         },
         {
           "name": "journal",
           "type": "string",
           "nullable": true,
-          "description": "Display name (sources.csv.gz) of the work's primary-location source, or of its first location's source when there is no primary one. Any source type: journals, repositories, conferences, ebook platforms. Null when the work has no source (22%).",
-          "example": "Coatings"
+          "description": "Display name (sources.csv.gz) of the work's primary-location source, or of its first location's source when there is no primary one. Any source type: journals, repositories, conferences, ebook platforms. Null when the work has no source (12.8%).",
+          "example": "WT Tijdschrift over de geschiedenis van de Vlaamse beweging"
         },
         {
           "name": "is_journal",
@@ -739,89 +739,89 @@
           "name": "FoS_0",
           "type": "string",
           "nullable": true,
-          "description": "';'-joined distinct OpenAlex field names (26 fields) of all the work's scored topics (up to 3, works/topics), ordered by topic score, best first; equals ';'.join(field). Null when the work has no topic (25%).",
-          "example": "Materials Science;Engineering;Environmental Science"
+          "description": "';'-joined distinct OpenAlex field names (26 fields) of all the work's scored topics (up to 3, works/topics), ordered by topic score, best first; equals ';'.join(field). Null when the work has no topic (20.6%).",
+          "example": "Arts and Humanities;Health Professions"
         },
         {
           "name": "FoS_rep",
           "type": "string",
           "nullable": true,
           "description": "OpenAlex field name of the work's highest-scoring topic (e.g. 'Materials Science'); the cohort key of paper_hit_probability. Null when no topic.",
-          "example": "Materials Science"
+          "example": "Arts and Humanities"
         },
         {
           "name": "domain",
           "type": "string",
           "nullable": true,
           "description": "OpenAlex domain (Health Sciences, Life Sciences, Physical Sciences or Social Sciences) of the work's highest-scoring topic; null when no topic. No Dimensions twin.",
-          "example": "Physical Sciences"
+          "example": "Social Sciences"
         },
         {
           "name": "primary_topic_field",
           "type": "string",
           "nullable": true,
           "description": "Field name of OpenAlex's own primary topic (works_semantic.primary_topic_json); null when the work has none. Equal to FoS_rep wherever both exist.",
-          "example": "Materials Science"
+          "example": "Arts and Humanities"
         },
         {
           "name": "primary_topic_subfield",
           "type": "string",
           "nullable": true,
           "description": "Subfield name (OpenAlex topic hierarchy, about 250 subfields) of the primary topic; null when none.",
-          "example": "Polymers and Plastics"
+          "example": "Philosophy"
         },
         {
           "name": "primary_topic_topic",
           "type": "string",
           "nullable": true,
           "description": "Display name of the primary topic (about 4,500 OpenAlex topics), looked up in topics.csv.gz by topic id; null when none.",
-          "example": "Flame retardant materials and properties"
+          "example": "Hermeneutics and Narrative Identity"
         },
         {
           "name": "field",
           "type": "list<element: string>",
           "nullable": true,
           "description": "List of the distinct field names of all the work's scored topics (1-3), best topic score first; null (not an empty list) when the work has no topic.",
-          "example": "[Materials Science, Engineering, Environmental Science]"
+          "example": "[Arts and Humanities, Health Professions]"
         },
         {
           "name": "subfield",
           "type": "list<element: string>",
           "nullable": true,
           "description": "List of the distinct subfield names of all the work's topics, best score first; de-duplicated by name (8 names are shared by two subfields and collapse to one entry); null when no topic.",
-          "example": "[Polymers and Plastics, Safety, Risk, Reliability and Q\u2026, Health, Toxicology and Mutagene\u2026]"
+          "example": "[Philosophy, General Health Professions]"
         },
         {
           "name": "topic",
           "type": "list<element: string>",
           "nullable": true,
           "description": "List of all the work's topic names, one per scored topic (1-3), best score first; topic[0] equals primary_topic_topic. Null when no topic. Topic ids and scores are in paper_topics.parquet.",
-          "example": "[Flame retardant materials and p\u2026, Fire dynamics and safety resear\u2026, Toxic Organic Pollutants Impact]"
+          "example": "[Hermeneutics and Narrative Iden\u2026, Aging, Elder Care, and Social I\u2026, Health, Medicine and Society]"
         },
         {
           "name": "cited_by_count",
           "type": "int64",
           "nullable": true,
           "description": "OpenAlex's own cited_by_count at snapshot time (all of OpenAlex); not the graph-derived, year-filtered C_all of paper_citation.",
-          "example": "34"
+          "example": "1"
         },
         {
           "name": "is_retracted",
           "type": "bool",
           "nullable": true,
-          "description": "OpenAlex is_retracted flag; null for 0.3% of works.",
+          "description": "OpenAlex is_retracted flag; null for 0.35% of works.",
           "example": "false"
         }
       ],
-      "row_groups": 1334,
-      "modified_utc": "2026-10-01T18:28:34.181782Z",
+      "row_groups": 2040,
+      "modified_utc": "2026-10-08T20:10:01.322427Z",
       "grain": "One document."
     },
     {
       "path": "OpenAlex/output/paper_sb.parquet",
       "family": "paper",
-      "rows": 88314669,
-      "bytes": 820726678,
+      "rows": 113458606,
+      "bytes": 1051410848,
       "columns": [
         "paper_id",
         "SB_B",
@@ -858,47 +858,15 @@
           "example": "5"
         }
       ],
-      "row_groups": 85,
-      "modified_utc": "2026-08-29T17:24:15.265882Z",
+      "row_groups": 109,
+      "modified_utc": "2026-10-08T17:27:53.402450Z",
       "grain": "One document."
-    },
-    {
-      "path": "OpenAlex/output/paper_team_size.parquet",
-      "family": "paper",
-      "rows": 251654553,
-      "bytes": 1447442911,
-      "columns": [
-        "paper_id",
-        "team_size"
-      ],
-      "schema": [
-        {
-          "name": "paper_id",
-          "type": "string",
-          "nullable": true,
-          "description": "OpenAlex work id as a string: 'W' followed by digits (e.g. W3002427681), URL prefix stripped; joins every other OpenAlex/output table. Same 251.7M works as paper_author.parquet.",
-          "example": "W3021264700"
-        },
-        {
-          "name": "team_size",
-          "type": "int32",
-          "nullable": true,
-          "description": "Legacy team size: number of distinct OpenAlex author ids on the work. Its producing code is lost, but it equals paper_author.team_size on every work; superseded by paper_author.parquet.",
-          "example": "5"
-        }
-      ],
-      "row_groups": 2047,
-      "modified_utc": "2026-09-01T16:07:38.128752Z",
-      "grain": "One paper_id with a legacy team_size value.",
-      "status": "legacy",
-      "note": "The current project has no producer for this legacy file. Native team-size validation uses the reproducible paper_author.parquet output, whose team_size counts distinct authors rather than affiliation rows.",
-      "provenance": "OpenAlex/notebook/paper_author.ipynb"
     },
     {
       "path": "OpenAlex/output/paper_z_score.parquet",
       "family": "paper",
-      "rows": 41425041,
-      "bytes": 1066979964,
+      "rows": 46394048,
+      "bytes": 1192642760,
       "columns": [
         "paper_id",
         "Z_median",
@@ -911,40 +879,40 @@
           "name": "paper_id",
           "type": "string",
           "nullable": true,
-          "description": "OpenAlex work id as a string: 'W' followed by digits (e.g. W3002427681), URL prefix stripped; joins every other OpenAlex/output table. Only journal-type works (primary-location source of OpenAlex type 'journal') published 1980-2020, with 2-1000 dated references in the graph and at least one scorable journal pair (41.4M); merged from the year-range partitions, 1900-1979 never run.",
-          "example": "W100000241"
+          "description": "OpenAlex work id as a string: 'W' followed by digits (e.g. W3002427681), URL prefix stripped; joins every other OpenAlex/output table. Only journal-type works (primary-location source of OpenAlex type 'journal') published 1980-2020, with 2-1000 dated references in the graph and at least one scorable journal pair (46.4M); merged from the 18 year-range partitions, 1900-1979 never run.",
+          "example": "W100000009"
         },
         {
           "name": "Z_median",
           "type": "double",
           "nullable": true,
           "description": "Median (numpy linear interpolation) of the Uzzi et al. (2013) z-scores of the distinct journal pairs formed by the journals of the paper's references (self-pairs included), each z taken from the paper's publication-year cohort (z_score_pair). Unitless; low or negative = atypical combinations, high = conventional.",
-          "example": "39.4466"
+          "example": "0.352423"
         },
         {
           "name": "Z_10pct",
           "type": "double",
           "nullable": true,
           "description": "10th percentile (numpy linear interpolation) of the same distinct-pair z-scores: the novelty tail (negative = the paper makes some combinations rarer than chance).",
-          "example": "8.11569"
+          "example": "-1.09757"
         },
         {
           "name": "Z_min",
           "type": "double",
           "nullable": true,
           "description": "Minimum z over the paper's distinct journal pairs (an addition to Uzzi et al.).",
-          "example": "4.42832"
+          "example": "-1.37859"
         },
         {
           "name": "n_pairs",
           "type": "int64",
           "nullable": true,
           "description": "Number of distinct journal pairs among the paper's references that received a z (pairs whose null standard deviation is 0 are dropped); distinct pairs, not pair occurrences.",
-          "example": "23"
+          "example": "4"
         }
       ],
-      "row_groups": 42,
-      "modified_utc": "2026-09-04T14:17:34.614565Z",
+      "row_groups": 47,
+      "modified_utc": "2026-10-09T06:16:44.591180Z",
       "grain": "One document.",
       "provenance": "OpenAlex/output/paper_z_score_provenance.json",
       "coverage_years": [
@@ -955,8 +923,8 @@
     {
       "path": "OpenAlex/output/z_score_pair.parquet",
       "family": "paper",
-      "rows": 430010933,
-      "bytes": 2529290969,
+      "rows": 533458701,
+      "bytes": 3136864079,
       "columns": [
         "code_1",
         "code_2",
@@ -990,11 +958,11 @@
           "type": "double",
           "nullable": true,
           "description": "z = (observed - null mean) / null SD for the journal pair in that year. Observed = co-occurrences of the pair across the reference lists of that year's focal papers, counted with multiplicity; null = 10 rewirings that swap cited works within each (citing year, cited year) cell; population SD (ddof=0); pairs with null SD 0 are omitted. Negative = rarer than chance (atypical).",
-          "example": "1418.86"
+          "example": "1408.04"
         }
       ],
-      "row_groups": 430,
-      "modified_utc": "2026-09-04T14:18:50.172884Z",
+      "row_groups": 533,
+      "modified_utc": "2026-10-09T06:18:20.791807Z",
       "grain": "One journal pair per cohort year.",
       "provenance": "OpenAlex/output/paper_z_score_provenance.json",
       "coverage_years": [
@@ -5098,7 +5066,7 @@
       "path": "PATSTAT/output/patstat_feg_disruption_trend.parquet",
       "family": "patstat",
       "rows": 124,
-      "bytes": 51840,
+      "bytes": 50093,
       "columns": [
         "year",
         "n",
@@ -5147,7 +5115,7 @@
           "name": "n",
           "type": "int64",
           "nullable": true,
-          "description": "Number of applications of this cohort in patstat_disruption with a non-NULL CD_all, i.e. with at least one citer; the denominator of the ni/nj/nk/njfrac means.",
+          "description": "Number of applications of this cohort in patstat_disruption with a non-NULL CD_all, i.e. with at least one citer: the denominator of the `_all` means. The 3-, 5- and 10-year ni / nj / nk / njfrac means are taken over the subset with something in that window.",
           "example": "14886"
         },
         {
@@ -5182,29 +5150,29 @@
           "name": "ni_3_mean",
           "type": "double",
           "nullable": true,
-          "description": "Mean of ni_3 over all n applications of the cohort INCLUDING the -1 sentinel of those with nothing in the window, so it is biased downward and can be negative (exactly -1 for early cohorts with no activity within 3 years). Recompute from patstat_disruption excluding -1 for a true mean.",
-          "example": "-0.999866"
+          "description": "Mean of ni_3 (citers that cite none of its references) over the cohort's applications with something in the 3-year window: the -1 placeholder of a application with nothing in it (no citer and nothing citing its references) is read as NULL. NULL when no application of the cohort has anything in the window (the earliest cohorts). Before 2026-10-03 the -1 rows were averaged in, which made this negative for early cohorts.",
+          "example": "1"
         },
         {
           "name": "nj_3_mean",
           "type": "double",
           "nullable": true,
-          "description": "Mean of nj_3 over all n applications of the cohort INCLUDING the -1 sentinel of those with nothing in the window, so it is biased downward and can be negative (exactly -1 for early cohorts with no activity within 3 years). Recompute from patstat_disruption excluding -1 for a true mean.",
-          "example": "-0.999933"
+          "description": "Mean of nj_3 (citers that also cite at least one of its references) over the cohort's applications with something in the 3-year window: the -1 placeholder of a application with nothing in it (no citer and nothing citing its references) is read as NULL. NULL when no application of the cohort has anything in the window (the earliest cohorts). Before 2026-10-03 the -1 rows were averaged in, which made this negative for early cohorts.",
+          "example": "0"
         },
         {
           "name": "nk_3_mean",
           "type": "double",
           "nullable": true,
-          "description": "Mean of nk_3 over all n applications of the cohort INCLUDING the -1 sentinel of those with nothing in the window, so it is biased downward and can be negative (exactly -1 for early cohorts with no activity within 3 years). Recompute from patstat_disruption excluding -1 for a true mean.",
-          "example": "-0.999933"
+          "description": "Mean of nk_3 (documents citing its references but not it) over the cohort's applications with something in the 3-year window: the -1 placeholder of a application with nothing in it (no citer and nothing citing its references) is read as NULL. NULL when no application of the cohort has anything in the window (the earliest cohorts). Before 2026-10-03 the -1 rows were averaged in, which made this negative for early cohorts.",
+          "example": "0"
         },
         {
           "name": "njfrac_3_mean",
           "type": "double",
           "nullable": true,
-          "description": "Mean over all n applications of nj_3 / (ni_3 + nj_3 + nk_3). Rows with the -1 sentinel give (-1)/(-3) = 1/3, so the value is pulled toward 0.333 (exactly 0.333 for cohorts with no activity within 3 years); recompute excluding -1 rows for the true share.",
-          "example": "0.333311"
+          "description": "Mean of the per-application nj_3 / (ni_3 + nj_3 + nk_3), the share of the 3-year neighbourhood that cites both the application and its references, over the applications with something in the window (the -1 placeholder is read as NULL); NULL when there are none. Before 2026-10-03 the -1 rows entered as (-1)/(-3) = 1/3 and pulled the mean toward 0.333.",
+          "example": "0"
         },
         {
           "name": "CD_5_mean",
@@ -5238,29 +5206,29 @@
           "name": "ni_5_mean",
           "type": "double",
           "nullable": true,
-          "description": "Mean of ni_5 over all n applications of the cohort INCLUDING the -1 sentinel of those with nothing in the window, so it is biased downward and can be negative (exactly -1 for early cohorts with no activity within 5 years). Recompute from patstat_disruption excluding -1 for a true mean.",
-          "example": "-0.999866"
+          "description": "Mean of ni_5 (citers that cite none of its references) over the cohort's applications with something in the 5-year window: the -1 placeholder of a application with nothing in it (no citer and nothing citing its references) is read as NULL. NULL when no application of the cohort has anything in the window (the earliest cohorts). Before 2026-10-03 the -1 rows were averaged in, which made this negative for early cohorts.",
+          "example": "1"
         },
         {
           "name": "nj_5_mean",
           "type": "double",
           "nullable": true,
-          "description": "Mean of nj_5 over all n applications of the cohort INCLUDING the -1 sentinel of those with nothing in the window, so it is biased downward and can be negative (exactly -1 for early cohorts with no activity within 5 years). Recompute from patstat_disruption excluding -1 for a true mean.",
-          "example": "-0.999933"
+          "description": "Mean of nj_5 (citers that also cite at least one of its references) over the cohort's applications with something in the 5-year window: the -1 placeholder of a application with nothing in it (no citer and nothing citing its references) is read as NULL. NULL when no application of the cohort has anything in the window (the earliest cohorts). Before 2026-10-03 the -1 rows were averaged in, which made this negative for early cohorts.",
+          "example": "0"
         },
         {
           "name": "nk_5_mean",
           "type": "double",
           "nullable": true,
-          "description": "Mean of nk_5 over all n applications of the cohort INCLUDING the -1 sentinel of those with nothing in the window, so it is biased downward and can be negative (exactly -1 for early cohorts with no activity within 5 years). Recompute from patstat_disruption excluding -1 for a true mean.",
-          "example": "-0.999933"
+          "description": "Mean of nk_5 (documents citing its references but not it) over the cohort's applications with something in the 5-year window: the -1 placeholder of a application with nothing in it (no citer and nothing citing its references) is read as NULL. NULL when no application of the cohort has anything in the window (the earliest cohorts). Before 2026-10-03 the -1 rows were averaged in, which made this negative for early cohorts.",
+          "example": "0"
         },
         {
           "name": "njfrac_5_mean",
           "type": "double",
           "nullable": true,
-          "description": "Mean over all n applications of nj_5 / (ni_5 + nj_5 + nk_5). Rows with the -1 sentinel give (-1)/(-3) = 1/3, so the value is pulled toward 0.333 (exactly 0.333 for cohorts with no activity within 5 years); recompute excluding -1 rows for the true share.",
-          "example": "0.333311"
+          "description": "Mean of the per-application nj_5 / (ni_5 + nj_5 + nk_5), the share of the 5-year neighbourhood that cites both the application and its references, over the applications with something in the window (the -1 placeholder is read as NULL); NULL when there are none. Before 2026-10-03 the -1 rows entered as (-1)/(-3) = 1/3 and pulled the mean toward 0.333.",
+          "example": "0"
         },
         {
           "name": "CD_10_mean",
@@ -5294,29 +5262,29 @@
           "name": "ni_10_mean",
           "type": "double",
           "nullable": true,
-          "description": "Mean of ni_10 over all n applications of the cohort INCLUDING the -1 sentinel of those with nothing in the window, so it is biased downward and can be negative (exactly -1 for early cohorts with no activity within 10 years). Recompute from patstat_disruption excluding -1 for a true mean.",
-          "example": "-0.999866"
+          "description": "Mean of ni_10 (citers that cite none of its references) over the cohort's applications with something in the 10-year window: the -1 placeholder of a application with nothing in it (no citer and nothing citing its references) is read as NULL. NULL when no application of the cohort has anything in the window (the earliest cohorts). Before 2026-10-03 the -1 rows were averaged in, which made this negative for early cohorts.",
+          "example": "1"
         },
         {
           "name": "nj_10_mean",
           "type": "double",
           "nullable": true,
-          "description": "Mean of nj_10 over all n applications of the cohort INCLUDING the -1 sentinel of those with nothing in the window, so it is biased downward and can be negative (exactly -1 for early cohorts with no activity within 10 years). Recompute from patstat_disruption excluding -1 for a true mean.",
-          "example": "-0.999933"
+          "description": "Mean of nj_10 (citers that also cite at least one of its references) over the cohort's applications with something in the 10-year window: the -1 placeholder of a application with nothing in it (no citer and nothing citing its references) is read as NULL. NULL when no application of the cohort has anything in the window (the earliest cohorts). Before 2026-10-03 the -1 rows were averaged in, which made this negative for early cohorts.",
+          "example": "0"
         },
         {
           "name": "nk_10_mean",
           "type": "double",
           "nullable": true,
-          "description": "Mean of nk_10 over all n applications of the cohort INCLUDING the -1 sentinel of those with nothing in the window, so it is biased downward and can be negative (exactly -1 for early cohorts with no activity within 10 years). Recompute from patstat_disruption excluding -1 for a true mean.",
-          "example": "-0.999933"
+          "description": "Mean of nk_10 (documents citing its references but not it) over the cohort's applications with something in the 10-year window: the -1 placeholder of a application with nothing in it (no citer and nothing citing its references) is read as NULL. NULL when no application of the cohort has anything in the window (the earliest cohorts). Before 2026-10-03 the -1 rows were averaged in, which made this negative for early cohorts.",
+          "example": "0"
         },
         {
           "name": "njfrac_10_mean",
           "type": "double",
           "nullable": true,
-          "description": "Mean over all n applications of nj_10 / (ni_10 + nj_10 + nk_10). Rows with the -1 sentinel give (-1)/(-3) = 1/3, so the value is pulled toward 0.333 (exactly 0.333 for cohorts with no activity within 10 years); recompute excluding -1 rows for the true share.",
-          "example": "0.333311"
+          "description": "Mean of the per-application nj_10 / (ni_10 + nj_10 + nk_10), the share of the 10-year neighbourhood that cites both the application and its references, over the applications with something in the window (the -1 placeholder is read as NULL); NULL when there are none. Before 2026-10-03 the -1 rows entered as (-1)/(-3) = 1/3 and pulled the mean toward 0.333.",
+          "example": "0"
         },
         {
           "name": "CD_all_mean",
@@ -5376,7 +5344,7 @@
         }
       ],
       "row_groups": 1,
-      "modified_utc": "2026-10-01T17:26:15.029057Z",
+      "modified_utc": "2026-10-03T18:51:00.386275Z",
       "grain": "One cohort year with aggregate metrics.",
       "note": "Filing clock: filing years at both ends, every application."
     },
@@ -7316,7 +7284,7 @@
       "path": "PATSTAT/output_grant/patstat_feg_disruption_trend.parquet",
       "family": "patstat",
       "rows": 124,
-      "bytes": 48425,
+      "bytes": 46583,
       "columns": [
         "year",
         "n",
@@ -7365,7 +7333,7 @@
           "name": "n",
           "type": "int64",
           "nullable": true,
-          "description": "Number of applications of this cohort in patstat_disruption with a non-NULL CD_all, i.e. with at least one citer; the denominator of the ni/nj/nk/njfrac means.",
+          "description": "Number of applications of this cohort in patstat_disruption with a non-NULL CD_all, i.e. with at least one citer: the denominator of the `_all` means. The 3-, 5- and 10-year ni / nj / nk / njfrac means are taken over the subset with something in that window.",
           "example": "44827"
         },
         {
@@ -7400,29 +7368,29 @@
           "name": "ni_3_mean",
           "type": "double",
           "nullable": true,
-          "description": "Mean of ni_3 over all n applications of the cohort INCLUDING the -1 sentinel of those with nothing in the window, so it is biased downward and can be negative (exactly -1 for early cohorts with no activity within 3 years). Recompute from patstat_disruption excluding -1 for a true mean.",
-          "example": "-0.999955"
+          "description": "Mean of ni_3 (citers that cite none of its references) over the cohort's applications with something in the 3-year window: the -1 placeholder of a application with nothing in it (no citer and nothing citing its references) is read as NULL. NULL when no application of the cohort has anything in the window (the earliest cohorts). Before 2026-10-03 the -1 rows were averaged in, which made this negative for early cohorts.",
+          "example": "1"
         },
         {
           "name": "nj_3_mean",
           "type": "double",
           "nullable": true,
-          "description": "Mean of nj_3 over all n applications of the cohort INCLUDING the -1 sentinel of those with nothing in the window, so it is biased downward and can be negative (exactly -1 for early cohorts with no activity within 3 years). Recompute from patstat_disruption excluding -1 for a true mean.",
-          "example": "-0.999978"
+          "description": "Mean of nj_3 (citers that also cite at least one of its references) over the cohort's applications with something in the 3-year window: the -1 placeholder of a application with nothing in it (no citer and nothing citing its references) is read as NULL. NULL when no application of the cohort has anything in the window (the earliest cohorts). Before 2026-10-03 the -1 rows were averaged in, which made this negative for early cohorts.",
+          "example": "0"
         },
         {
           "name": "nk_3_mean",
           "type": "double",
           "nullable": true,
-          "description": "Mean of nk_3 over all n applications of the cohort INCLUDING the -1 sentinel of those with nothing in the window, so it is biased downward and can be negative (exactly -1 for early cohorts with no activity within 3 years). Recompute from patstat_disruption excluding -1 for a true mean.",
-          "example": "-0.999978"
+          "description": "Mean of nk_3 (documents citing its references but not it) over the cohort's applications with something in the 3-year window: the -1 placeholder of a application with nothing in it (no citer and nothing citing its references) is read as NULL. NULL when no application of the cohort has anything in the window (the earliest cohorts). Before 2026-10-03 the -1 rows were averaged in, which made this negative for early cohorts.",
+          "example": "0"
         },
         {
           "name": "njfrac_3_mean",
           "type": "double",
           "nullable": true,
-          "description": "Mean over all n applications of nj_3 / (ni_3 + nj_3 + nk_3). Rows with the -1 sentinel give (-1)/(-3) = 1/3, so the value is pulled toward 0.333 (exactly 0.333 for cohorts with no activity within 3 years); recompute excluding -1 rows for the true share.",
-          "example": "0.333326"
+          "description": "Mean of the per-application nj_3 / (ni_3 + nj_3 + nk_3), the share of the 3-year neighbourhood that cites both the application and its references, over the applications with something in the window (the -1 placeholder is read as NULL); NULL when there are none. Before 2026-10-03 the -1 rows entered as (-1)/(-3) = 1/3 and pulled the mean toward 0.333.",
+          "example": "0"
         },
         {
           "name": "CD_5_mean",
@@ -7456,29 +7424,29 @@
           "name": "ni_5_mean",
           "type": "double",
           "nullable": true,
-          "description": "Mean of ni_5 over all n applications of the cohort INCLUDING the -1 sentinel of those with nothing in the window, so it is biased downward and can be negative (exactly -1 for early cohorts with no activity within 5 years). Recompute from patstat_disruption excluding -1 for a true mean.",
-          "example": "-0.999955"
+          "description": "Mean of ni_5 (citers that cite none of its references) over the cohort's applications with something in the 5-year window: the -1 placeholder of a application with nothing in it (no citer and nothing citing its references) is read as NULL. NULL when no application of the cohort has anything in the window (the earliest cohorts). Before 2026-10-03 the -1 rows were averaged in, which made this negative for early cohorts.",
+          "example": "1"
         },
         {
           "name": "nj_5_mean",
           "type": "double",
           "nullable": true,
-          "description": "Mean of nj_5 over all n applications of the cohort INCLUDING the -1 sentinel of those with nothing in the window, so it is biased downward and can be negative (exactly -1 for early cohorts with no activity within 5 years). Recompute from patstat_disruption excluding -1 for a true mean.",
-          "example": "-0.999978"
+          "description": "Mean of nj_5 (citers that also cite at least one of its references) over the cohort's applications with something in the 5-year window: the -1 placeholder of a application with nothing in it (no citer and nothing citing its references) is read as NULL. NULL when no application of the cohort has anything in the window (the earliest cohorts). Before 2026-10-03 the -1 rows were averaged in, which made this negative for early cohorts.",
+          "example": "0"
         },
         {
           "name": "nk_5_mean",
           "type": "double",
           "nullable": true,
-          "description": "Mean of nk_5 over all n applications of the cohort INCLUDING the -1 sentinel of those with nothing in the window, so it is biased downward and can be negative (exactly -1 for early cohorts with no activity within 5 years). Recompute from patstat_disruption excluding -1 for a true mean.",
-          "example": "-0.999978"
+          "description": "Mean of nk_5 (documents citing its references but not it) over the cohort's applications with something in the 5-year window: the -1 placeholder of a application with nothing in it (no citer and nothing citing its references) is read as NULL. NULL when no application of the cohort has anything in the window (the earliest cohorts). Before 2026-10-03 the -1 rows were averaged in, which made this negative for early cohorts.",
+          "example": "0"
         },
         {
           "name": "njfrac_5_mean",
           "type": "double",
           "nullable": true,
-          "description": "Mean over all n applications of nj_5 / (ni_5 + nj_5 + nk_5). Rows with the -1 sentinel give (-1)/(-3) = 1/3, so the value is pulled toward 0.333 (exactly 0.333 for cohorts with no activity within 5 years); recompute excluding -1 rows for the true share.",
-          "example": "0.333326"
+          "description": "Mean of the per-application nj_5 / (ni_5 + nj_5 + nk_5), the share of the 5-year neighbourhood that cites both the application and its references, over the applications with something in the window (the -1 placeholder is read as NULL); NULL when there are none. Before 2026-10-03 the -1 rows entered as (-1)/(-3) = 1/3 and pulled the mean toward 0.333.",
+          "example": "0"
         },
         {
           "name": "CD_10_mean",
@@ -7512,29 +7480,29 @@
           "name": "ni_10_mean",
           "type": "double",
           "nullable": true,
-          "description": "Mean of ni_10 over all n applications of the cohort INCLUDING the -1 sentinel of those with nothing in the window, so it is biased downward and can be negative (exactly -1 for early cohorts with no activity within 10 years). Recompute from patstat_disruption excluding -1 for a true mean.",
-          "example": "-0.999955"
+          "description": "Mean of ni_10 (citers that cite none of its references) over the cohort's applications with something in the 10-year window: the -1 placeholder of a application with nothing in it (no citer and nothing citing its references) is read as NULL. NULL when no application of the cohort has anything in the window (the earliest cohorts). Before 2026-10-03 the -1 rows were averaged in, which made this negative for early cohorts.",
+          "example": "1"
         },
         {
           "name": "nj_10_mean",
           "type": "double",
           "nullable": true,
-          "description": "Mean of nj_10 over all n applications of the cohort INCLUDING the -1 sentinel of those with nothing in the window, so it is biased downward and can be negative (exactly -1 for early cohorts with no activity within 10 years). Recompute from patstat_disruption excluding -1 for a true mean.",
-          "example": "-0.999978"
+          "description": "Mean of nj_10 (citers that also cite at least one of its references) over the cohort's applications with something in the 10-year window: the -1 placeholder of a application with nothing in it (no citer and nothing citing its references) is read as NULL. NULL when no application of the cohort has anything in the window (the earliest cohorts). Before 2026-10-03 the -1 rows were averaged in, which made this negative for early cohorts.",
+          "example": "0"
         },
         {
           "name": "nk_10_mean",
           "type": "double",
           "nullable": true,
-          "description": "Mean of nk_10 over all n applications of the cohort INCLUDING the -1 sentinel of those with nothing in the window, so it is biased downward and can be negative (exactly -1 for early cohorts with no activity within 10 years). Recompute from patstat_disruption excluding -1 for a true mean.",
-          "example": "-0.999978"
+          "description": "Mean of nk_10 (documents citing its references but not it) over the cohort's applications with something in the 10-year window: the -1 placeholder of a application with nothing in it (no citer and nothing citing its references) is read as NULL. NULL when no application of the cohort has anything in the window (the earliest cohorts). Before 2026-10-03 the -1 rows were averaged in, which made this negative for early cohorts.",
+          "example": "0"
         },
         {
           "name": "njfrac_10_mean",
           "type": "double",
           "nullable": true,
-          "description": "Mean over all n applications of nj_10 / (ni_10 + nj_10 + nk_10). Rows with the -1 sentinel give (-1)/(-3) = 1/3, so the value is pulled toward 0.333 (exactly 0.333 for cohorts with no activity within 10 years); recompute excluding -1 rows for the true share.",
-          "example": "0.333326"
+          "description": "Mean of the per-application nj_10 / (ni_10 + nj_10 + nk_10), the share of the 10-year neighbourhood that cites both the application and its references, over the applications with something in the window (the -1 placeholder is read as NULL); NULL when there are none. Before 2026-10-03 the -1 rows entered as (-1)/(-3) = 1/3 and pulled the mean toward 0.333.",
+          "example": "0"
         },
         {
           "name": "CD_all_mean",
@@ -7594,7 +7562,7 @@
         }
       ],
       "row_groups": 1,
-      "modified_utc": "2026-10-01T19:27:44.134154Z",
+      "modified_utc": "2026-10-03T18:50:55.249217Z",
       "grain": "One cohort year with aggregate metrics.",
       "note": "Grant clock: grant years at both ends, granted applications only."
     },
@@ -9534,7 +9502,7 @@
       "path": "PATSTAT/output_family/patstat_feg_disruption_trend.parquet",
       "family": "patstat",
       "rows": 124,
-      "bytes": 52457,
+      "bytes": 50459,
       "columns": [
         "year",
         "n",
@@ -9583,7 +9551,7 @@
           "name": "n",
           "type": "int64",
           "nullable": true,
-          "description": "Number of families of this cohort in patstat_disruption with a non-NULL CD_all, i.e. with at least one citer; the denominator of the ni/nj/nk/njfrac means.",
+          "description": "Number of families of this cohort in patstat_disruption with a non-NULL CD_all, i.e. with at least one citer: the denominator of the `_all` means. The 3-, 5- and 10-year ni / nj / nk / njfrac means are taken over the subset with something in that window.",
           "example": "16496"
         },
         {
@@ -9618,29 +9586,29 @@
           "name": "ni_3_mean",
           "type": "double",
           "nullable": true,
-          "description": "Mean of ni_3 over all n families of the cohort INCLUDING the -1 sentinel of those with nothing in the window, so it is biased downward and can be negative (exactly -1 for early cohorts with no activity within 3 years). Recompute from patstat_disruption excluding -1 for a true mean.",
-          "example": "-0.999879"
+          "description": "Mean of ni_3 (citers that cite none of its references) over the cohort's families with something in the 3-year window: the -1 placeholder of a family with nothing in it (no citer and nothing citing its references) is read as NULL. NULL when no family of the cohort has anything in the window (the earliest cohorts). Before 2026-10-03 the -1 rows were averaged in, which made this negative for early cohorts.",
+          "example": "1"
         },
         {
           "name": "nj_3_mean",
           "type": "double",
           "nullable": true,
-          "description": "Mean of nj_3 over all n families of the cohort INCLUDING the -1 sentinel of those with nothing in the window, so it is biased downward and can be negative (exactly -1 for early cohorts with no activity within 3 years). Recompute from patstat_disruption excluding -1 for a true mean.",
-          "example": "-0.999939"
+          "description": "Mean of nj_3 (citers that also cite at least one of its references) over the cohort's families with something in the 3-year window: the -1 placeholder of a family with nothing in it (no citer and nothing citing its references) is read as NULL. NULL when no family of the cohort has anything in the window (the earliest cohorts). Before 2026-10-03 the -1 rows were averaged in, which made this negative for early cohorts.",
+          "example": "0"
         },
         {
           "name": "nk_3_mean",
           "type": "double",
           "nullable": true,
-          "description": "Mean of nk_3 over all n families of the cohort INCLUDING the -1 sentinel of those with nothing in the window, so it is biased downward and can be negative (exactly -1 for early cohorts with no activity within 3 years). Recompute from patstat_disruption excluding -1 for a true mean.",
-          "example": "-0.999939"
+          "description": "Mean of nk_3 (documents citing its references but not it) over the cohort's families with something in the 3-year window: the -1 placeholder of a family with nothing in it (no citer and nothing citing its references) is read as NULL. NULL when no family of the cohort has anything in the window (the earliest cohorts). Before 2026-10-03 the -1 rows were averaged in, which made this negative for early cohorts.",
+          "example": "0"
         },
         {
           "name": "njfrac_3_mean",
           "type": "double",
           "nullable": true,
-          "description": "Mean over all n families of nj_3 / (ni_3 + nj_3 + nk_3). Rows with the -1 sentinel give (-1)/(-3) = 1/3, so the value is pulled toward 0.333 (exactly 0.333 for cohorts with no activity within 3 years); recompute excluding -1 rows for the true share.",
-          "example": "0.333313"
+          "description": "Mean of the per-family nj_3 / (ni_3 + nj_3 + nk_3), the share of the 3-year neighbourhood that cites both the family and its references, over the families with something in the window (the -1 placeholder is read as NULL); NULL when there are none. Before 2026-10-03 the -1 rows entered as (-1)/(-3) = 1/3 and pulled the mean toward 0.333.",
+          "example": "0"
         },
         {
           "name": "CD_5_mean",
@@ -9674,29 +9642,29 @@
           "name": "ni_5_mean",
           "type": "double",
           "nullable": true,
-          "description": "Mean of ni_5 over all n families of the cohort INCLUDING the -1 sentinel of those with nothing in the window, so it is biased downward and can be negative (exactly -1 for early cohorts with no activity within 5 years). Recompute from patstat_disruption excluding -1 for a true mean.",
-          "example": "-0.999879"
+          "description": "Mean of ni_5 (citers that cite none of its references) over the cohort's families with something in the 5-year window: the -1 placeholder of a family with nothing in it (no citer and nothing citing its references) is read as NULL. NULL when no family of the cohort has anything in the window (the earliest cohorts). Before 2026-10-03 the -1 rows were averaged in, which made this negative for early cohorts.",
+          "example": "1"
         },
         {
           "name": "nj_5_mean",
           "type": "double",
           "nullable": true,
-          "description": "Mean of nj_5 over all n families of the cohort INCLUDING the -1 sentinel of those with nothing in the window, so it is biased downward and can be negative (exactly -1 for early cohorts with no activity within 5 years). Recompute from patstat_disruption excluding -1 for a true mean.",
-          "example": "-0.999939"
+          "description": "Mean of nj_5 (citers that also cite at least one of its references) over the cohort's families with something in the 5-year window: the -1 placeholder of a family with nothing in it (no citer and nothing citing its references) is read as NULL. NULL when no family of the cohort has anything in the window (the earliest cohorts). Before 2026-10-03 the -1 rows were averaged in, which made this negative for early cohorts.",
+          "example": "0"
         },
         {
           "name": "nk_5_mean",
           "type": "double",
           "nullable": true,
-          "description": "Mean of nk_5 over all n families of the cohort INCLUDING the -1 sentinel of those with nothing in the window, so it is biased downward and can be negative (exactly -1 for early cohorts with no activity within 5 years). Recompute from patstat_disruption excluding -1 for a true mean.",
-          "example": "-0.999939"
+          "description": "Mean of nk_5 (documents citing its references but not it) over the cohort's families with something in the 5-year window: the -1 placeholder of a family with nothing in it (no citer and nothing citing its references) is read as NULL. NULL when no family of the cohort has anything in the window (the earliest cohorts). Before 2026-10-03 the -1 rows were averaged in, which made this negative for early cohorts.",
+          "example": "0"
         },
         {
           "name": "njfrac_5_mean",
           "type": "double",
           "nullable": true,
-          "description": "Mean over all n families of nj_5 / (ni_5 + nj_5 + nk_5). Rows with the -1 sentinel give (-1)/(-3) = 1/3, so the value is pulled toward 0.333 (exactly 0.333 for cohorts with no activity within 5 years); recompute excluding -1 rows for the true share.",
-          "example": "0.333313"
+          "description": "Mean of the per-family nj_5 / (ni_5 + nj_5 + nk_5), the share of the 5-year neighbourhood that cites both the family and its references, over the families with something in the window (the -1 placeholder is read as NULL); NULL when there are none. Before 2026-10-03 the -1 rows entered as (-1)/(-3) = 1/3 and pulled the mean toward 0.333.",
+          "example": "0"
         },
         {
           "name": "CD_10_mean",
@@ -9730,29 +9698,29 @@
           "name": "ni_10_mean",
           "type": "double",
           "nullable": true,
-          "description": "Mean of ni_10 over all n families of the cohort INCLUDING the -1 sentinel of those with nothing in the window, so it is biased downward and can be negative (exactly -1 for early cohorts with no activity within 10 years). Recompute from patstat_disruption excluding -1 for a true mean.",
-          "example": "-0.999879"
+          "description": "Mean of ni_10 (citers that cite none of its references) over the cohort's families with something in the 10-year window: the -1 placeholder of a family with nothing in it (no citer and nothing citing its references) is read as NULL. NULL when no family of the cohort has anything in the window (the earliest cohorts). Before 2026-10-03 the -1 rows were averaged in, which made this negative for early cohorts.",
+          "example": "1"
         },
         {
           "name": "nj_10_mean",
           "type": "double",
           "nullable": true,
-          "description": "Mean of nj_10 over all n families of the cohort INCLUDING the -1 sentinel of those with nothing in the window, so it is biased downward and can be negative (exactly -1 for early cohorts with no activity within 10 years). Recompute from patstat_disruption excluding -1 for a true mean.",
-          "example": "-0.999939"
+          "description": "Mean of nj_10 (citers that also cite at least one of its references) over the cohort's families with something in the 10-year window: the -1 placeholder of a family with nothing in it (no citer and nothing citing its references) is read as NULL. NULL when no family of the cohort has anything in the window (the earliest cohorts). Before 2026-10-03 the -1 rows were averaged in, which made this negative for early cohorts.",
+          "example": "0"
         },
         {
           "name": "nk_10_mean",
           "type": "double",
           "nullable": true,
-          "description": "Mean of nk_10 over all n families of the cohort INCLUDING the -1 sentinel of those with nothing in the window, so it is biased downward and can be negative (exactly -1 for early cohorts with no activity within 10 years). Recompute from patstat_disruption excluding -1 for a true mean.",
-          "example": "-0.999939"
+          "description": "Mean of nk_10 (documents citing its references but not it) over the cohort's families with something in the 10-year window: the -1 placeholder of a family with nothing in it (no citer and nothing citing its references) is read as NULL. NULL when no family of the cohort has anything in the window (the earliest cohorts). Before 2026-10-03 the -1 rows were averaged in, which made this negative for early cohorts.",
+          "example": "0"
         },
         {
           "name": "njfrac_10_mean",
           "type": "double",
           "nullable": true,
-          "description": "Mean over all n families of nj_10 / (ni_10 + nj_10 + nk_10). Rows with the -1 sentinel give (-1)/(-3) = 1/3, so the value is pulled toward 0.333 (exactly 0.333 for cohorts with no activity within 10 years); recompute excluding -1 rows for the true share.",
-          "example": "0.333313"
+          "description": "Mean of the per-family nj_10 / (ni_10 + nj_10 + nk_10), the share of the 10-year neighbourhood that cites both the family and its references, over the families with something in the window (the -1 placeholder is read as NULL); NULL when there are none. Before 2026-10-03 the -1 rows entered as (-1)/(-3) = 1/3 and pulled the mean toward 0.333.",
+          "example": "0"
         },
         {
           "name": "CD_all_mean",
@@ -9812,7 +9780,7 @@
         }
       ],
       "row_groups": 1,
-      "modified_utc": "2026-10-01T21:59:28.736390Z",
+      "modified_utc": "2026-10-03T18:50:58.235256Z",
       "grain": "One cohort year with aggregate metrics.",
       "note": "Family unit: one row per DOCDB family (key docdb_family_id), earliest priority year at both ends, distinct family-to-family citations; read 'application' in the row meaning as 'family'."
     },
@@ -10786,7 +10754,7 @@
       "path": "pcs/output/pcs_citation.parquet",
       "family": "pcs",
       "rows": 5106527,
-      "bytes": 62568852,
+      "bytes": 63252734,
       "columns": [
         "paper_id",
         "C_3",
@@ -10832,14 +10800,14 @@
           "type": "int64",
           "nullable": true,
           "description": "Number of US patents citing the paper (Reliance on Science rows, any confidence score, front-page or in-text) whose PatentsView grant year y_q is 0 to 10 years after the paper's publication year (0 <= y_q - y_P <= 10, same year included), y_P = OpenAlex publication year. Citing documents without a PatentsView grant year (pre-grant publications, reissue/design/plant numbers) and papers without a year contribute 0; equals C_examiner_10 + C_non_examiner_10.",
-          "example": "0"
+          "example": "1"
         },
         {
           "name": "C_all",
           "type": "int64",
           "nullable": true,
           "description": "Number of US patents citing the paper (Reliance on Science rows, any confidence score, front-page or in-text) whose PatentsView grant year y_q is at or after the paper's publication year (0 <= y_q - y_P, no upper bound), y_P = OpenAlex publication year. Citing documents without a PatentsView grant year (pre-grant publications, reissue/design/plant numbers) and papers without a year contribute 0; equals C_examiner_all + C_non_examiner_all.",
-          "example": "0"
+          "example": "1"
         },
         {
           "name": "C_examiner_3",
@@ -10881,7 +10849,7 @@
           "type": "int64",
           "nullable": true,
           "description": "Part of C_10 whose reftype is anything other than 'exm' (in this file always 'app', applicant/other); in practice equal to C_10.",
-          "example": "0"
+          "example": "1"
         },
         {
           "name": "C_examiner_all",
@@ -10895,7 +10863,7 @@
           "type": "int64",
           "nullable": true,
           "description": "Part of C_all whose reftype is anything other than 'exm' (in this file always 'app', applicant/other); in practice equal to C_all.",
-          "example": "0"
+          "example": "1"
         },
         {
           "name": "C_total",
@@ -10920,14 +10888,14 @@
         }
       ],
       "row_groups": 5,
-      "modified_utc": "2026-09-01T17:35:43.162610Z",
+      "modified_utc": "2026-10-08T17:24:48.714510Z",
       "grain": "One document."
     },
     {
       "path": "pcs/output/pcs_citation_trend.parquet",
       "family": "pcs",
-      "rows": 12992507,
-      "bytes": 51586412,
+      "rows": 14498485,
+      "bytes": 57226096,
       "columns": [
         "paper_id",
         "pub_year",
@@ -10942,29 +10910,29 @@
           "name": "paper_id",
           "type": "string",
           "nullable": true,
-          "description": "OpenAlex work id of the cited paper ('W' + Reliance on Science oaid). Only papers with at least one dated patent citation at a non-negative lag appear (4.36M papers).",
-          "example": "W3066"
+          "description": "OpenAlex work id of the cited paper ('W' + Reliance on Science oaid). Only papers with at least one dated patent citation at a non-negative lag appear (4.87M papers).",
+          "example": "W979"
         },
         {
           "name": "pub_year",
           "type": "int32",
           "nullable": true,
-          "description": "Publication year of the cited paper from the OpenAlex 2026-01-16 snapshot (oa_common.load_map, works publication_year); papers with unknown year are excluded.",
-          "example": "1999"
+          "description": "Publication year of the cited paper from the OpenAlex 2026-09-23 release (oa_common.load_map, works publication_year); papers with unknown year are excluded.",
+          "example": "2006"
         },
         {
           "name": "cite_year",
           "type": "int32",
           "nullable": true,
           "description": "Grant year of the citing US patents (year of PatentsView g_patent patent_date), 1976-2025.",
-          "example": "2007"
+          "example": "2013"
         },
         {
           "name": "yrs_since_pub",
           "type": "int32",
           "nullable": true,
           "description": "cite_year - pub_year in years, always >= 0 (citations from patents granted before the paper's publication year are dropped, not clamped).",
-          "example": "8"
+          "example": "7"
         },
         {
           "name": "pcs",
@@ -10977,7 +10945,7 @@
           "name": "pcs_examiner",
           "type": "double",
           "nullable": true,
-          "description": "Part of pcs whose Reliance on Science reftype is 'exm' (examiner); float64, may print as -0.0. Near-empty (337 citations in the whole table), kept only for schema parity with patent_citation_trend.",
+          "description": "Part of pcs whose Reliance on Science reftype is 'exm' (examiner); float64, may print as -0.0. Near-empty (423 citations in the whole table), kept only for schema parity with patent_citation_trend.",
           "example": "0"
         },
         {
@@ -10988,15 +10956,15 @@
           "example": "1"
         }
       ],
-      "row_groups": 13,
-      "modified_utc": "2026-08-31T20:57:27.332275Z",
+      "row_groups": 14,
+      "modified_utc": "2026-10-08T17:24:49.661808Z",
       "grain": "One document per citing year."
     },
     {
       "path": "pcs/output/pcs_hit_probability.parquet",
       "family": "pcs",
-      "rows": 4480434,
-      "bytes": 79467524,
+      "rows": 5022564,
+      "bytes": 89103419,
       "columns": [
         "paper_id",
         "FoS",
@@ -11011,61 +10979,61 @@
           "name": "paper_id",
           "type": "string",
           "nullable": true,
-          "description": "OpenAlex work id ('W' + integer). Rows are papers present in pcs_citation.parquet (i.e. cited by >= 1 US patent at any date) that also have a field and year in OpenAlex paper_metadata (4.48M); never-patent-cited papers are not in the cohorts.",
-          "example": "W2011473300"
+          "description": "OpenAlex work id ('W' + integer). Rows are papers present in pcs_citation.parquet (i.e. cited by >= 1 US patent at any date) that also have a field and year in OpenAlex paper_metadata (5.02M); never-patent-cited papers are not in the cohorts.",
+          "example": "W2400511492"
         },
         {
           "name": "FoS",
           "type": "string",
           "nullable": true,
-          "description": "Cohort field: the OpenAlex topic-hierarchy field (one of 26, e.g. 'Medicine', 'Engineering') of the paper's highest-scoring topic (FoS_rep), else the first field of FoS_0; taken from OpenAlex paper_metadata at build time (2026-08-31).",
-          "example": "Medicine"
+          "description": "Cohort field: the OpenAlex topic-hierarchy field (one of 26, e.g. 'Medicine', 'Engineering') of the paper's highest-scoring topic (FoS_rep), else the first field of FoS_0; taken from OpenAlex paper_metadata at build time (2026-10-08).",
+          "example": "Biochemistry, Genetics and Molecular Biology"
         },
         {
           "name": "year",
           "type": "int64",
           "nullable": true,
-          "description": "Cohort year: the paper's publication year from OpenAlex/output/paper_metadata.parquet (as of 2026-08-31).",
-          "example": "1997"
+          "description": "Cohort year: the paper's publication year from OpenAlex/output/paper_metadata.parquet (as of 2026-10-08).",
+          "example": "1996"
         },
         {
           "name": "pctl_c3",
           "type": "float",
           "nullable": true,
           "description": "Percentile of the paper's patent-citation count C_3 (pcs_citation) within its (FoS, year) cohort, on a 0-1 scale: pandas rank(method='min', pct=True) = (1 + number of cohort papers with a strictly lower C_3) / cohort size, so values lie in (0, 1] and ties share the lowest rank. A paper with C_3 = 0 gets 1/cohort size, not 0; >= 0.99 reads as top 1 %, but only relative to other patent-cited papers.",
-          "example": "3.6266e-05"
+          "example": "4.29129e-05"
         },
         {
           "name": "pctl_c5",
           "type": "float",
           "nullable": true,
           "description": "Percentile of the paper's patent-citation count C_5 (pcs_citation) within its (FoS, year) cohort, on a 0-1 scale: pandas rank(method='min', pct=True) = (1 + number of cohort papers with a strictly lower C_5) / cohort size, so values lie in (0, 1] and ties share the lowest rank. A paper with C_5 = 0 gets 1/cohort size, not 0; >= 0.99 reads as top 1 %, but only relative to other patent-cited papers.",
-          "example": "3.6266e-05"
+          "example": "4.29129e-05"
         },
         {
           "name": "pctl_c10",
           "type": "float",
           "nullable": true,
           "description": "Percentile of the paper's patent-citation count C_10 (pcs_citation) within its (FoS, year) cohort, on a 0-1 scale: pandas rank(method='min', pct=True) = (1 + number of cohort papers with a strictly lower C_10) / cohort size, so values lie in (0, 1] and ties share the lowest rank. A paper with C_10 = 0 gets 1/cohort size, not 0; >= 0.99 reads as top 1 %, but only relative to other patent-cited papers.",
-          "example": "0.478132"
+          "example": "0.646226"
         },
         {
           "name": "pctl_call",
           "type": "float",
           "nullable": true,
           "description": "Percentile of the paper's patent-citation count C_all (pcs_citation) within its (FoS, year) cohort, on a 0-1 scale: pandas rank(method='min', pct=True) = (1 + number of cohort papers with a strictly lower C_all) / cohort size, so values lie in (0, 1] and ties share the lowest rank. A paper with C_all = 0 gets 1/cohort size, not 0; >= 0.99 reads as top 1 %, but only relative to other patent-cited papers.",
-          "example": "0.991006"
+          "example": "0.313136"
         }
       ],
       "row_groups": 5,
-      "modified_utc": "2026-08-31T16:55:40.431635Z",
+      "modified_utc": "2026-10-08T20:33:02.446737Z",
       "grain": "One document."
     },
     {
       "path": "PPP/output/ppp_paper_trend.parquet",
       "family": "ppp",
-      "rows": 5788073,
-      "bytes": 21100536,
+      "rows": 6724083,
+      "bytes": 23774404,
       "columns": [
         "paperid",
         "patent",
@@ -11081,7 +11049,7 @@
           "name": "paperid",
           "type": "string",
           "nullable": true,
-          "description": "OpenAlex work id ('W' + integer) of the pair's paper; a PPP pairs a paper with the US patent judged to embody the same discovery, from _patent_paper_pairs_plus.csv (548,315 pairs over 335,917 papers and 309,729 patents, ppp_score 1-4; see PPP/ppprev1.pdf). Pairs whose paper is not in the OpenAlex citation graph (10.2 % of pairs) or that received no citations are absent.",
+          "description": "OpenAlex work id ('W' + integer) of the pair's paper; a PPP pairs a paper with the US patent judged to embody the same discovery, from _patent_paper_pairs_plus.csv (548,315 pairs over 335,917 papers and 309,729 patents, ppp_score 1-4; see PPP/ppprev1.pdf). Pairs whose paper is not in the OpenAlex citation graph (1.1 % of pairs) or that received no citations are absent.",
           "example": "W2025049717"
         },
         {
@@ -11116,7 +11084,7 @@
           "name": "p2p",
           "type": "int64",
           "nullable": true,
-          "description": "Paper->paper citations: number of OpenAlex works (any type, 2026-01-16 snapshot reference graph) published in cite_year that cite the pair's paper. Rows exist only for years with >= 1 p2p or pat2p citation, so 0 here means the row exists because of patent citations.",
+          "description": "Paper->paper citations: number of OpenAlex works (any type, 2026-09-23 release reference graph) published in cite_year that cite the pair's paper. Rows exist only for years with >= 1 p2p or pat2p citation, so 0 here means the row exists because of patent citations.",
           "example": "3"
         },
         {
@@ -11134,8 +11102,8 @@
           "example": "0"
         }
       ],
-      "row_groups": 6,
-      "modified_utc": "2026-09-01T16:19:33.502439Z",
+      "row_groups": 7,
+      "modified_utc": "2026-10-08T17:36:12.851276Z",
       "grain": "One paper-patent linkage pair per citing year with paper-side counts."
     },
     {
@@ -11204,7 +11172,7 @@
         }
       ],
       "row_groups": 3,
-      "modified_utc": "2026-09-01T16:19:35.861542Z",
+      "modified_utc": "2026-10-08T17:36:15.491253Z",
       "grain": "One paper-patent linkage pair per citing year with patent-side counts."
     },
     {
@@ -12099,9 +12067,9 @@
       "grain": "One document."
     }
   ],
-  "total_files": 91,
-  "total_rows": 8702270284,
-  "total_bytes": 105877748346,
+  "total_files": 90,
+  "total_rows": 9250375645,
+  "total_bytes": 111313168642,
   "excluded_files": [
     "OpenAlex/output/paper_disruption_trend.parquet",
     "OpenAlex/output/paper_disruption_trend_summary.parquet",
@@ -12109,11 +12077,13 @@
     "OpenAlex/output/paper_topics_long.parquet",
     "OpenAlex/output/paper_z_score_1980_1984.parquet",
     "OpenAlex/output/paper_z_score_1985_1989.parquet",
-    "OpenAlex/output/paper_z_score_1990_2000.parquet",
-    "OpenAlex/output/paper_z_score_2000_2005.parquet",
-    "OpenAlex/output/paper_z_score_2001_2006.onepass.parquet",
-    "OpenAlex/output/paper_z_score_2001_2006.parquet",
-    "OpenAlex/output/paper_z_score_2007_2011.parquet",
+    "OpenAlex/output/paper_z_score_1990_1994.parquet",
+    "OpenAlex/output/paper_z_score_1995_1999.parquet",
+    "OpenAlex/output/paper_z_score_2000_2002.parquet",
+    "OpenAlex/output/paper_z_score_2003_2005.parquet",
+    "OpenAlex/output/paper_z_score_2006_2007.parquet",
+    "OpenAlex/output/paper_z_score_2008_2009.parquet",
+    "OpenAlex/output/paper_z_score_2010_2011.parquet",
     "OpenAlex/output/paper_z_score_2012_2012.parquet",
     "OpenAlex/output/paper_z_score_2013_2013.parquet",
     "OpenAlex/output/paper_z_score_2014_2014.parquet",
@@ -12123,14 +12093,15 @@
     "OpenAlex/output/paper_z_score_2018_2018.parquet",
     "OpenAlex/output/paper_z_score_2019_2019.parquet",
     "OpenAlex/output/paper_z_score_2020_2020.parquet",
-    "OpenAlex/output/paper_z_score_old.parquet",
     "OpenAlex/output/z_score_pair_1980_1984.parquet",
     "OpenAlex/output/z_score_pair_1985_1989.parquet",
-    "OpenAlex/output/z_score_pair_1990_2000.parquet",
-    "OpenAlex/output/z_score_pair_2000_2005.parquet",
-    "OpenAlex/output/z_score_pair_2001_2006.onepass.parquet",
-    "OpenAlex/output/z_score_pair_2001_2006.parquet",
-    "OpenAlex/output/z_score_pair_2007_2011.parquet",
+    "OpenAlex/output/z_score_pair_1990_1994.parquet",
+    "OpenAlex/output/z_score_pair_1995_1999.parquet",
+    "OpenAlex/output/z_score_pair_2000_2002.parquet",
+    "OpenAlex/output/z_score_pair_2003_2005.parquet",
+    "OpenAlex/output/z_score_pair_2006_2007.parquet",
+    "OpenAlex/output/z_score_pair_2008_2009.parquet",
+    "OpenAlex/output/z_score_pair_2010_2011.parquet",
     "OpenAlex/output/z_score_pair_2012_2012.parquet",
     "OpenAlex/output/z_score_pair_2013_2013.parquet",
     "OpenAlex/output/z_score_pair_2014_2014.parquet",
@@ -12140,7 +12111,6 @@
     "OpenAlex/output/z_score_pair_2018_2018.parquet",
     "OpenAlex/output/z_score_pair_2019_2019.parquet",
     "OpenAlex/output/z_score_pair_2020_2020.parquet",
-    "OpenAlex/output/z_score_pair_old.parquet",
     "PatentView/output/patent_citation.parquet.partial-granted-only",
     "PatentView/output/patent_citation_trend_old.parquet",
     "PatentView/output/patent_disruption.parquet.pre-dedup",
@@ -12156,7 +12126,7 @@
       "reason": "Sharded reference intermediate, not a final top-level table."
     }
   ],
-  "exclusions_note": "Explicit canonical top-level outputs only. Old vintages, backups, dated z-score partitions and sharded reference intermediates are excluded. The legacy paper_team_size table remains listed and labeled.",
+  "exclusions_note": "Explicit canonical top-level outputs only. Old vintages, backups, dated z-score partitions and sharded reference intermediates are excluded. The legacy paper_team_size table (no producer) was retired with the 2026-09-23 OpenAlex rebuild; team size lives in paper_author.",
   "paper_z_score_provenance": {
     "path": "OpenAlex/output/paper_z_score_provenance.json",
     "producer": "OpenAlex/notebook/paper_z_score_merge.ipynb",
@@ -12165,15 +12135,19 @@
       1980,
       2020
     ],
-    "paper_rows": 41425041,
+    "paper_rows": 46394048,
     "note": "Coverage is explicitly recorded in the provenance file; the bare output filename does not imply coverage beginning in 1900.",
     "vintage": "post-MAG-alignment fix (is_journal-only mapping) and post two-pass rewrite",
     "partitions": [
       "paper_z_score_1980_1984.parquet",
       "paper_z_score_1985_1989.parquet",
-      "paper_z_score_1990_2000.parquet",
-      "paper_z_score_2001_2006.parquet",
-      "paper_z_score_2007_2011.parquet",
+      "paper_z_score_1990_1994.parquet",
+      "paper_z_score_1995_1999.parquet",
+      "paper_z_score_2000_2002.parquet",
+      "paper_z_score_2003_2005.parquet",
+      "paper_z_score_2006_2007.parquet",
+      "paper_z_score_2008_2009.parquet",
+      "paper_z_score_2010_2011.parquet",
       "paper_z_score_2012_2012.parquet",
       "paper_z_score_2013_2013.parquet",
       "paper_z_score_2014_2014.parquet",
@@ -12190,7 +12164,7 @@
     "producer": "PPP/notebook/ppp_citation_trend.ipynb",
     "configuration": "PPP/ppp_common.py",
     "output_rows": {
-      "ppp_paper_trend": 5788073,
+      "ppp_paper_trend": 6724083,
       "ppp_patent_trend": 2906165
     },
     "note": "Pair counts describe linkage records, not trend rows. Saved outputs embedded in the producing notebook may be stale; provenance below requires a job log matching both current output row counts.",
@@ -12199,8 +12173,8 @@
     "pairs": 548315,
     "distinct_papers": 335917,
     "distinct_patents": 309729,
-    "run_log": "jobs/PPP/logs/PPP_ppp_citation_trend-57022053.out",
-    "run_log_modified_utc": "2026-09-01T16:19:37.695050Z",
+    "run_log": "jobs/OpenAlex/logs/ppp_citation_trend-60314476.out",
+    "run_log_modified_utc": "2026-10-08T17:36:25.821738Z",
     "source_bytes": 52679809
   }
 }

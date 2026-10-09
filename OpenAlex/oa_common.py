@@ -1,14 +1,14 @@
-"""Data layer for the paper-metric notebooks, on renli's OpenAlex snapshot.
+"""Data layer for the paper-metric notebooks, on the OpenAlex snapshot (official parquet release 2026-09-23).
 
 The notebooks were written against MAG + SciSciNet on a Windows drive: a single
 `PaperReferences.txt`, a `paper_metadata.sqlite`, `Journals.txt`, and integer MAG paper ids.
 None of that exists here. This module supplies the same four things from
-`/project/jevans/renli_shared/OpenAlex_2026_Jan_16_Renly_parquet/`, so the metric kernels in
+`/project/jevans/OpenAlex_shared/OpenAlex_2026_Sep_23_flat/`, so the metric kernels in
 the notebooks — the numba disruption engine, the SB kernel, the Uzzi shuffle, the vectorised
 citation counts — run **unchanged**.
 
 The one idea that makes that possible: an OpenAlex work id is `W` followed by digits, and the
-largest in this snapshot is ~7.1e9. `int(id[1:])` therefore round-trips through int64, and the
+largest is ~7.1e9. `int(id[1:])` therefore round-trips through int64, and the
 notebooks' whole code-space machinery (a sorted `uni_mag`, `searchsorted` to map id -> code,
 `'W' + str(code)` to map back) keeps working with the accession number standing in for the MAG
 integer. Nothing about the algorithms changes; only where the numbers come from.
@@ -16,6 +16,16 @@ integer. Nothing about the algorithms changes; only where the numbers come from.
     import oa_common as oa
     oa.build_graph()      # referenced_works -> edges + years, cached as .npz
     oa.build_csr()        # -> out/in adjacency, cached
+
+Snapshot history. Until 2026-10-08 everything here read renli's 2026-01-16 conversion
+(`renli_shared/OpenAlex_2026_Jan_16_Renly_parquet`), which had lost 104M of its 477M works: it named
+every output part after the input file's basename, so same-numbered files from different
+`updated_date=` folders overwrote one another, and 301 failed files were never retried. The outputs
+built on it are kept in `output_Renly/` (caches in `cache_Renly/`). ROOT is now a flattening of
+OpenAlex's own parquet export (`OpenAlex_shared/OpenAlex_2026_Sep_23`, 476,196,327 works) into the
+same table layout, written by `flatten_snapshot.py`, so the notebooks read it unchanged. The one
+table that changed form is the author table: `works/authorships/part_*.parquet` replaces
+`works_au_affs_fixed.csv.gz` (same column names, one row per author slot).
 """
 from __future__ import annotations
 
@@ -30,10 +40,12 @@ import pandas as pd
 import pyarrow.parquet as pq
 
 # ── Where everything lives ────────────────────────────────────────────────────────────────
-ROOT   = "/project/jevans/renli_shared/OpenAlex_2026_Jan_16_Renly_parquet"   # read-only
+ROOT   = "/project/jevans/OpenAlex_shared/OpenAlex_2026_Sep_23_flat"   # read-only, flatten_snapshot.py
+SNAPSHOT = "/project/jevans/OpenAlex_shared/OpenAlex_2026_Sep_23"    # the nested original it was flattened from
 WORKS  = f"{ROOT}/works"
+AUTHORSHIPS = f"{WORKS}/authorships/part_*.parquet"   # replaces renli's works_au_affs_fixed.csv.gz
 BASE   = "/project/jevans/Dawoon/Science of Science/OpenAlex"
-CACHE  = f"{BASE}/cache"                       # our derived artefacts; renli's tree is read-only
+CACHE  = f"{BASE}/cache"                       # our derived artefacts; the snapshot tree is read-only
 OUT    = f"{BASE}/output"          # every notebook writes its parquet here
 for _d in (CACHE, OUT):
     os.makedirs(_d, exist_ok=True)
@@ -52,6 +64,33 @@ FOS_PQ     = f"{CACHE}/paper_fos.parquet"      # was sciscinet_papers_fos.parque
 # used to produce, and the edge table carries the join that used to be redone per notebook.
 MAP_NPZ = f"{CACHE}/work_year_source_map.npz"
 REF_PQ  = f"{OUT}/referenced_works_w_year"
+
+
+def par_imap(fn, items, processes=None):
+    """Ordered parallel map over fork()ed workers: yields fn(item) in the order of `items`.
+
+    For functions that cannot be pickled by name -- closures, or functions defined in a notebook
+    cell. The workers inherit `fn` and every array it reads copy-on-write, so nothing large crosses
+    a pipe except the results. Results arrive in input order, so a loop rewritten with this gives
+    byte-identical output to the serial loop. `processes` defaults to NB_WORKERS (set by
+    nbsave.sbatch to the job's CPUs); 1 runs serially in this process."""
+    global _PAR_FN
+    if processes is None:
+        processes = int(os.environ.get("NB_WORKERS") or os.environ.get("SLURM_CPUS_PER_TASK") or 1)
+    if processes <= 1:
+        yield from map(fn, items)
+        return
+    from multiprocessing import get_context
+    _PAR_FN = fn
+    with get_context("fork").Pool(processes) as pool:
+        yield from pool.imap(_par_call, items, chunksize=1)
+
+
+_PAR_FN = None
+
+
+def _par_call(item):
+    return _PAR_FN(item)
 
 
 def have_consolidated() -> bool:
@@ -104,7 +143,7 @@ YEAR_RANGE = None          # e.g. (1950, 2026); None = no filter beyond YEAR_MIN
 def norm_id(s: pd.Series) -> pd.Series:
     """Bare accession from either form.
 
-    `works_semantic`, `works_au_affs_fixed` and `works_authorships` store the full URL
+    `works_semantic` (and renli's `works_au_affs_fixed`) store the full URL
     (`https://openalex.org/W…`); every other table stores `W…`. Joining the two forms returns
     zero rows and raises nothing, so normalise on the way in, always."""
     return s.astype(str).str.rsplit("/", n=1).str[-1]
@@ -195,7 +234,7 @@ def build_graph(force: bool = False, verbose: bool = True) -> str:
         d = pq.read_table(f, columns=["work_id", "referenced_work_id"]).to_pandas()
         u = to_code(id_to_code(d["work_id"]))
         v = to_code(id_to_code(d["referenced_work_id"]))
-        m = (u >= 0) & (v >= 0)
+        m = (u >= 0) & (v >= 0) & (u != v)     # no self-citations (see referenced_works_w_year)
         if m.any():
             cf.append(u[m]); ct.append(v[m])
         del d, u, v, m
@@ -233,19 +272,22 @@ def _build_graph_from_parquet(verbose: bool = True) -> str:
     parts = ref_parts()
     if verbose:
         print(f"[2/2] edges from {len(parts)} partitions of {REF_PQ} …", flush=True)
-    cf, ct = [], []
-    for i, f in enumerate(parts):
+
+    def one(f):
         d = pq.read_table(f, columns=["work_id", "referenced_work_id"]).to_pandas()
         u = to_code(id_to_code(d["work_id"]))
         v = to_code(id_to_code(d["referenced_work_id"]))
-        m = (u >= 0) & (v >= 0)
-        if m.any():
-            cf.append(u[m]); ct.append(v[m])
-        del d, u, v, m
+        m = (u >= 0) & (v >= 0) & (u != v)     # no self-citations (see referenced_works_w_year)
+        return u[m], v[m]
+
+    cf, ct = [], []
+    for i, (u, v) in enumerate(par_imap(one, parts)):   # parts in order -> same arrays as the serial loop
+        if len(u):
+            cf.append(u); ct.append(v)
+        del u, v
         if verbose and (i + 1) % 200 == 0:
             print(f"      {i+1}/{len(parts)}  {sum(map(len, cf)):,} edges  "
                   f"[{time.time()-t0:.0f}s]", flush=True)
-        gc.collect()
     c_from = np.concatenate(cf).astype(np.int32)
     c_to = np.concatenate(ct).astype(np.int32)
     del cf, ct
@@ -501,9 +543,9 @@ def build_fos(force: bool = False, verbose: bool = True) -> str:
     tp["topic_id"] = norm_id(tp["id"])
     fmap = dict(zip(tp["topic_id"], tp["field_display_name"]))
     dmap = dict(zip(tp["topic_id"], tp["domain_display_name"]))
-    frames = []
     tps = parts("topics")
-    for i, f in enumerate(tps):
+
+    def one(f):
         d = pq.read_table(f, columns=["work_id", "topic_id", "score"]).to_pandas()
         d["work_id"] = norm_id(d["work_id"])
         d["topic_id"] = norm_id(d["topic_id"])
@@ -514,7 +556,11 @@ def build_fos(force: bool = False, verbose: bool = True) -> str:
         rep = d.groupby("work_id", sort=False).first()[["field", "domain"]]
         allf = d.groupby("work_id", sort=False)["field"].apply(
             lambda s: ";".join(pd.unique(s)))
-        frames.append(rep.assign(FoS_0=allf).reset_index())
+        return rep.assign(FoS_0=allf).reset_index()
+
+    frames = []
+    for i, fr in enumerate(par_imap(one, tps)):      # partition order kept -> same table as the serial loop
+        frames.append(fr)
         if verbose and (i + 1) % 300 == 0:
             print(f"  topics {i+1}/{len(tps)}", flush=True)
     out = (pd.concat(frames, ignore_index=True)

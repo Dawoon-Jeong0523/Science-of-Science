@@ -74,7 +74,7 @@ TABLES = {
     'OpenAlex/output/paper_author.parquet': {
         'work_id': ("OpenAlex work id ('W' + digits, URL prefix stripped); the same values as paper_id"
                     ' in the sibling tables, under a different column name. One row per work with at '
-                    'least one author id in works_au_affs_fixed (251.7M works).'),
+                    'least one author id in works/authorships (292.4M works).'),
         'author_list': ("';'-joined OpenAlex author ids (opaque 'A' + digits) in byline order "
                         '(author_position_int, ties broken by author id), each author listed once even'
                         ' when the source repeats them per affiliation.'),
@@ -86,7 +86,7 @@ TABLES = {
     },
     'OpenAlex/output/paper_author_country.parquet': {
         'paper_id': ("OpenAlex work id as a string: 'W' followed by digits (e.g. W3002427681), URL "
-                     'prefix stripped; joins every other OpenAlex/output table. Same 251.7M works as '
+                     'prefix stripped; joins every other OpenAlex/output table. Same 292.4M works as '
                      'paper_author (which calls the column work_id).'),
         'team_size': ('Number of distinct authors (author ids) on the work; identical to '
                       'paper_author.team_size on every row.'),
@@ -94,7 +94,7 @@ TABLES = {
                       "per-authorship 'countries', i.e. the countries of the institutions their "
                       'affiliations were matched to). 0 when no author is located.'),
         'countries': ("Sorted, ';'-joined distinct ISO 3166-1 alpha-2 codes over all located authors "
-                      "(e.g. 'CN;US'); null when no author is located (55% of works). Namibia is 'NA',"
+                      "(e.g. 'CN;US'); null when no author is located (53.5% of works). Namibia is 'NA',"
                       ' not a missing value. Coverage rises strongly over time, so take shares over '
                       'located works.'),
         'n_countries': 'Number of distinct codes in countries; 0 when countries is null.',
@@ -114,28 +114,28 @@ TABLES = {
     'OpenAlex/output/paper_citation.parquet': {
         'paper_id': ("OpenAlex work id as a string: 'W' followed by digits (e.g. W3002427681), URL "
                      'prefix stripped; joins every other OpenAlex/output table. One row per work with '
-                     'a usable publication year (348.9M), cited or not.'),
+                     'a usable publication year (460.5M), cited or not.'),
         'C_3': ('Number of citations received within 3 years of publication, publication year counted '
                 'as year 0: incoming reference edges from OpenAlex works with 0 <= citing year - cited'
                 ' year <= 3 (calendar years), over the OpenAlex works/referenced_works graph '
-                '(2026-01-16 snapshot), edges kept when both ends have a publication year in '
+                '(2026-09-23 release), edges kept when both ends have a publication year in '
                 '1000-2030. 0 for uncited documents; cohorts less than 3 years before the snapshot are'
                 ' right-truncated.'),
         'C_5': ('Number of citations received within 5 years of publication, publication year counted '
                 'as year 0: incoming reference edges from OpenAlex works with 0 <= citing year - cited'
                 ' year <= 5 (calendar years), over the OpenAlex works/referenced_works graph '
-                '(2026-01-16 snapshot), edges kept when both ends have a publication year in '
+                '(2026-09-23 release), edges kept when both ends have a publication year in '
                 '1000-2030. 0 for uncited documents; cohorts less than 5 years before the snapshot are'
                 ' right-truncated.'),
         'C_10': ('Number of citations received within 10 years of publication, publication year '
                  'counted as year 0: incoming reference edges from OpenAlex works with 0 <= citing '
                  'year - cited year <= 10 (calendar years), over the OpenAlex works/referenced_works '
-                 'graph (2026-01-16 snapshot), edges kept when both ends have a publication year in '
+                 'graph (2026-09-23 release), edges kept when both ends have a publication year in '
                  '1000-2030. 0 for uncited documents; cohorts less than 10 years before the snapshot '
                  'are right-truncated.'),
         'C_all': ('Number of citations received from works published in or after the focal year '
                   '(citing year - cited year >= 0, no upper bound), over the OpenAlex '
-                  'works/referenced_works graph (2026-01-16 snapshot), edges kept when both ends have '
+                  'works/referenced_works graph (2026-09-23 release), edges kept when both ends have '
                   'a publication year in 1000-2030. Citations from works dated earlier than the focal '
                   'document are dropped. 0 for uncited documents.'),
     },
@@ -167,16 +167,13 @@ TABLES = {
     'OpenAlex/output/paper_disruption.parquet': {
         'paper_id': ("OpenAlex work id as a string: 'W' followed by digits (e.g. W3002427681), URL "
                      'prefix stripped; joins every other OpenAlex/output table. One row per work with '
-                     'a usable publication year (348.9M), same rows as paper_citation.'),
+                     'a usable publication year (460.5M), same rows as paper_citation.'),
         'CD_3': ("Funk & Owen-Smith CD (disruption) index for window '3': (ni - nj) / (ni + nj + nk), "
                  'counting only papers with 0 <= year(citer) - year(focal) <= 3, publication year '
                  'counted as year 0. Nominal range [-1, 1] (+1 disruptive, -1 consolidating). Null '
                  'when the paper has no citers at all, or when neither a citer nor a paper citing its '
                  'references falls in the window; 0 (not null) when the window has no citer but has '
-                 'papers citing the focal references. OpenAlex artefact: for roughly 0.1M papers per '
-                 'window that list themselves among their own references (self-citation edges), nk '
-                 'comes out negative, so CD can fall below -1 (minimum -2; about 30k papers for '
-                 'CD_all) or be null despite defined counts (about 80k for CD_all).'),
+                 'papers citing the focal references. Self-citation edges are dropped from the graph, so CD stays within [-1, 1].'),
         'F_3': ("Foundation share (0-1) for window '3': fraction of the focal paper's in-window citers"
                 " whose own references include more of the focal paper's other in-window citers than "
                 'of its references (down > up); ties with up = down > 0 count 1/2 here and 1/2 in E. F'
@@ -199,18 +196,13 @@ TABLES = {
         'nk_3': ("Count of papers (other than the focal one) published in window '3' (0 <= year(citer)"
                  ' - year(focal) <= 3, publication year counted as year 0) that cite at least one of '
                  "the focal paper's references but not the focal paper itself. -1 sentinel as for ni. "
-                 'OpenAlex artefact: about 0.1M papers have a computed nk of -1 (self-citation edges: '
-                 'the paper is in its own reference list), distinguishable from the sentinel because '
-                 'ni/nj are >= 0 there.'),
+                 'Self-citation edges are dropped from the graph, so -1 is only ever the sentinel.'),
         'CD_5': ("Funk & Owen-Smith CD (disruption) index for window '5': (ni - nj) / (ni + nj + nk), "
                  'counting only papers with 0 <= year(citer) - year(focal) <= 5, publication year '
                  'counted as year 0. Nominal range [-1, 1] (+1 disruptive, -1 consolidating). Null '
                  'when the paper has no citers at all, or when neither a citer nor a paper citing its '
                  'references falls in the window; 0 (not null) when the window has no citer but has '
-                 'papers citing the focal references. OpenAlex artefact: for roughly 0.1M papers per '
-                 'window that list themselves among their own references (self-citation edges), nk '
-                 'comes out negative, so CD can fall below -1 (minimum -2; about 30k papers for '
-                 'CD_all) or be null despite defined counts (about 80k for CD_all).'),
+                 'papers citing the focal references. Self-citation edges are dropped from the graph, so CD stays within [-1, 1].'),
         'F_5': ("Foundation share (0-1) for window '5': fraction of the focal paper's in-window citers"
                 " whose own references include more of the focal paper's other in-window citers than "
                 'of its references (down > up); ties with up = down > 0 count 1/2 here and 1/2 in E. F'
@@ -233,19 +225,13 @@ TABLES = {
         'nk_5': ("Count of papers (other than the focal one) published in window '5' (0 <= year(citer)"
                  ' - year(focal) <= 5, publication year counted as year 0) that cite at least one of '
                  "the focal paper's references but not the focal paper itself. -1 sentinel as for ni. "
-                 'OpenAlex artefact: about 0.1M papers have a computed nk of -1 (self-citation edges: '
-                 'the paper is in its own reference list), distinguishable from the sentinel because '
-                 'ni/nj are >= 0 there.'),
+                 'Self-citation edges are dropped from the graph, so -1 is only ever the sentinel.'),
         'CD_10': ("Funk & Owen-Smith CD (disruption) index for window '10': (ni - nj) / (ni + nj + "
                   'nk), counting only papers with 0 <= year(citer) - year(focal) <= 10, publication '
                   'year counted as year 0. Nominal range [-1, 1] (+1 disruptive, -1 consolidating). '
                   'Null when the paper has no citers at all, or when neither a citer nor a paper '
                   'citing its references falls in the window; 0 (not null) when the window has no '
-                  'citer but has papers citing the focal references. OpenAlex artefact: for roughly '
-                  '0.1M papers per window that list themselves among their own references '
-                  '(self-citation edges), nk comes out negative, so CD can fall below -1 (minimum -2; '
-                  'about 30k papers for CD_all) or be null despite defined counts (about 80k for '
-                  'CD_all).'),
+                  'citer but has papers citing the focal references. Self-citation edges are dropped from the graph, so CD stays within [-1, 1].'),
         'F_10': ("Foundation share (0-1) for window '10': fraction of the focal paper's in-window "
                  "citers whose own references include more of the focal paper's other in-window citers"
                  ' than of its references (down > up); ties with up = down > 0 count 1/2 here and 1/2 '
@@ -268,18 +254,13 @@ TABLES = {
         'nk_10': ("Count of papers (other than the focal one) published in window '10' (0 <= "
                   'year(citer) - year(focal) <= 10, publication year counted as year 0) that cite at '
                   "least one of the focal paper's references but not the focal paper itself. -1 "
-                  'sentinel as for ni. OpenAlex artefact: about 0.1M papers have a computed nk of -1 '
-                  '(self-citation edges: the paper is in its own reference list), distinguishable from'
-                  ' the sentinel because ni/nj are >= 0 there.'),
+                  'sentinel as for ni. Self-citation edges are dropped from the graph, so -1 is only ever the sentinel.'),
         'CD_all': ("Funk & Owen-Smith CD (disruption) index for window 'all': (ni - nj) / (ni + nj + "
                    'nk), counting only papers with year(citer) - year(focal) >= 0, no upper bound. '
                    'Nominal range [-1, 1] (+1 disruptive, -1 consolidating). Null when the paper has '
                    'no citers at all, or when neither a citer nor a paper citing its references falls '
                    'in the window; 0 (not null) when the window has no citer but has papers citing the'
-                   ' focal references. OpenAlex artefact: for roughly 0.1M papers per window that list'
-                   ' themselves among their own references (self-citation edges), nk comes out '
-                   'negative, so CD can fall below -1 (minimum -2; about 30k papers for CD_all) or be '
-                   'null despite defined counts (about 80k for CD_all).'),
+                   ' focal references. Self-citation edges are dropped from the graph, so CD stays within [-1, 1].'),
         'F_all': ("Foundation share (0-1) for window 'all': fraction of the focal paper's in-window "
                   "citers whose own references include more of the focal paper's other in-window "
                   'citers than of its references (down > up); ties with up = down > 0 count 1/2 here '
@@ -301,15 +282,12 @@ TABLES = {
                    'references. -1 sentinel as for ni.'),
         'nk_all': ("Count of papers (other than the focal one) published in window 'all' (year(citer) "
                    "- year(focal) >= 0, no upper bound) that cite at least one of the focal paper's "
-                   'references but not the focal paper itself. -1 sentinel as for ni. OpenAlex '
-                   'artefact: about 0.1M papers have a computed nk of -1 (self-citation edges: the '
-                   'paper is in its own reference list), distinguishable from the sentinel because '
-                   'ni/nj are >= 0 there.'),
+                   'references but not the focal paper itself. -1 sentinel as for ni. Self-citation edges are dropped from the graph, so -1 is only ever the sentinel.'),
         'pctl_year': ('Cohort year for the CD percentiles: paper_metadata.year (publication year, '
                       'stored as a double); present on every row.'),
         'pctl_group': ('Cohort field for the CD percentiles: the first field listed in '
                        "paper_metadata.FoS_0, i.e. the OpenAlex field of the work's top-scoring topic "
-                       '(= FoS_rep). Null when the work has no topic (about 25%), and then every '
+                       '(= FoS_rep). Null when the work has no topic (about 21%), and then every '
                        'CD_*_pctl is null.'),
         'CD_3_pctl': ('Minimum-rank percentile (0-1] of CD_3 within its (pctl_year, pctl_group) cohort'
                       ' among papers with a non-null CD_3: rank() / n, ties share the lowest rank. '
@@ -347,7 +325,7 @@ TABLES = {
     'OpenAlex/output/paper_hit_probability.parquet': {
         'paper_id': ("OpenAlex work id as a string: 'W' followed by digits (e.g. W3002427681), URL "
                      'prefix stripped; joins every other OpenAlex/output table. Only works that have '
-                     'both a field (topic) and a publication year (262.5M).'),
+                     'both a field (topic) and a publication year (364.3M).'),
         'FoS': ("Cohort field: OpenAlex field name (one of 26, e.g. 'Medicine') of the work's "
                 'highest-scoring topic (paper_metadata.FoS_rep, else the first entry of FoS_0). Not '
                 'comparable with Dimensions FoR divisions.'),
@@ -373,10 +351,9 @@ TABLES = {
     'OpenAlex/output/paper_metadata.parquet': {
         'paper_id': ("OpenAlex work id as a string: 'W' followed by digits (e.g. W3002427681), URL "
                      'prefix stripped; joins every other OpenAlex/output table. One row per work of '
-                     'works/works in the snapshot (372.7M), in snapshot order; one placeholder id '
-                     "'W-1' is present."),
-        'year': ('OpenAlex publication_year stored as float64 (null for 6.4% of works). Raw value, not'
-                 ' range checked (1000-2050 in the file); the graph-based tables only keep works dated'
+                     'works/works in the 2026-09-23 release (476.2M), in partition order.'),
+        'year': ('OpenAlex publication_year stored as float64 (null for 3.3% of works). Raw value, not'
+                 ' range checked (1007-2050 in the file); the graph-based tables only keep works dated'
                  ' 1000-2030.'),
         'doctype': ('OpenAlex work type (article, other, dataset, book-chapter, dissertation, '
                     'preprint, book, review, paratext, letter, report, editorial, erratum, retraction,'
@@ -388,14 +365,14 @@ TABLES = {
         'journal': ("Display name (sources.csv.gz) of the work's primary-location source, or of its "
                     "first location's source when there is no primary one. Any source type: journals, "
                     'repositories, conferences, ebook platforms. Null when the work has no source '
-                    '(22%).'),
+                    '(12.8%).'),
         'is_journal': ("True when that source's OpenAlex type is 'journal', False for other source "
                        'types, null when the work has no source.'),
         'author_list': ('Always null (Arrow type null): placeholder kept for schema compatibility; '
                         'author lists are in paper_author.parquet.'),
         'FoS_0': ("';'-joined distinct OpenAlex field names (26 fields) of all the work's scored "
                   'topics (up to 3, works/topics), ordered by topic score, best first; equals '
-                  "';'.join(field). Null when the work has no topic (25%)."),
+                  "';'.join(field). Null when the work has no topic (20.6%)."),
         'FoS_rep': ("OpenAlex field name of the work's highest-scoring topic (e.g. 'Materials "
                     "Science'); the cohort key of paper_hit_probability. Null when no topic."),
         'domain': ('OpenAlex domain (Health Sciences, Life Sciences, Physical Sciences or Social '
@@ -418,7 +395,7 @@ TABLES = {
                   'in paper_topics.parquet.'),
         'cited_by_count': ("OpenAlex's own cited_by_count at snapshot time (all of OpenAlex); not the "
                            'graph-derived, year-filtered C_all of paper_citation.'),
-        'is_retracted': 'OpenAlex is_retracted flag; null for 0.3% of works.',
+        'is_retracted': 'OpenAlex is_retracted flag; null for 0.35% of works.',
     },
     'OpenAlex/output/paper_sb.parquet': {
         'paper_id': ("OpenAlex work id as a string: 'W' followed by digits (e.g. W3002427681), URL "
@@ -437,20 +414,12 @@ TABLES = {
         'n_cite': ('Number of dated citations the histogram was built from: citations from works '
                    "published in or after the document's publication year, all years (>= 1)."),
     },
-    'OpenAlex/output/paper_team_size.parquet': {
-        'paper_id': ("OpenAlex work id as a string: 'W' followed by digits (e.g. W3002427681), URL "
-                     'prefix stripped; joins every other OpenAlex/output table. Same 251.7M works as '
-                     'paper_author.parquet.'),
-        'team_size': ('Legacy team size: number of distinct OpenAlex author ids on the work. Its '
-                      'producing code is lost, but it equals paper_author.team_size on every work; '
-                      'superseded by paper_author.parquet.'),
-    },
     'OpenAlex/output/paper_z_score.parquet': {
         'paper_id': ("OpenAlex work id as a string: 'W' followed by digits (e.g. W3002427681), URL "
                      'prefix stripped; joins every other OpenAlex/output table. Only journal-type '
                      "works (primary-location source of OpenAlex type 'journal') published 1980-2020, "
                      'with 2-1000 dated references in the graph and at least one scorable journal pair'
-                     ' (41.4M); merged from the year-range partitions, 1900-1979 never run.'),
+                     ' (46.4M); merged from the 18 year-range partitions, 1900-1979 never run.'),
         'Z_median': ('Median (numpy linear interpolation) of the Uzzi et al. (2013) z-scores of the '
                      "distinct journal pairs formed by the journals of the paper's references "
                      "(self-pairs included), each z taken from the paper's publication-year cohort "
@@ -2137,7 +2106,9 @@ TABLES = {
     'PATSTAT/output/patstat_feg_disruption_trend.parquet': {
         'year': "Cohort year: the application's filing year, 1900-2023.",
         'n': ('Number of applications of this cohort in patstat_disruption with a non-NULL CD_all, '
-              'i.e. with at least one citer; the denominator of the ni/nj/nk/njfrac means.'),
+              'i.e. with at least one citer: the denominator of the `_all` means. The 3-, 5- and '
+              '10-year ni / nj / nk / njfrac means are taken over the subset with something in that '
+              'window.'),
         'CD_3_mean': ("Mean of CD_3 (window 3) over the cohort's applications with a non-NULL CD_3 "
                       '(NULLs ignored); NULL if none.'),
         'F_3_mean': ("Mean Foundation share F_3 over the cohort's applications with at least one citer"
@@ -2149,22 +2120,29 @@ TABLES = {
         'G_3_mean': ("Mean Generalization share G_3 over the cohort's applications with at least one "
                      'citer in the window (NULLs ignored); NULL if none. Decomposition of Fang & Evans'
                      ' (2025), arXiv:2510.03240.'),
-        'ni_3_mean': ('Mean of ni_3 over all n applications of the cohort INCLUDING the -1 sentinel of'
-                      ' those with nothing in the window, so it is biased downward and can be negative'
-                      ' (exactly -1 for early cohorts with no activity within 3 years). Recompute from'
-                      ' patstat_disruption excluding -1 for a true mean.'),
-        'nj_3_mean': ('Mean of nj_3 over all n applications of the cohort INCLUDING the -1 sentinel of'
-                      ' those with nothing in the window, so it is biased downward and can be negative'
-                      ' (exactly -1 for early cohorts with no activity within 3 years). Recompute from'
-                      ' patstat_disruption excluding -1 for a true mean.'),
-        'nk_3_mean': ('Mean of nk_3 over all n applications of the cohort INCLUDING the -1 sentinel of'
-                      ' those with nothing in the window, so it is biased downward and can be negative'
-                      ' (exactly -1 for early cohorts with no activity within 3 years). Recompute from'
-                      ' patstat_disruption excluding -1 for a true mean.'),
-        'njfrac_3_mean': ('Mean over all n applications of nj_3 / (ni_3 + nj_3 + nk_3). Rows with the '
-                          '-1 sentinel give (-1)/(-3) = 1/3, so the value is pulled toward 0.333 '
-                          '(exactly 0.333 for cohorts with no activity within 3 years); recompute '
-                          'excluding -1 rows for the true share.'),
+        'ni_3_mean': ("Mean of ni_3 (citers that cite none of its references) over the cohort's "
+                      'applications with something in the 3-year window: the -1 placeholder of a '
+                      'application with nothing in it (no citer and nothing citing its references) is '
+                      'read as NULL. NULL when no application of the cohort has anything in the window'
+                      ' (the earliest cohorts). Before 2026-10-03 the -1 rows were averaged in, which '
+                      'made this negative for early cohorts.'),
+        'nj_3_mean': ('Mean of nj_3 (citers that also cite at least one of its references) over the '
+                      "cohort's applications with something in the 3-year window: the -1 placeholder "
+                      'of a application with nothing in it (no citer and nothing citing its '
+                      'references) is read as NULL. NULL when no application of the cohort has '
+                      'anything in the window (the earliest cohorts). Before 2026-10-03 the -1 rows '
+                      'were averaged in, which made this negative for early cohorts.'),
+        'nk_3_mean': ("Mean of nk_3 (documents citing its references but not it) over the cohort's "
+                      'applications with something in the 3-year window: the -1 placeholder of a '
+                      'application with nothing in it (no citer and nothing citing its references) is '
+                      'read as NULL. NULL when no application of the cohort has anything in the window'
+                      ' (the earliest cohorts). Before 2026-10-03 the -1 rows were averaged in, which '
+                      'made this negative for early cohorts.'),
+        'njfrac_3_mean': ('Mean of the per-application nj_3 / (ni_3 + nj_3 + nk_3), the share of the '
+                          '3-year neighbourhood that cites both the application and its references, '
+                          'over the applications with something in the window (the -1 placeholder is '
+                          'read as NULL); NULL when there are none. Before 2026-10-03 the -1 rows '
+                          'entered as (-1)/(-3) = 1/3 and pulled the mean toward 0.333.'),
         'CD_5_mean': ("Mean of CD_5 (window 5) over the cohort's applications with a non-NULL CD_5 "
                       '(NULLs ignored); NULL if none.'),
         'F_5_mean': ("Mean Foundation share F_5 over the cohort's applications with at least one citer"
@@ -2176,22 +2154,29 @@ TABLES = {
         'G_5_mean': ("Mean Generalization share G_5 over the cohort's applications with at least one "
                      'citer in the window (NULLs ignored); NULL if none. Decomposition of Fang & Evans'
                      ' (2025), arXiv:2510.03240.'),
-        'ni_5_mean': ('Mean of ni_5 over all n applications of the cohort INCLUDING the -1 sentinel of'
-                      ' those with nothing in the window, so it is biased downward and can be negative'
-                      ' (exactly -1 for early cohorts with no activity within 5 years). Recompute from'
-                      ' patstat_disruption excluding -1 for a true mean.'),
-        'nj_5_mean': ('Mean of nj_5 over all n applications of the cohort INCLUDING the -1 sentinel of'
-                      ' those with nothing in the window, so it is biased downward and can be negative'
-                      ' (exactly -1 for early cohorts with no activity within 5 years). Recompute from'
-                      ' patstat_disruption excluding -1 for a true mean.'),
-        'nk_5_mean': ('Mean of nk_5 over all n applications of the cohort INCLUDING the -1 sentinel of'
-                      ' those with nothing in the window, so it is biased downward and can be negative'
-                      ' (exactly -1 for early cohorts with no activity within 5 years). Recompute from'
-                      ' patstat_disruption excluding -1 for a true mean.'),
-        'njfrac_5_mean': ('Mean over all n applications of nj_5 / (ni_5 + nj_5 + nk_5). Rows with the '
-                          '-1 sentinel give (-1)/(-3) = 1/3, so the value is pulled toward 0.333 '
-                          '(exactly 0.333 for cohorts with no activity within 5 years); recompute '
-                          'excluding -1 rows for the true share.'),
+        'ni_5_mean': ("Mean of ni_5 (citers that cite none of its references) over the cohort's "
+                      'applications with something in the 5-year window: the -1 placeholder of a '
+                      'application with nothing in it (no citer and nothing citing its references) is '
+                      'read as NULL. NULL when no application of the cohort has anything in the window'
+                      ' (the earliest cohorts). Before 2026-10-03 the -1 rows were averaged in, which '
+                      'made this negative for early cohorts.'),
+        'nj_5_mean': ('Mean of nj_5 (citers that also cite at least one of its references) over the '
+                      "cohort's applications with something in the 5-year window: the -1 placeholder "
+                      'of a application with nothing in it (no citer and nothing citing its '
+                      'references) is read as NULL. NULL when no application of the cohort has '
+                      'anything in the window (the earliest cohorts). Before 2026-10-03 the -1 rows '
+                      'were averaged in, which made this negative for early cohorts.'),
+        'nk_5_mean': ("Mean of nk_5 (documents citing its references but not it) over the cohort's "
+                      'applications with something in the 5-year window: the -1 placeholder of a '
+                      'application with nothing in it (no citer and nothing citing its references) is '
+                      'read as NULL. NULL when no application of the cohort has anything in the window'
+                      ' (the earliest cohorts). Before 2026-10-03 the -1 rows were averaged in, which '
+                      'made this negative for early cohorts.'),
+        'njfrac_5_mean': ('Mean of the per-application nj_5 / (ni_5 + nj_5 + nk_5), the share of the '
+                          '5-year neighbourhood that cites both the application and its references, '
+                          'over the applications with something in the window (the -1 placeholder is '
+                          'read as NULL); NULL when there are none. Before 2026-10-03 the -1 rows '
+                          'entered as (-1)/(-3) = 1/3 and pulled the mean toward 0.333.'),
         'CD_10_mean': ("Mean of CD_10 (window 10) over the cohort's applications with a non-NULL CD_10"
                        ' (NULLs ignored); NULL if none.'),
         'F_10_mean': ("Mean Foundation share F_10 over the cohort's applications with at least one "
@@ -2203,22 +2188,29 @@ TABLES = {
         'G_10_mean': ("Mean Generalization share G_10 over the cohort's applications with at least one"
                       ' citer in the window (NULLs ignored); NULL if none. Decomposition of Fang & '
                       'Evans (2025), arXiv:2510.03240.'),
-        'ni_10_mean': ('Mean of ni_10 over all n applications of the cohort INCLUDING the -1 sentinel '
-                       'of those with nothing in the window, so it is biased downward and can be '
-                       'negative (exactly -1 for early cohorts with no activity within 10 years). '
-                       'Recompute from patstat_disruption excluding -1 for a true mean.'),
-        'nj_10_mean': ('Mean of nj_10 over all n applications of the cohort INCLUDING the -1 sentinel '
-                       'of those with nothing in the window, so it is biased downward and can be '
-                       'negative (exactly -1 for early cohorts with no activity within 10 years). '
-                       'Recompute from patstat_disruption excluding -1 for a true mean.'),
-        'nk_10_mean': ('Mean of nk_10 over all n applications of the cohort INCLUDING the -1 sentinel '
-                       'of those with nothing in the window, so it is biased downward and can be '
-                       'negative (exactly -1 for early cohorts with no activity within 10 years). '
-                       'Recompute from patstat_disruption excluding -1 for a true mean.'),
-        'njfrac_10_mean': ('Mean over all n applications of nj_10 / (ni_10 + nj_10 + nk_10). Rows with'
-                           ' the -1 sentinel give (-1)/(-3) = 1/3, so the value is pulled toward 0.333'
-                           ' (exactly 0.333 for cohorts with no activity within 10 years); recompute '
-                           'excluding -1 rows for the true share.'),
+        'ni_10_mean': ("Mean of ni_10 (citers that cite none of its references) over the cohort's "
+                       'applications with something in the 10-year window: the -1 placeholder of a '
+                       'application with nothing in it (no citer and nothing citing its references) is'
+                       ' read as NULL. NULL when no application of the cohort has anything in the '
+                       'window (the earliest cohorts). Before 2026-10-03 the -1 rows were averaged in,'
+                       ' which made this negative for early cohorts.'),
+        'nj_10_mean': ('Mean of nj_10 (citers that also cite at least one of its references) over the '
+                       "cohort's applications with something in the 10-year window: the -1 placeholder"
+                       ' of a application with nothing in it (no citer and nothing citing its '
+                       'references) is read as NULL. NULL when no application of the cohort has '
+                       'anything in the window (the earliest cohorts). Before 2026-10-03 the -1 rows '
+                       'were averaged in, which made this negative for early cohorts.'),
+        'nk_10_mean': ("Mean of nk_10 (documents citing its references but not it) over the cohort's "
+                       'applications with something in the 10-year window: the -1 placeholder of a '
+                       'application with nothing in it (no citer and nothing citing its references) is'
+                       ' read as NULL. NULL when no application of the cohort has anything in the '
+                       'window (the earliest cohorts). Before 2026-10-03 the -1 rows were averaged in,'
+                       ' which made this negative for early cohorts.'),
+        'njfrac_10_mean': ('Mean of the per-application nj_10 / (ni_10 + nj_10 + nk_10), the share of '
+                           'the 10-year neighbourhood that cites both the application and its '
+                           'references, over the applications with something in the window (the -1 '
+                           'placeholder is read as NULL); NULL when there are none. Before 2026-10-03 '
+                           'the -1 rows entered as (-1)/(-3) = 1/3 and pulled the mean toward 0.333.'),
         'CD_all_mean': ("Mean of CD_all (any age) over the cohort's applications with a non-NULL "
                         'CD_all (NULLs ignored); NULL if none.'),
         'F_all_mean': ("Mean Foundation share F_all over the cohort's applications with at least one "
@@ -2998,7 +2990,9 @@ TABLES = {
         'year': ("Cohort year: the grant year (first publication flagged publn_first_grant = 'Y'), "
                  '1900-2023.'),
         'n': ('Number of applications of this cohort in patstat_disruption with a non-NULL CD_all, '
-              'i.e. with at least one citer; the denominator of the ni/nj/nk/njfrac means.'),
+              'i.e. with at least one citer: the denominator of the `_all` means. The 3-, 5- and '
+              '10-year ni / nj / nk / njfrac means are taken over the subset with something in that '
+              'window.'),
         'CD_3_mean': ("Mean of CD_3 (window 3) over the cohort's applications with a non-NULL CD_3 "
                       '(NULLs ignored); NULL if none.'),
         'F_3_mean': ("Mean Foundation share F_3 over the cohort's applications with at least one citer"
@@ -3010,22 +3004,29 @@ TABLES = {
         'G_3_mean': ("Mean Generalization share G_3 over the cohort's applications with at least one "
                      'citer in the window (NULLs ignored); NULL if none. Decomposition of Fang & Evans'
                      ' (2025), arXiv:2510.03240.'),
-        'ni_3_mean': ('Mean of ni_3 over all n applications of the cohort INCLUDING the -1 sentinel of'
-                      ' those with nothing in the window, so it is biased downward and can be negative'
-                      ' (exactly -1 for early cohorts with no activity within 3 years). Recompute from'
-                      ' patstat_disruption excluding -1 for a true mean.'),
-        'nj_3_mean': ('Mean of nj_3 over all n applications of the cohort INCLUDING the -1 sentinel of'
-                      ' those with nothing in the window, so it is biased downward and can be negative'
-                      ' (exactly -1 for early cohorts with no activity within 3 years). Recompute from'
-                      ' patstat_disruption excluding -1 for a true mean.'),
-        'nk_3_mean': ('Mean of nk_3 over all n applications of the cohort INCLUDING the -1 sentinel of'
-                      ' those with nothing in the window, so it is biased downward and can be negative'
-                      ' (exactly -1 for early cohorts with no activity within 3 years). Recompute from'
-                      ' patstat_disruption excluding -1 for a true mean.'),
-        'njfrac_3_mean': ('Mean over all n applications of nj_3 / (ni_3 + nj_3 + nk_3). Rows with the '
-                          '-1 sentinel give (-1)/(-3) = 1/3, so the value is pulled toward 0.333 '
-                          '(exactly 0.333 for cohorts with no activity within 3 years); recompute '
-                          'excluding -1 rows for the true share.'),
+        'ni_3_mean': ("Mean of ni_3 (citers that cite none of its references) over the cohort's "
+                      'applications with something in the 3-year window: the -1 placeholder of a '
+                      'application with nothing in it (no citer and nothing citing its references) is '
+                      'read as NULL. NULL when no application of the cohort has anything in the window'
+                      ' (the earliest cohorts). Before 2026-10-03 the -1 rows were averaged in, which '
+                      'made this negative for early cohorts.'),
+        'nj_3_mean': ('Mean of nj_3 (citers that also cite at least one of its references) over the '
+                      "cohort's applications with something in the 3-year window: the -1 placeholder "
+                      'of a application with nothing in it (no citer and nothing citing its '
+                      'references) is read as NULL. NULL when no application of the cohort has '
+                      'anything in the window (the earliest cohorts). Before 2026-10-03 the -1 rows '
+                      'were averaged in, which made this negative for early cohorts.'),
+        'nk_3_mean': ("Mean of nk_3 (documents citing its references but not it) over the cohort's "
+                      'applications with something in the 3-year window: the -1 placeholder of a '
+                      'application with nothing in it (no citer and nothing citing its references) is '
+                      'read as NULL. NULL when no application of the cohort has anything in the window'
+                      ' (the earliest cohorts). Before 2026-10-03 the -1 rows were averaged in, which '
+                      'made this negative for early cohorts.'),
+        'njfrac_3_mean': ('Mean of the per-application nj_3 / (ni_3 + nj_3 + nk_3), the share of the '
+                          '3-year neighbourhood that cites both the application and its references, '
+                          'over the applications with something in the window (the -1 placeholder is '
+                          'read as NULL); NULL when there are none. Before 2026-10-03 the -1 rows '
+                          'entered as (-1)/(-3) = 1/3 and pulled the mean toward 0.333.'),
         'CD_5_mean': ("Mean of CD_5 (window 5) over the cohort's applications with a non-NULL CD_5 "
                       '(NULLs ignored); NULL if none.'),
         'F_5_mean': ("Mean Foundation share F_5 over the cohort's applications with at least one citer"
@@ -3037,22 +3038,29 @@ TABLES = {
         'G_5_mean': ("Mean Generalization share G_5 over the cohort's applications with at least one "
                      'citer in the window (NULLs ignored); NULL if none. Decomposition of Fang & Evans'
                      ' (2025), arXiv:2510.03240.'),
-        'ni_5_mean': ('Mean of ni_5 over all n applications of the cohort INCLUDING the -1 sentinel of'
-                      ' those with nothing in the window, so it is biased downward and can be negative'
-                      ' (exactly -1 for early cohorts with no activity within 5 years). Recompute from'
-                      ' patstat_disruption excluding -1 for a true mean.'),
-        'nj_5_mean': ('Mean of nj_5 over all n applications of the cohort INCLUDING the -1 sentinel of'
-                      ' those with nothing in the window, so it is biased downward and can be negative'
-                      ' (exactly -1 for early cohorts with no activity within 5 years). Recompute from'
-                      ' patstat_disruption excluding -1 for a true mean.'),
-        'nk_5_mean': ('Mean of nk_5 over all n applications of the cohort INCLUDING the -1 sentinel of'
-                      ' those with nothing in the window, so it is biased downward and can be negative'
-                      ' (exactly -1 for early cohorts with no activity within 5 years). Recompute from'
-                      ' patstat_disruption excluding -1 for a true mean.'),
-        'njfrac_5_mean': ('Mean over all n applications of nj_5 / (ni_5 + nj_5 + nk_5). Rows with the '
-                          '-1 sentinel give (-1)/(-3) = 1/3, so the value is pulled toward 0.333 '
-                          '(exactly 0.333 for cohorts with no activity within 5 years); recompute '
-                          'excluding -1 rows for the true share.'),
+        'ni_5_mean': ("Mean of ni_5 (citers that cite none of its references) over the cohort's "
+                      'applications with something in the 5-year window: the -1 placeholder of a '
+                      'application with nothing in it (no citer and nothing citing its references) is '
+                      'read as NULL. NULL when no application of the cohort has anything in the window'
+                      ' (the earliest cohorts). Before 2026-10-03 the -1 rows were averaged in, which '
+                      'made this negative for early cohorts.'),
+        'nj_5_mean': ('Mean of nj_5 (citers that also cite at least one of its references) over the '
+                      "cohort's applications with something in the 5-year window: the -1 placeholder "
+                      'of a application with nothing in it (no citer and nothing citing its '
+                      'references) is read as NULL. NULL when no application of the cohort has '
+                      'anything in the window (the earliest cohorts). Before 2026-10-03 the -1 rows '
+                      'were averaged in, which made this negative for early cohorts.'),
+        'nk_5_mean': ("Mean of nk_5 (documents citing its references but not it) over the cohort's "
+                      'applications with something in the 5-year window: the -1 placeholder of a '
+                      'application with nothing in it (no citer and nothing citing its references) is '
+                      'read as NULL. NULL when no application of the cohort has anything in the window'
+                      ' (the earliest cohorts). Before 2026-10-03 the -1 rows were averaged in, which '
+                      'made this negative for early cohorts.'),
+        'njfrac_5_mean': ('Mean of the per-application nj_5 / (ni_5 + nj_5 + nk_5), the share of the '
+                          '5-year neighbourhood that cites both the application and its references, '
+                          'over the applications with something in the window (the -1 placeholder is '
+                          'read as NULL); NULL when there are none. Before 2026-10-03 the -1 rows '
+                          'entered as (-1)/(-3) = 1/3 and pulled the mean toward 0.333.'),
         'CD_10_mean': ("Mean of CD_10 (window 10) over the cohort's applications with a non-NULL CD_10"
                        ' (NULLs ignored); NULL if none.'),
         'F_10_mean': ("Mean Foundation share F_10 over the cohort's applications with at least one "
@@ -3064,22 +3072,29 @@ TABLES = {
         'G_10_mean': ("Mean Generalization share G_10 over the cohort's applications with at least one"
                       ' citer in the window (NULLs ignored); NULL if none. Decomposition of Fang & '
                       'Evans (2025), arXiv:2510.03240.'),
-        'ni_10_mean': ('Mean of ni_10 over all n applications of the cohort INCLUDING the -1 sentinel '
-                       'of those with nothing in the window, so it is biased downward and can be '
-                       'negative (exactly -1 for early cohorts with no activity within 10 years). '
-                       'Recompute from patstat_disruption excluding -1 for a true mean.'),
-        'nj_10_mean': ('Mean of nj_10 over all n applications of the cohort INCLUDING the -1 sentinel '
-                       'of those with nothing in the window, so it is biased downward and can be '
-                       'negative (exactly -1 for early cohorts with no activity within 10 years). '
-                       'Recompute from patstat_disruption excluding -1 for a true mean.'),
-        'nk_10_mean': ('Mean of nk_10 over all n applications of the cohort INCLUDING the -1 sentinel '
-                       'of those with nothing in the window, so it is biased downward and can be '
-                       'negative (exactly -1 for early cohorts with no activity within 10 years). '
-                       'Recompute from patstat_disruption excluding -1 for a true mean.'),
-        'njfrac_10_mean': ('Mean over all n applications of nj_10 / (ni_10 + nj_10 + nk_10). Rows with'
-                           ' the -1 sentinel give (-1)/(-3) = 1/3, so the value is pulled toward 0.333'
-                           ' (exactly 0.333 for cohorts with no activity within 10 years); recompute '
-                           'excluding -1 rows for the true share.'),
+        'ni_10_mean': ("Mean of ni_10 (citers that cite none of its references) over the cohort's "
+                       'applications with something in the 10-year window: the -1 placeholder of a '
+                       'application with nothing in it (no citer and nothing citing its references) is'
+                       ' read as NULL. NULL when no application of the cohort has anything in the '
+                       'window (the earliest cohorts). Before 2026-10-03 the -1 rows were averaged in,'
+                       ' which made this negative for early cohorts.'),
+        'nj_10_mean': ('Mean of nj_10 (citers that also cite at least one of its references) over the '
+                       "cohort's applications with something in the 10-year window: the -1 placeholder"
+                       ' of a application with nothing in it (no citer and nothing citing its '
+                       'references) is read as NULL. NULL when no application of the cohort has '
+                       'anything in the window (the earliest cohorts). Before 2026-10-03 the -1 rows '
+                       'were averaged in, which made this negative for early cohorts.'),
+        'nk_10_mean': ("Mean of nk_10 (documents citing its references but not it) over the cohort's "
+                       'applications with something in the 10-year window: the -1 placeholder of a '
+                       'application with nothing in it (no citer and nothing citing its references) is'
+                       ' read as NULL. NULL when no application of the cohort has anything in the '
+                       'window (the earliest cohorts). Before 2026-10-03 the -1 rows were averaged in,'
+                       ' which made this negative for early cohorts.'),
+        'njfrac_10_mean': ('Mean of the per-application nj_10 / (ni_10 + nj_10 + nk_10), the share of '
+                           'the 10-year neighbourhood that cites both the application and its '
+                           'references, over the applications with something in the window (the -1 '
+                           'placeholder is read as NULL); NULL when there are none. Before 2026-10-03 '
+                           'the -1 rows entered as (-1)/(-3) = 1/3 and pulled the mean toward 0.333.'),
         'CD_all_mean': ("Mean of CD_all (any age) over the cohort's applications with a non-NULL "
                         'CD_all (NULLs ignored); NULL if none.'),
         'F_all_mean': ("Mean Foundation share F_all over the cohort's applications with at least one "
@@ -3890,7 +3905,8 @@ TABLES = {
         'year': ("Cohort year: the family's earliest priority year, restricted to 1900-2023 (pre-1900 "
                  'priority cohorts are left out).'),
         'n': ('Number of families of this cohort in patstat_disruption with a non-NULL CD_all, i.e. '
-              'with at least one citer; the denominator of the ni/nj/nk/njfrac means.'),
+              'with at least one citer: the denominator of the `_all` means. The 3-, 5- and 10-year ni'
+              ' / nj / nk / njfrac means are taken over the subset with something in that window.'),
         'CD_3_mean': ("Mean of CD_3 (window 3) over the cohort's families with a non-NULL CD_3 (NULLs "
                       'ignored); NULL if none.'),
         'F_3_mean': ("Mean Foundation share F_3 over the cohort's families with at least one citer in "
@@ -3902,22 +3918,29 @@ TABLES = {
         'G_3_mean': ("Mean Generalization share G_3 over the cohort's families with at least one citer"
                      ' in the window (NULLs ignored); NULL if none. Decomposition of Fang & Evans '
                      '(2025), arXiv:2510.03240.'),
-        'ni_3_mean': ('Mean of ni_3 over all n families of the cohort INCLUDING the -1 sentinel of '
-                      'those with nothing in the window, so it is biased downward and can be negative '
-                      '(exactly -1 for early cohorts with no activity within 3 years). Recompute from '
-                      'patstat_disruption excluding -1 for a true mean.'),
-        'nj_3_mean': ('Mean of nj_3 over all n families of the cohort INCLUDING the -1 sentinel of '
-                      'those with nothing in the window, so it is biased downward and can be negative '
-                      '(exactly -1 for early cohorts with no activity within 3 years). Recompute from '
-                      'patstat_disruption excluding -1 for a true mean.'),
-        'nk_3_mean': ('Mean of nk_3 over all n families of the cohort INCLUDING the -1 sentinel of '
-                      'those with nothing in the window, so it is biased downward and can be negative '
-                      '(exactly -1 for early cohorts with no activity within 3 years). Recompute from '
-                      'patstat_disruption excluding -1 for a true mean.'),
-        'njfrac_3_mean': ('Mean over all n families of nj_3 / (ni_3 + nj_3 + nk_3). Rows with the -1 '
-                          'sentinel give (-1)/(-3) = 1/3, so the value is pulled toward 0.333 (exactly'
-                          ' 0.333 for cohorts with no activity within 3 years); recompute excluding -1'
-                          ' rows for the true share.'),
+        'ni_3_mean': ("Mean of ni_3 (citers that cite none of its references) over the cohort's "
+                      'families with something in the 3-year window: the -1 placeholder of a family '
+                      'with nothing in it (no citer and nothing citing its references) is read as '
+                      'NULL. NULL when no family of the cohort has anything in the window (the '
+                      'earliest cohorts). Before 2026-10-03 the -1 rows were averaged in, which made '
+                      'this negative for early cohorts.'),
+        'nj_3_mean': ('Mean of nj_3 (citers that also cite at least one of its references) over the '
+                      "cohort's families with something in the 3-year window: the -1 placeholder of a "
+                      'family with nothing in it (no citer and nothing citing its references) is read '
+                      'as NULL. NULL when no family of the cohort has anything in the window (the '
+                      'earliest cohorts). Before 2026-10-03 the -1 rows were averaged in, which made '
+                      'this negative for early cohorts.'),
+        'nk_3_mean': ("Mean of nk_3 (documents citing its references but not it) over the cohort's "
+                      'families with something in the 3-year window: the -1 placeholder of a family '
+                      'with nothing in it (no citer and nothing citing its references) is read as '
+                      'NULL. NULL when no family of the cohort has anything in the window (the '
+                      'earliest cohorts). Before 2026-10-03 the -1 rows were averaged in, which made '
+                      'this negative for early cohorts.'),
+        'njfrac_3_mean': ('Mean of the per-family nj_3 / (ni_3 + nj_3 + nk_3), the share of the 3-year'
+                          ' neighbourhood that cites both the family and its references, over the '
+                          'families with something in the window (the -1 placeholder is read as NULL);'
+                          ' NULL when there are none. Before 2026-10-03 the -1 rows entered as '
+                          '(-1)/(-3) = 1/3 and pulled the mean toward 0.333.'),
         'CD_5_mean': ("Mean of CD_5 (window 5) over the cohort's families with a non-NULL CD_5 (NULLs "
                       'ignored); NULL if none.'),
         'F_5_mean': ("Mean Foundation share F_5 over the cohort's families with at least one citer in "
@@ -3929,22 +3952,29 @@ TABLES = {
         'G_5_mean': ("Mean Generalization share G_5 over the cohort's families with at least one citer"
                      ' in the window (NULLs ignored); NULL if none. Decomposition of Fang & Evans '
                      '(2025), arXiv:2510.03240.'),
-        'ni_5_mean': ('Mean of ni_5 over all n families of the cohort INCLUDING the -1 sentinel of '
-                      'those with nothing in the window, so it is biased downward and can be negative '
-                      '(exactly -1 for early cohorts with no activity within 5 years). Recompute from '
-                      'patstat_disruption excluding -1 for a true mean.'),
-        'nj_5_mean': ('Mean of nj_5 over all n families of the cohort INCLUDING the -1 sentinel of '
-                      'those with nothing in the window, so it is biased downward and can be negative '
-                      '(exactly -1 for early cohorts with no activity within 5 years). Recompute from '
-                      'patstat_disruption excluding -1 for a true mean.'),
-        'nk_5_mean': ('Mean of nk_5 over all n families of the cohort INCLUDING the -1 sentinel of '
-                      'those with nothing in the window, so it is biased downward and can be negative '
-                      '(exactly -1 for early cohorts with no activity within 5 years). Recompute from '
-                      'patstat_disruption excluding -1 for a true mean.'),
-        'njfrac_5_mean': ('Mean over all n families of nj_5 / (ni_5 + nj_5 + nk_5). Rows with the -1 '
-                          'sentinel give (-1)/(-3) = 1/3, so the value is pulled toward 0.333 (exactly'
-                          ' 0.333 for cohorts with no activity within 5 years); recompute excluding -1'
-                          ' rows for the true share.'),
+        'ni_5_mean': ("Mean of ni_5 (citers that cite none of its references) over the cohort's "
+                      'families with something in the 5-year window: the -1 placeholder of a family '
+                      'with nothing in it (no citer and nothing citing its references) is read as '
+                      'NULL. NULL when no family of the cohort has anything in the window (the '
+                      'earliest cohorts). Before 2026-10-03 the -1 rows were averaged in, which made '
+                      'this negative for early cohorts.'),
+        'nj_5_mean': ('Mean of nj_5 (citers that also cite at least one of its references) over the '
+                      "cohort's families with something in the 5-year window: the -1 placeholder of a "
+                      'family with nothing in it (no citer and nothing citing its references) is read '
+                      'as NULL. NULL when no family of the cohort has anything in the window (the '
+                      'earliest cohorts). Before 2026-10-03 the -1 rows were averaged in, which made '
+                      'this negative for early cohorts.'),
+        'nk_5_mean': ("Mean of nk_5 (documents citing its references but not it) over the cohort's "
+                      'families with something in the 5-year window: the -1 placeholder of a family '
+                      'with nothing in it (no citer and nothing citing its references) is read as '
+                      'NULL. NULL when no family of the cohort has anything in the window (the '
+                      'earliest cohorts). Before 2026-10-03 the -1 rows were averaged in, which made '
+                      'this negative for early cohorts.'),
+        'njfrac_5_mean': ('Mean of the per-family nj_5 / (ni_5 + nj_5 + nk_5), the share of the 5-year'
+                          ' neighbourhood that cites both the family and its references, over the '
+                          'families with something in the window (the -1 placeholder is read as NULL);'
+                          ' NULL when there are none. Before 2026-10-03 the -1 rows entered as '
+                          '(-1)/(-3) = 1/3 and pulled the mean toward 0.333.'),
         'CD_10_mean': ("Mean of CD_10 (window 10) over the cohort's families with a non-NULL CD_10 "
                        '(NULLs ignored); NULL if none.'),
         'F_10_mean': ("Mean Foundation share F_10 over the cohort's families with at least one citer "
@@ -3956,22 +3986,29 @@ TABLES = {
         'G_10_mean': ("Mean Generalization share G_10 over the cohort's families with at least one "
                       'citer in the window (NULLs ignored); NULL if none. Decomposition of Fang & '
                       'Evans (2025), arXiv:2510.03240.'),
-        'ni_10_mean': ('Mean of ni_10 over all n families of the cohort INCLUDING the -1 sentinel of '
-                       'those with nothing in the window, so it is biased downward and can be negative'
-                       ' (exactly -1 for early cohorts with no activity within 10 years). Recompute '
-                       'from patstat_disruption excluding -1 for a true mean.'),
-        'nj_10_mean': ('Mean of nj_10 over all n families of the cohort INCLUDING the -1 sentinel of '
-                       'those with nothing in the window, so it is biased downward and can be negative'
-                       ' (exactly -1 for early cohorts with no activity within 10 years). Recompute '
-                       'from patstat_disruption excluding -1 for a true mean.'),
-        'nk_10_mean': ('Mean of nk_10 over all n families of the cohort INCLUDING the -1 sentinel of '
-                       'those with nothing in the window, so it is biased downward and can be negative'
-                       ' (exactly -1 for early cohorts with no activity within 10 years). Recompute '
-                       'from patstat_disruption excluding -1 for a true mean.'),
-        'njfrac_10_mean': ('Mean over all n families of nj_10 / (ni_10 + nj_10 + nk_10). Rows with the'
-                           ' -1 sentinel give (-1)/(-3) = 1/3, so the value is pulled toward 0.333 '
-                           '(exactly 0.333 for cohorts with no activity within 10 years); recompute '
-                           'excluding -1 rows for the true share.'),
+        'ni_10_mean': ("Mean of ni_10 (citers that cite none of its references) over the cohort's "
+                       'families with something in the 10-year window: the -1 placeholder of a family '
+                       'with nothing in it (no citer and nothing citing its references) is read as '
+                       'NULL. NULL when no family of the cohort has anything in the window (the '
+                       'earliest cohorts). Before 2026-10-03 the -1 rows were averaged in, which made '
+                       'this negative for early cohorts.'),
+        'nj_10_mean': ('Mean of nj_10 (citers that also cite at least one of its references) over the '
+                       "cohort's families with something in the 10-year window: the -1 placeholder of "
+                       'a family with nothing in it (no citer and nothing citing its references) is '
+                       'read as NULL. NULL when no family of the cohort has anything in the window '
+                       '(the earliest cohorts). Before 2026-10-03 the -1 rows were averaged in, which '
+                       'made this negative for early cohorts.'),
+        'nk_10_mean': ("Mean of nk_10 (documents citing its references but not it) over the cohort's "
+                       'families with something in the 10-year window: the -1 placeholder of a family '
+                       'with nothing in it (no citer and nothing citing its references) is read as '
+                       'NULL. NULL when no family of the cohort has anything in the window (the '
+                       'earliest cohorts). Before 2026-10-03 the -1 rows were averaged in, which made '
+                       'this negative for early cohorts.'),
+        'njfrac_10_mean': ('Mean of the per-family nj_10 / (ni_10 + nj_10 + nk_10), the share of the '
+                           '10-year neighbourhood that cites both the family and its references, over '
+                           'the families with something in the window (the -1 placeholder is read as '
+                           'NULL); NULL when there are none. Before 2026-10-03 the -1 rows entered as '
+                           '(-1)/(-3) = 1/3 and pulled the mean toward 0.333.'),
         'CD_all_mean': ("Mean of CD_all (any age) over the cohort's families with a non-NULL CD_all "
                         '(NULLs ignored); NULL if none.'),
         'F_all_mean': ("Mean Foundation share F_all over the cohort's families with at least one citer"
@@ -4451,8 +4488,8 @@ TABLES = {
     'pcs/output/pcs_citation_trend.parquet': {
         'paper_id': ("OpenAlex work id of the cited paper ('W' + Reliance on Science oaid). Only "
                      'papers with at least one dated patent citation at a non-negative lag appear '
-                     '(4.36M papers).'),
-        'pub_year': ('Publication year of the cited paper from the OpenAlex 2026-01-16 snapshot '
+                     '(4.87M papers).'),
+        'pub_year': ('Publication year of the cited paper from the OpenAlex 2026-09-23 release '
                      '(oa_common.load_map, works publication_year); papers with unknown year are '
                      'excluded.'),
         'cite_year': ('Grant year of the citing US patents (year of PatentsView g_patent patent_date),'
@@ -4464,7 +4501,7 @@ TABLES = {
                 'Summing over all rows of a paper reproduces pcs_citation.C_all, and over '
                 'yrs_since_pub <= w reproduces C_w.'),
         'pcs_examiner': ("Part of pcs whose Reliance on Science reftype is 'exm' (examiner); float64, "
-                         'may print as -0.0. Near-empty (337 citations in the whole table), kept only '
+                         'may print as -0.0. Near-empty (423 citations in the whole table), kept only '
                          'for schema parity with patent_citation_trend.'),
         'pcs_non_examiner': ("Part of pcs whose reftype is not 'exm' (applicant 'app'); float64, in "
                              'practice equal to pcs.'),
@@ -4472,13 +4509,13 @@ TABLES = {
     'pcs/output/pcs_hit_probability.parquet': {
         'paper_id': ("OpenAlex work id ('W' + integer). Rows are papers present in "
                      'pcs_citation.parquet (i.e. cited by >= 1 US patent at any date) that also have a'
-                     ' field and year in OpenAlex paper_metadata (4.48M); never-patent-cited papers '
+                     ' field and year in OpenAlex paper_metadata (5.02M); never-patent-cited papers '
                      'are not in the cohorts.'),
         'FoS': ("Cohort field: the OpenAlex topic-hierarchy field (one of 26, e.g. 'Medicine', "
                 "'Engineering') of the paper's highest-scoring topic (FoS_rep), else the first field "
-                'of FoS_0; taken from OpenAlex paper_metadata at build time (2026-08-31).'),
+                'of FoS_0; taken from OpenAlex paper_metadata at build time (2026-10-08).'),
         'year': ("Cohort year: the paper's publication year from "
-                 'OpenAlex/output/paper_metadata.parquet (as of 2026-08-31).'),
+                 'OpenAlex/output/paper_metadata.parquet (as of 2026-10-08).'),
         'pctl_c3': ("Percentile of the paper's patent-citation count C_3 (pcs_citation) within its "
                     "(FoS, year) cohort, on a 0-1 scale: pandas rank(method='min', pct=True) = (1 + "
                     'number of cohort papers with a strictly lower C_3) / cohort size, so values lie '
@@ -4509,7 +4546,7 @@ TABLES = {
                     'the US patent judged to embody the same discovery, from '
                     '_patent_paper_pairs_plus.csv (548,315 pairs over 335,917 papers and 309,729 '
                     'patents, ppp_score 1-4; see PPP/ppprev1.pdf). Pairs whose paper is not in the '
-                    'OpenAlex citation graph (10.2 % of pairs) or that received no citations are '
+                    'OpenAlex citation graph (1.1 % of pairs) or that received no citations are '
                     'absent.'),
         'patent': ("The pair's US patent as written in the pair list: 'US-' + PatentsView patent "
                    "number (e.g. 'US-10000036', reissues 'US-RE…', plant 'US-PP…'). The counts in this"
@@ -4521,7 +4558,7 @@ TABLES = {
                       "p2p, and the citing US patent's PatentsView grant year for pat2p_*."),
         'yrs_since_pub': ('cite_year - pub_year in years, >= 0 (rows with a citing year before '
                           'publication are dropped; same-year citations kept).'),
-        'p2p': ('Paper->paper citations: number of OpenAlex works (any type, 2026-01-16 snapshot '
+        'p2p': ('Paper->paper citations: number of OpenAlex works (any type, 2026-09-23 release '
                 "reference graph) published in cite_year that cite the pair's paper. Rows exist only "
                 'for years with >= 1 p2p or pat2p citation, so 0 here means the row exists because of '
                 'patent citations.'),

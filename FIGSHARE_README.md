@@ -21,7 +21,7 @@ The pipeline is organised in *domain* folders. Figshare items are flat, so each 
 
 | Figshare file prefix | pipeline folder | corpus | key |
 |---|---|---|---|
-| `OpenAlex__` | `OpenAlex/output/` | OpenAlex works (snapshot 2026-01-16), ~373M papers | `paper_id` = OpenAlex work id, `W…` |
+| `OpenAlex__` | `OpenAlex/output/` | OpenAlex works (release 2026-09-23), ~476M papers | `paper_id` = OpenAlex work id, `W…` |
 | `Dimensions__` | `Dimensions/output/` | Dimensions publications (June 2025 dump), ~155M papers | `paper_id` = Dimensions id, `pub.…` |
 | `PatentView__` | `PatentView/output/` | US **utility** patents, PatentsView granted bulk (2026-05-21), ~8.5M patents | `patent_id` = USPTO patent number as a string |
 | `Case_law__` | `Case law/output/` | US court cases, Caselaw Access Project (CAP), 5.18M cases | `case_id` = CAP case id (int64) |
@@ -34,7 +34,8 @@ uncompressed `.tar` bundles (`<Domain>__<dir>.partNN.tar`); each tar extracts to
 `<domain>/output/<dir>/part_NNNN.parquet` and the parts can be read as one dataset
 (`pd.read_parquet('<dir>/')`, `read_parquet('<dir>/*.parquet')` in DuckDB).
 
-**Availability.** The full set is ~111 GiB, which exceeds the storage attached to this item.
+**Availability.** The full set is ~226 GiB (OpenAlex ~186 GiB, of which `paper_topics` is 86 GiB;
+Dimensions ~35 GiB), which exceeds the storage attached to this item.
 Uploaded so far: every table of Case law, pcs, PPP and PatentView, plus
 `OpenAlex__paper_author_country.parquet`. The remaining OpenAlex and Dimensions tables are
 documented below so their schemas are on record, but are **not yet uploaded**. The file list on
@@ -52,7 +53,9 @@ Let *F* be the focal document with year *y* (publication year, grant year, or de
 and let a citation from *c* to *F* have age `age = year(c) − y`. Only `age ≥ 0` is counted.
 
 **Citation counts — `*_citation.parquet`.** `C_3, C_5, C_10` count citers with `0 ≤ age ≤ w`;
-`C_all` counts every citer with `age ≥ 0`. Uncited documents are present with zeros.
+`C_all` counts every citer with `age ≥ 0`. The OpenAlex, Dimensions and Case law tables include
+uncited documents with zeros; `PatentView__patent_citation` and `pcs__pcs_citation` hold cited
+documents only.
 
 **Citation trend — `*_citation_trend.parquet`.** The same citations kept by year: one row per
 (document, citing year) with ≥ 1 citation, `yrs_since_* = cite_year − y`. Sparse: a year with
@@ -64,12 +67,20 @@ decomposition, per window `w ∈ {3, 5, 10, all}` (column suffix `_3, _5, _10, _
 - `ni` citers of *F* that cite none of *F*'s references; `nj` citers of *F* that also cite ≥ 1 of
   its references; `nk` documents citing ≥ 1 of *F*'s references but not *F*;
 - `CD = (ni − nj) / (ni + nj + nk)` in [−1, 1]; +1 disruptive, −1 consolidating;
-- `F, E, G` (Foundation / Extension / Generalization) partition *F*'s citers by whether a citer
-  leans on *F*'s references (`E`), on *F*'s other citers (`F`), or on neither (`G`); ties split
-  ½/½ so `F + E + G = 1`.
+- `F, E, G` (Foundation / Extension / Generalization; Fang & Evans 2025) partition *F*'s citers by
+  whether a citer leans on *F*'s references (`E`), on *F*'s other citers (`F`), or on neither
+  (`G`); ties split ½/½ so `F + E + G = 1`.
 
-A document with no citer in the window has `CD, F, E, G = NaN` (not 0) and `ni, nj, nk` = −1
-(OpenAlex/Dimensions) or NaN (PatentView/Case law).
+`F, E, G` are NaN when the window has no citer. `CD` is NaN when the document is never cited or
+the window holds neither a citer nor an `nk` document, and 0 (not NaN) when the window has no
+citer but `nk > 0`. Where `CD` is NaN, `ni, nj, nk` are −1 (OpenAlex/Dimensions) or NaN
+(PatentView/Case law). The OpenAlex and PatentView graphs drop self-citations, so `CD` there stays
+in [−1, 1].
+`OpenAlex__paper_disruption` and `PatentView__patent_disruption` also carry `CD_{w}_pctl`
+(minimum-rank percentile of `CD_w` within a cohort; ties share the lowest value) and
+`CD_{w}_pctl_cume` (cumulative share, the column to threshold for "top x %"), with the cohort
+keys `pctl_year, pctl_group`: (publication year, field) for papers, (filing year, CPC section)
+for patents.
 
 **Disruption trend — `*_disruption_trend.parquet`.** CD and F/E/G as they evolve: one row per
 (document, year) in which a new citer or co-citing document appeared, carrying that year's
@@ -102,26 +113,31 @@ CPC subclasses for patents).
 
 ## 3. OpenAlex (papers) — `OpenAlex__*`
 
-Source: OpenAlex snapshot of 2026-01-16 (works, referenced_works, primary_locations, topics,
-authorships). Citation graph: ~1.78 B work→work references with both endpoints dated.
+Source: the official OpenAlex parquet release of 2026-09-23, flattened into partition-aligned
+tables (works, works_semantic, topics, primary_locations, locations, referenced_works, authorships;
+2,040 parts each). Citation graph: 3.14 B work→work references (self-citations dropped), of which
+2.99 B have both endpoints dated and enter the citation-based tables. Every OpenAlex, pcs and PPP
+table here was rebuilt on 2026-10-08; the earlier versions came from a 2026-01-16 conversion that
+had lost 104M of the snapshot's 477M works.
 
 | file | rows | columns | notes |
 |---|---|---|---|
-| `paper_metadata.parquet` | 372.7M | `paper_id, year, doctype, ref_count, journal, is_journal, author_list, FoS_0, FoS_rep, domain, cited_by_count, is_retracted` | `FoS_rep` = field of the highest-scoring topic (26 OpenAlex fields), `FoS_0` = all fields `;`-joined, `domain` = the 4 OpenAlex domains. `author_list` is **entirely null** here — use `paper_author`. `cited_by_count` is OpenAlex's own count, not the graph's. |
-| `paper_author.parquet` | 251.7M | `work_id, author_list, team_size, first_author, last_author` | One row per work with ≥ 1 author. De-duplicated on (work, author): the source is author × affiliation. `author_list` = author ids in author order. Keyed `work_id` (same values as `paper_id`). |
-| `paper_author_country.parquet` | 251.7M | `paper_id, team_size, n_located, countries, n_countries, country_author_counts, first_author_country, last_author_country, is_international` | Author countries (ISO2, from the affiliation's institution); same works and `team_size` as `paper_author`. 44.6 % of papers have ≥ 1 located author, 7.2 % are international. `countries` sorted `;`-joined, `country_author_counts` like `US:3;CN:1` (an author with two countries counts in both). Added 2026-09-13. |
-| `paper_team_size.parquet` | 251.7M | `paper_id, team_size` | Superseded by `paper_author` (identical team sizes; kept for continuity). |
-| `paper_citation.parquet` | 348.9M | `paper_id, C_3, C_5, C_10, C_all` | paper→paper. |
-| `paper_citation_trend.parquet` | 584.1M | `paper_id, pub_year, cite_year, yrs_since_pub, p2p, pat2p_examiner, pat2p_non_examiner` | `p2p` paper→paper; `pat2p_*` US patent→paper citations (Reliance on Science) by patent grant year, split by who put the reference on the patent. |
-| `paper_disruption.parquet` | 348.9M | `paper_id` + `CD, F, E, G, ni, nj, nk` × `_3, _5, _10, _all` | 28 metric columns. |
-| `paper_disruption_trend.parquet` | 1.23 B | `paper_id, pub_year, cite_year, yrs_since_pub, ni_new, nj_new, nk_new, ni, nj, nk, CD, F, E, G` | 13.5 GB. |
-| `paper_disruption_trend_summary.parquet` | 34k | `pub_year, yrs_since_pub, n_CD, CD_mean, n_F, F_mean, n_E, E_mean, n_G, G_mean` | cohort × age means. |
-| `paper_sb.parquet` | 88.3M | `paper_id, SB_B, SB_T, n_cite` | |
-| `paper_hit_probability.parquet` | 262.5M | `paper_id, FoS, year, pctl_c3, pctl_c5, pctl_c10, pctl_call` | cohort = (`FoS`, `year`). |
-| `paper_z_score.parquet` | 41.4M | `paper_id, Z_median, Z_10pct, Z_min, n_pairs` | Journal-type papers **1980–2020** (not 1900–2020) with 2–1000 references. Merged from the year partitions below. |
-| `paper_z_score_<a>_<b>.parquet` | — | same | Year-range partitions of the above (1980_1984 … 2020_2020). `paper_z_score_2000_2005` and `paper_z_score_old` are an earlier vintage with a wrong journal mapping and are **not** part of the merged file; `*_2001_2006.onepass` is a byte-identical verification copy of `*_2001_2006`. |
-| `z_score_pair.parquet`, `z_score_pair_<a>_<b>.parquet` | 430.0M | `code_1, code_2, year, Z_score` | Journal-pair z by focal year; same partitioning and vintage caveats as above. |
-| `referenced_works_w_year/` (1,334 parts, tar bundles) | ~1.78 B | `work_id, work_year, work_id_source_id, referenced_work_id, referenced_work_year, referenced_work_id_source_id` | The citation edge list with year and source (journal) of both endpoints. Years are nullable int16. |
+| `paper_metadata.parquet` | 476.2M | `paper_id, year, doctype, ref_count, journal, is_journal, author_list, FoS_0, FoS_rep, domain, primary_topic_field, primary_topic_subfield, primary_topic_topic, field, subfield, topic, cited_by_count, is_retracted` | `FoS_rep` = field of the highest-scoring topic (26 OpenAlex fields), `FoS_0` = all fields `;`-joined, `domain` = the 4 OpenAlex domains. `primary_topic_*` = OpenAlex's own primary topic; `field, subfield, topic` = lists over the work's 1–3 scored topics, best first. `author_list` is **entirely null** here — use `paper_author`. `cited_by_count` is OpenAlex's own count, not the graph's. `year` is null for 3.3 % of works. |
+| `paper_author.parquet` | 292.4M | `work_id, author_list, team_size, first_author, last_author` | One row per work with ≥ 1 author id in the release's authorships. De-duplicated on (work, author). `author_list` = author ids in author order. Keyed `work_id` (same values as `paper_id`). |
+| `paper_author_country.parquet` | 292.4M | `paper_id, team_size, n_located, countries, n_countries, country_author_counts, first_author_country, last_author_country, is_international` | Author countries (ISO2, from the affiliation's institution); same works and `team_size` as `paper_author`. 46.5 % of papers have ≥ 1 located author, 7.1 % are international. `countries` sorted `;`-joined, `country_author_counts` like `US:3;CN:1` (an author with two countries counts in both). Added 2026-09-13. |
+| `paper_citation.parquet` | 460.5M | `paper_id, C_3, C_5, C_10, C_all` | paper→paper; one row per work with a usable publication year, cited or not. |
+| `paper_citation_trend.parquet` | 737.5M | `paper_id, pub_year, cite_year, yrs_since_pub, p2p, pat2p_examiner, pat2p_non_examiner` | `p2p` paper→paper; `pat2p_*` US patent→paper citations (Reliance on Science) by patent grant year, split by who put the reference on the patent. |
+| `paper_disruption.parquet` | 460.5M | `paper_id` + `CD, F, E, G, ni, nj, nk` × `_3, _5, _10, _all`, `pctl_year, pctl_group`, `CD_{w}_pctl, CD_{w}_pctl_cume` | 28 metric columns plus the CD percentiles (§2); 39 columns. |
+| `paper_disruption_trend.parquet` | 1.45 B | `paper_id, pub_year, cite_year, yrs_since_pub, ni_new, nj_new, nk_new, ni, nj, nk, CD, F, E, G` | 16.3 GB. |
+| `paper_disruption_trend_summary.parquet` | 35k | `pub_year, yrs_since_pub, n_CD, CD_mean, n_F, F_mean, n_E, E_mean, n_G, G_mean` | cohort × age means. |
+| `paper_sb.parquet` | 113.5M | `paper_id, SB_B, SB_T, n_cite` | |
+| `paper_hit_probability.parquet` | 364.3M | `paper_id, FoS, year, pctl_c3, pctl_c5, pctl_c10, pctl_call` | cohort = (`FoS`, `year`). |
+| `paper_z_score.parquet` | 46.4M | `paper_id, Z_median, Z_10pct, Z_min, n_pairs` | Journal-type papers **1980–2020** (not 1900–2020) with 2–1000 references. Merged from the year partitions below. |
+| `paper_z_score_<a>_<b>.parquet` | — | same | The 18 year-range partitions of the above (1980_1984 … 2020_2020). |
+| `z_score_pair.parquet`, `z_score_pair_<a>_<b>.parquet` | 533.5M | `code_1, code_2, year, Z_score` | Journal-pair z by focal year; same partitioning as above. |
+| `paper_topics.parquet` | 476.2M | `paper_id, year, n_topics, topic_ids, topics, topic_scores, subfield_ids, subfields, field_ids, fields, domain_ids, domains, primary_topic_id, primary_topic, primary_topic_score, primary_subfield_id, primary_subfield, primary_field_id, primary_field, primary_domain_id, primary_domain, keyword_ids, keywords, keyword_scores, n_keywords` | Every scored topic of a work with its subfield / field / domain, OpenAlex's primary topic, and keywords, each with ids and scores; multi-valued columns `;`-joined in score order. 92 GB. |
+| `paper_topics_long.parquet` | 1.00 B | `paper_id, rank, topic_id, score, topic, subfield_id, subfield, field_id, field, domain_id, domain` | One row per (work, scored topic); `rank` 1 = best. |
+| `referenced_works_w_year/` (2,040 parts, tar bundles) | 3.14 B | `work_id, work_year, work_id_source_id, referenced_work_id, referenced_work_year, referenced_work_id_source_id` | The citation edge list with year and source (journal) of both endpoints. Years are nullable int16. |
 
 ## 4. Dimensions (papers) — `Dimensions__*`
 
@@ -170,7 +186,7 @@ jump around 2001 and 2013 by construction.
 | `patent_disruption_compare.parquet` | 4 | `window, n_base_rows, n_app_rows, n_app_only, n_paired, base_mean, app_mean, delta, pearson, spearman, pct_down, pct_up, pct_same, d_ni, d_nj, d_nk` | Per-window comparison of the two tables above. |
 | `patent_disruption_trend.parquet` | 93.7M | `patent_id, grant_year, cite_year, yrs_since_grant, ni_new, nj_new, nk_new, ni, nj, nk, CD, F, E, G` | |
 | `patent_disruption_trend_summary.parquet` | 1,275 | `grant_year, yrs_since_grant, n_CD, CD_mean, …, G_mean` | |
-| `patent_feg_disruption_trend.parquet` | 49 | `year, n, {CD,F,E,G,ni,nj,nk,njfrac}_{w}_mean` | Means by grant year; `njfrac = nj / (ni + nj)`. |
+| `patent_feg_disruption_trend.parquet` | 49 | `year, n, {CD,F,E,G,ni,nj,nk,njfrac}_{w}_mean` | Means by grant year over patents cited at least once. `njfrac_{w}_mean` is the mean of the per-patent `nj / (ni + nj + nk)` (the share of the patent's window neighbourhood, its citers plus the patents citing only its references, that cites both); a patent whose window has neither, so a zero denominator, is left out. |
 | `patent_sb.parquet` | 6.80M | `patent_id, SB_B, SB_T, n_cite` | |
 | `patent_hit_probability.parquet` | 8.51M | `patent_id, wipo_sector, grant_year`, `pctl_<count>_{w}` for every count column of `patent_citation`, plus `pctl_c3, pctl_c5, pctl_c10, pctl_call` (= `pctl_C_*`) | cohort = (WIPO sector, grant year); 5 sectors. |
 | `patent_hit_probability_old.parquet` | 8.51M | `patent_id, wipo_sector, grant_year, pctl_c3, pctl_c5, pctl_c10, pctl_call` | Previous vintage (granted `C_*` only). |
@@ -189,7 +205,7 @@ no edge is lost to missing dates.
 | `case_citation.parquet` | 5.18M | `case_id, C_3, C_5, C_10, C_all` | Includes the 1,391,837 never-cited cases with zeros. |
 | `case_citation_trend.parquet` | 25.8M | `case_id, decision_year, cite_year, yrs_since_decision, C` | |
 | `case_disruption.parquet` | 5.18M | `case_id` + `CD, F, E, G, ni, nj, nk` × windows | |
-| `case_feg_disruption_trend.parquet` | 221 | `year, n, {CD,F,E,G,ni,nj,nk,njfrac}_{w}_mean, n_{w}_defined` | Means by decision year. Right-truncated at the recent end. |
+| `case_feg_disruption_trend.parquet` | 221 | `year, n, {CD,F,E,G,ni,nj,nk,njfrac}_{w}_mean, n_{w}_defined` | Means by decision year. Right-truncated at the recent end. `njfrac_{w}_mean` is the mean of the per-case `nj / (ni + nj)` (the share of a case's citers that also cite its references) over cases with `ni + nj > 0`: a different denominator from the patent table. |
 | `case_sb.parquet` | 3.79M | `case_id, SB_B, SB_T, n_cite` | |
 | `case_hit_probability.parquet` | 5.18M | `case_id, jurisdiction, decision_year, cohort_n, pctl_C_3, pctl_C_5, pctl_C_10, pctl_C_all` | cohort = (jurisdiction, decision year); `cohort_n` is its size — filter on it. |
 
@@ -202,8 +218,8 @@ are dated by grant year. Provenance: `examiner` vs `non_examiner` (applicant and
 | file | rows | columns | notes |
 |---|---|---|---|
 | `pcs_citation.parquet` | 5.11M | `paper_id, C_{w}, C_examiner_{w}, C_non_examiner_{w}` for `w ∈ {3,5,10,all}`, `C_total, C_examiner_total, C_non_examiner_total` | Number of US patents citing the paper. `*_total` ignores the year (includes citing patents without a matched grant year). Cited papers only. |
-| `pcs_citation_trend.parquet` | 13.0M | `paper_id, pub_year, cite_year, yrs_since_pub, pcs, pcs_examiner, pcs_non_examiner` | |
-| `pcs_hit_probability.parquet` | 4.48M | `paper_id, FoS, year, pctl_c3, pctl_c5, pctl_c10, pctl_call` | Percentile of patent citations within the OpenAlex (field, year) cohort of papers that have ≥ 1 patent citation. |
+| `pcs_citation_trend.parquet` | 14.5M | `paper_id, pub_year, cite_year, yrs_since_pub, pcs, pcs_examiner, pcs_non_examiner` | |
+| `pcs_hit_probability.parquet` | 5.02M | `paper_id, FoS, year, pctl_c3, pctl_c5, pctl_c10, pctl_call` | Percentile of patent citations within the OpenAlex (field, year) cohort of papers that have ≥ 1 patent citation. |
 
 ## 8. PPP — patent–paper pairs — `PPP__*`
 
@@ -213,7 +229,7 @@ each pair get a yearly citation trend.
 
 | file | rows | columns | notes |
 |---|---|---|---|
-| `ppp_paper_trend.parquet` | 5.79M | `paperid, patent, pub_year, cite_year, yrs_since_pub, p2p, pat2p_examiner, pat2p_non_examiner` | Paper side, anchored at publication year: paper→paper and US patent→paper citations. |
+| `ppp_paper_trend.parquet` | 6.72M | `paperid, patent, pub_year, cite_year, yrs_since_pub, p2p, pat2p_examiner, pat2p_non_examiner` | Paper side, anchored at publication year: paper→paper and US patent→paper citations. |
 | `ppp_patent_trend.parquet` | 2.91M | `paperid, patent, grant_year, cite_year, yrs_since_grant, pat2pat_examiner, pat2pat_non_examiner` | Patent side, anchored at grant year: US patent→patent citations. |
 
 `patent` is formatted `US-<number>`; strip the prefix to join `PatentView__*` on `patent_id`.
@@ -225,7 +241,12 @@ each pair get a yearly citation trend.
 - **Right truncation.** A document from 2018 cannot have a 10-year window. Every fixed-window
   series bends at the recent end for that reason alone; `_all` grows shorter the closer the
   document is to the snapshot. Read windows only where they have closed.
-- **NaN is "undefined", not zero.** CD/F/E/G are NaN for documents with no citer in the window;
+- **Recent OpenAlex years.** Works dated 2024–2026 are dominated by `dataset` records (25.2M of
+  the 45.1M works dated 2025; journal works stay near 6–7M a year), and from 2024 about 10M datasets
+  a year carry references, so citations received in those years include dataset references; 2026
+  is a partial year. Filter on `doctype` or `is_journal` before reading trends into those years.
+- **NaN is "undefined", not zero.** F/E/G are NaN for documents with no citer in the window, and CD
+  is too unless the window has an `nk` document (then CD = 0; §2);
   SB and hit-probability tables omit or rank-at-the-bottom uncited documents as documented above.
 - **Sparse trend tables.** A missing (document, year) row means zero citations in that year;
   a document missing from a trend table was never cited.
@@ -244,6 +265,7 @@ each pair get a yearly citation trend.
 ## 10. References
 
 - Funk, R. J., & Owen-Smith, J. (2017). A dynamic network measure of technological change. *Management Science*, 63(3), 791–817.
+- Fang, H., & Evans, J. (2025). Generalization and the Rise of System-level Creativity in Science. arXiv:2510.03240. https://arxiv.org/abs/2510.03240
 - Ke, Q., Ferrara, E., Radicchi, F., & Flammini, A. (2015). Defining and identifying Sleeping Beauties in science. *PNAS*, 112(24), 7426–7431.
 - Uzzi, B., Mukherjee, S., Stringer, M., & Jones, B. (2013). Atypical combinations and scientific impact. *Science*, 342(6157), 468–472.
 - Kim, D., Cerigo, D. B., Jeong, H., & Youn, H. (2016). Technological novelty profile and invention's future impact. *EPJ Data Science*, 5, 8.

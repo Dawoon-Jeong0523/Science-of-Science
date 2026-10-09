@@ -9,18 +9,18 @@ literatures so results can be compared document for document.
 
 | Pipeline | Documents | Source | Key | Notebooks |
 |---|---|---|---|---|
-| `OpenAlex/` | papers | OpenAlex snapshot 2026-01-16 (renli_shared) | `paper_id` = `W` + integer | 13 |
+| `OpenAlex/` | papers | OpenAlex release 2026-09-23 (official parquet, flattened; `OpenAlex_shared`) | `paper_id` = `W` + integer | 16 |
 | `Dimensions/` | papers | Dimensions June 2025 dump | `paper_id` = `pub.` + digits | 11 |
 | `PatentView/` | US granted utility patents | PatentsView bulk (granted 2026-05-21, pre-grant 2026-08-28) | `patent_id` | 15 |
 | `PATSTAT/` | patent applications, worldwide, on a filing and a grant clock, and DOCDB families | PATSTAT Global 2023 Autumn | `appln_id` / `docdb_family_id` | 14 |
 | `Case law/` | US court opinions (CAP) | `Edge_list.parquet` (47.5 M citations) + `metadata.csv` (5.18 M cases) | case id | 8 |
 | `pcs/` | patent -> paper citations | Reliance on Science (`pcs_oa_uspto.csv`) | `paper_id` | 3 |
 | `PPP/` | patent-paper pairs | `_patent_paper_pairs_plus.csv` | (`paperid`, `patent`) | 1 |
-| `validation/` | face-validity checks and the metrics dashboard | all of the above | | 13 |
+| `validation/` | face-validity checks and the metrics dashboard | all of the above | | 14 |
 
 Every pipeline writes one tidy parquet per metric, keyed on its id, so the
 outputs of one pipeline are meant to be merged with each other, not read alone.
-There are 91 such tables, about 106 GB (PATSTAT counts three times, same file names:
+There are 90 such tables, about 111 GB (PATSTAT counts three times, same file names:
 `PATSTAT/output/` on the filing clock, `PATSTAT/output_grant/` on the grant clock, and
 `PATSTAT/output_family/` with the DOCDB family as the unit).
 
@@ -56,17 +56,18 @@ Science of Science/
 ├── .gitignore                          data, caches, raw mirrors, token: all excluded
 ├── Atypical_combinations.ipynb         superseded 2025 Colab original
 ├── Disruption_Index.ipynb              superseded 2025 Colab original
-├── explore_openalex_2026_renli.ipynb   first look at the OpenAlex snapshot
+├── explore_openalex_2026_renli.ipynb   first look at renli's 2026-01-16 conversion (historical)
 ├── FIGSHARE_README.md                  dataset README that accompanies the Figshare deposit
 ├── figshare_upload.py                  deposit the output parquets on Figshare (resumable, MD5-checked)
 ├── MAG-Disruption-CD5.ipynb            superseded 2025 Colab original
-├── openalex_2026_entity_tables.csv     schema listings of the OpenAlex snapshot
+├── openalex_2026_entity_tables.csv     schema listings of renli's 2026-01-16 conversion (historical)
 ├── openalex_2026_schemas.csv
 ├── openalex_2026_top_level.csv
 ├── openalex_2026_works_datasets.csv
 ├── paper_style.py                      shared matplotlib style
 ├── run_notebook.py                     exec a notebook's code cells in order, as a plain script
-├── OpenAlex/                           papers, OpenAlex 2026-01-16
+├── OpenAlex/                           papers, OpenAlex release 2026-09-23 (since 2026-10-08)
+│   ├── flatten_snapshot.py                 flattens the official nested parquet into the 7 tables the notebooks read
 │   ├── oa_common.py                        paths + data layer; every OpenAlex notebook imports this
 │   ├── oa_common.py.pre-pcsswap
 │   ├── oa_common.py.pre-stream
@@ -84,14 +85,21 @@ Science of Science/
 │   │   ├── paper_hit_probability.ipynb
 │   │   ├── paper_metadata.ipynb
 │   │   ├── paper_sb.ipynb
+│   │   ├── paper_topics.ipynb
 │   │   ├── paper_z_score.ipynb
 │   │   ├── paper_z_score.ipynb.pre-1980
 │   │   ├── paper_z_score.ipynb.pre-twopass
 │   │   ├── paper_z_score_merge.ipynb
-│   │   └── referenced_works_w_year.ipynb
-│   ├── Old/                                superseded notebook versions (11 files)
-│   └── output/                             parquet tables live here on Midway (not tracked)
-│       └── paper_z_score_provenance.json       year coverage of the merged atypicality file
+│   │   ├── referenced_works_w_year.ipynb
+│   │   ├── output_comparison.ipynb             every output table, Renly 2026-01-16 conversion vs the 2026-09-23 rebuild
+│   │   └── snapshot_comparison.ipynb           works per publication year in both versions, and where the gap comes from
+│   ├── Old/                                superseded notebook versions
+│   ├── figures/                            comparison figures and their CSV tables
+│   ├── output/                             parquet tables live here on Midway (not tracked)
+│   │   └── paper_z_score_provenance.json       year coverage of the merged atypicality file
+│   ├── output_Renly/, cache_Renly/         the same tables built on renli's 2026-01-16 conversion, which had lost
+│   │                                       104M of 477M works (kept for comparison; not tracked)
+│   └── cache/                              graph, CSR, work map, journal and FoS caches (not tracked)
 ├── Dimensions/                         the same paper metrics on the Dimensions June 2025 index
 │   ├── dim_common.py                       keeps the public names of oa_common.py
 │   ├── Readme.txt                          where this index is NOT equivalent to its twin
@@ -199,7 +207,7 @@ Science of Science/
 │   ├── val_common.py                       V.init / V.save / V.paper / V.patent / V.dim / V.patstat(_grant, _family) / NEEDS / NB_FIG_DIR
 │   ├── val_common.py.pre-caselaw
 │   ├── data/
-│   │   ├── inventory.json                      local diagnostic report of the 91 derived tables, with column descriptions and examples
+│   │   ├── inventory.json                      local diagnostic report of the 90 derived tables, with column descriptions and examples
 │   │   ├── world_countries.geojson             Natural Earth 1:50m Admin 0, trimmed (the maps need it)
 │   │   └── world_countries.source.json         its provenance
 │   ├── Figures/                            figure exports, <notebook>_<section>.{jpg,pdf} (292 files)
@@ -213,10 +221,16 @@ Science of Science/
 │   │   ├── run_notebook.py                     per-pipeline copy of the runner
 │   │   └── submit_dimensions.sh                submit the chain with afterok dependencies (`plan` prints the order)
 │   ├── OpenAlex/
+│   │   ├── sep23_rebuild.sh                    submit the whole OpenAlex chain (flatten verify -> ... -> z-score merge)
+│   │   ├── sep23_downstream.sh                 rerun pcs, PPP, Atypicality and validation on the rebuilt outputs
+│   │   ├── flatten.sbatch                      flatten_snapshot.py: parts (one shard per node), lookups, verify
+│   │   ├── nbsave.sbatch                       run ONE notebook with its outputs written back (NBPATH=..., SAVE=1)
+│   │   ├── build_caches.sbatch                 graph + CSR caches
+│   │   ├── build_journal_fos.sbatch            journal + FoS caches, before the notebooks that read them
 │   │   ├── disruption_trend.sbatch             the long disruption-trajectory job
 │   │   ├── nb.sbatch                           run ONE notebook on a jevans node
 │   │   ├── run_notebook.py                     per-pipeline copy of the runner
-│   │   ├── submit_openalex.sh                  submit the chain with afterok dependencies (`plan` prints the order)
+│   │   ├── submit_openalex.sh                  the pre-2026-10-08 chain (renli's tree); superseded by sep23_rebuild.sh
 │   │   ├── verify.sbatch
 │   │   └── zsec.sbatch                         z-score by year range
 │   ├── PatentView/
@@ -280,9 +294,9 @@ column suffixes `_3`, `_5`, `_10`, `_all`.
 | Sleeping beauty | `*_sb` | Ke et al. (2015) beauty coefficient `SB_B` and awakening time `SB_T` from the yearly citation histogram. |
 | Hit probability | `*_hit_probability` | Percentile of each count column within its cohort: (field, year) for papers, (WIPO sector, year) for patents, (jurisdiction, year) for case law. `pctl >= 0.99` is the top 1 %. |
 | Citation trajectory | `*_citation_trend` | One row per (document, citing year), with years since publication or grant and the citation channel (paper -> paper, patent -> paper by examiner / applicant, patent -> patent). |
-| Team size / authors | `paper_author`, `paper_team_size`, `patent_inventor`, `patstat_inventor` | Author (inventor) lists in author order, team size, and the first and last author (inventor), from OpenAlex `works_au_affs`, Dimensions `authors[]` or PatentsView `g_inventor_disambiguated`. Patents de-duplicate on (patent, inventor id); `n_inventors` is `team_size` under its PatentView name. PATSTAT lists inventor `person_id`s from `tls207` (a named person once per application, an unnamed placeholder record once per slot); they are not disambiguated across applications. |
+| Team size / authors | `paper_author`, `patent_inventor`, `patstat_inventor` | Author (inventor) lists in author order, team size, and the first and last author (inventor), from OpenAlex `works/authorships`, Dimensions `authors[]` or PatentsView `g_inventor_disambiguated`. Patents de-duplicate on (patent, inventor id); `n_inventors` is `team_size` under its PatentView name. PATSTAT lists inventor `person_id`s from `tls207` (a named person once per application, an unnamed placeholder record once per slot); they are not disambiguated across applications. |
 | Geography | `paper_author_country` (OpenAlex, Dimensions), `patent_inventor_country`, `patstat_inventor_country` | ISO2 countries of a document's authors or inventors: the sorted distinct set, the per-country head counts, whether the document is international, and (papers) the first and last author's own countries. Papers take the country of the institution an affiliation resolved to; patents take the address printed on the grant, with the assignee countries beside it. |
-| FEG trend | `*_feg_disruption_trend` | Per-year means of CD / F / E / G (Fang & Evans 2025) / ni / nj / nk. |
+| FEG trend | `*_feg_disruption_trend` | Per-year means of CD / F / E / G (Fang & Evans 2025) / ni / nj / nk, plus `njfrac`: the mean of the per-document `nj / (ni + nj + nk)` for PatentsView and PATSTAT, of `nj / (ni + nj)` for case law (documents with a zero denominator left out). PATSTAT stores `ni = nj = nk = -1` for a window with nothing in it; its FEG trend reads that as NULL, so the windowed means cover the documents with something in the window (fixed 2026-10-03). |
 
 Where the literatures differ in a way that matters (field taxonomy, what counts
 as a journal, the time anchor, what "examiner" means, left-censoring of the
@@ -305,12 +319,15 @@ sbatch --export=ALL,NB=<notebook_stem> -J <jobname> nb.sbatch   # one notebook
 
 Run orders:
 
-- OpenAlex and Dimensions: `references_w_year` first (one pass over the dump),
-  then `paper_metadata`, `paper_citation`, `paper_disruption`, `paper_sb`,
-  `paper_z_score` (+ `paper_z_score_merge`), `paper_citation_trend`,
-  `paper_hit_probability`, `paper_author`, `paper_disruption_trend`.
-  `paper_author_country` has no dependency on the others and re-uses
-  `paper_author`'s scan of the 40.8 GB affiliation gzip.
+- OpenAlex (`jobs/OpenAlex/sep23_rebuild.sh`): `flatten_snapshot.py` once per snapshot
+  (`flatten.sbatch`: parts, lookups, verify), then `referenced_works_w_year`, then the graph/CSR
+  and journal/FoS caches, then `paper_metadata`, `paper_citation`, `paper_citation_trend`,
+  `paper_sb`, `paper_disruption` (+ `paper_disruption_trend`), `paper_hit_probability`,
+  `paper_topics`, `paper_author` -> `paper_author_country`, and `paper_z_score` in 18 year
+  ranges -> `paper_z_score_merge`.
+- Dimensions: `references_w_year` first (one pass over the dump), then `paper_metadata`,
+  `paper_citation`, `paper_disruption`, `paper_sb`, `paper_z_score` (+ `paper_z_score_merge`),
+  `paper_citation_trend`, `paper_hit_probability`, `paper_author`, `paper_disruption_trend`.
 - PatentView: `patent_metadata`, `patent_reference`, `patent_disruption`,
   `patent_sb`, `patent_citation`, `patent_citation_trend`,
   `patent_disruption_app_add` have no dependency; then `patent_z_score`,
@@ -429,11 +446,16 @@ every file, its columns, the metric definitions and the reading caveats.
 
 ## Known caveats
 
-- OpenAlex publication years 2023 to 2025 are incomplete in the 2026-01-16
-  snapshot. Trends ending there measure ingestion, not science, and each window
-  `w` must stop at `last year - w`.
+- The newest OpenAlex years are dominated by non-article records in the
+  2026-09-23 release: 45.1 M works are dated 2025, 25.2 M of them `dataset`
+  records (3.3 M in 2021), while journal works stay near 6-7 M a year. From 2024
+  about 10 M datasets a year also carry references (37.7 M of the reference edges
+  from 2025 works, against 155.4 M from articles), so citations received in
+  2024-2026 include dataset references, and 2026 is a partial year. Trends
+  running into those years measure ingestion, not science: restrict to journal
+  works or articles, and stop each window `w` at `last year - w`.
 - Paper atypicality on OpenAlex covers 1980-2020 only: `paper_z_score.parquet`
-  (41,425,041 papers) merges 14 year-range partitions, as recorded in
+  (46,394,048 papers) merges 18 year-range partitions, as recorded in
   `paper_z_score_provenance.json`; 1900-1979 was never run. Files suffixed
   `_old` come from a superseded null model and are not a baseline.
 - PatentsView `citation_category` changed coding in 2001 and 2013, so any
@@ -441,9 +463,13 @@ every file, its columns, the metric definitions and the reading caveats.
 - PatentsView citations are recorded only from patents granted 1976 onwards, so
   `n_k` is undercounted and CD inflated for the earliest grant years. Quote
   patent disruption trends from 1985.
-- The Uzzi 2x2 (conventionality x novelty) does not reproduce on the 2000-2005
-  paper data; Z agreement with SciSciNet is only moderate while pair counts
-  agree almost exactly. Resolve before interpreting.
+- The Uzzi 2x2 (conventionality x novelty) reproduces on the merged 1980-2020
+  run when hits are ranked within the scored papers (`paper_validation` §3: high
+  median conventionality with a novel tail has the highest hit rate, 6.8 %
+  against 4.9 % overall). Ranked against the whole corpus instead (§9c), 19 % of
+  the scored journal papers clear the top-5 % bar and the peak moves to low
+  conventionality. Z agreement with SciSciNet is moderate (Spearman 0.72 for the
+  median, 0.68 for the 10th percentile) while pair counts agree closely (0.95).
 - PATSTAT is stored on two clocks. `PATSTAT/output/` uses the filing year at
   both ends and every application; `PATSTAT/output_grant/` uses grant years and
   granted applications only (about 61 % of the filing-clock edges survive, PCT
@@ -457,7 +483,7 @@ every file, its columns, the metric definitions and the reading caveats.
 - Dimensions fields are ANZSRC FoR 2020 divisions, not OpenAlex fields, and
   its patent -> paper channel carries no examiner tag. See `Dimensions/Readme.txt` §4.
 - Author country coverage is a property of OpenAlex's affiliation matching, not
-  of the paper: 17.5 % of 1950 papers have a located author against 59.2 % of
+  of the paper: 15.9 % of 1950 papers have a located author against 55.7 % of
   2020 papers. Take every country share over located documents, or a rising
   coverage curve will read as rising collaboration. Inventor coverage does not
   have this problem (99.3 %, because a US grant must print an address), except

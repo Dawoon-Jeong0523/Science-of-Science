@@ -43,8 +43,8 @@ FAMILIES = [
  dict(key='ppp', prefix='ppp_validation', accent=4, title='Paper–patent pairs', chip='PPP', nav='Patent Paper Pair', pipeline=True),
  dict(key='caselaw', prefix='case_law_validation', accent=5, title='Case law', chip='CASE', nav='Case law', pipeline=True),
  dict(key='authorcountry', prefix='author_country_validation', accent=8, title='Author countries', chip='OpenAlex', nav='Author countries', pipeline=False,
-  intro=('Where the authors of 251.7 M OpenAlex works sit: ISO2 countries from the institution each affiliation resolved to, one row per work in paper_author_country.parquet. '
-         '44.6% of works have at least one located author. Coverage, country shares under full and fractional counting, international collaboration by team size, '
+  intro=('Where the authors of 292.4 M OpenAlex works sit: ISO2 countries from the institution each affiliation resolved to, one row per work in paper_author_country.parquet. '
+         '46.5% of works have at least one located author. Coverage, country shares under full and fractional counting, international collaboration by team size, '
          'its relation to impact and disruption, partner pairs, country profiles, and a cross-check against the Dimensions author countries.')),
  dict(key='inventorcountry', prefix='inventor_country_validation', accent=9, title='Inventor countries', chip='PatentsView', nav='Inventor countries', pipeline=False,
   intro=('Where the inventors of 8.5 M US utility patents sit: the country of the address printed on the grant, one row per patent in patent_inventor_country.parquet, with the assignee countries beside it. '
@@ -74,10 +74,10 @@ CAPTIONS = {
   '6d': ('Citation trajectories — all eligible papers', 'Corpus-wide trajectories with the citation-count and observation-span filters required by the metric.'),
   '6e': ('Trajectories by field — hit top 1% vs all papers', 'Compare selected high-impact papers with all eligible papers in each field.'),
   '8': ('Disruption over publication years', 'Mean CD by window, indexed trends, and field-level comparisons with closed citation windows.'),
-  '9a': ('Earlier 2000–2005 run — atypicality coverage', 'Historical restricted run, before the journal-mapping fix; separate from the merged scores in §3–4.'),
-  '9b1': ('Earlier 2000–2005 run — Z-score distributions', 'Historical restricted-run median, 10th-percentile and minimum Z distributions.'),
-  '9b2': ('Earlier 2000–2005 run — Z-score CDF', 'Historical restricted-run cumulative distributions; do not pool with the corrected merged run.'),
-  '9d': ('Earlier 2000–2005 run — SciSciNet agreement', 'Historical restricted-run atypicality comparison; the latest merged-run comparison is in §3c.'),
+  '9a': ('Atypicality coverage by publication year', 'Journal papers in paper_metadata against papers with a Z-score, per publication year 1980–2020, and mean Z_median by year; the same merged file as §3–4 (46.4 M papers, 18 year-range partitions).'),
+  '9b1': ('Z-score distributions', 'Median, 10th-percentile and minimum Z of the merged 1980–2020 run on symlog axes: Z_median is positive for 97.8% of papers, Z_10pct negative for 46.7%.'),
+  '9b2': ('Z-score CDF — §9 redraw', 'The §4 cumulative distributions redrawn by §9b on the same merged 1980–2020 file.'),
+  '9d': ('Atypicality agreement with SciSciNet', 'Z_median, Z_10pct and n_pairs against SciSciNet\'s Atyp_Median_Z, Atyp_10pct_Z and Atyp_Pairs on a 3 M-row sample of the merged run: Spearman +0.72, +0.68 and +0.95; §3c reports the two Z comparisons beside the other metrics.'),
  },
  'dimension': {
   '1': ('Coverage by metric', 'How many of the 153.8 M publications have each metric defined.'),
@@ -89,7 +89,7 @@ CAPTIONS = {
   '7': ('F / E / G decomposition', 'Foundation / Extension / Generalization in the five-year window; F + E + G = 1 asserted, then the three shares by publication year.'),
   '8': ('Hit percentile', 'Percentile within (FoR division, year) with ties at the lowest rank; the block at 0 is the never-cited share.'),
   '9': ('Metric means by FoR division', 'ANZSRC FoR 2020 divisions with at least 20,000 publications: citations, disruption and hit rate by field.'),
-  '10': ('Cross-metric correlations', 'Spearman on a 500k sample: C<sub>all</sub> vs times_cited +0.999, C<sub>all</sub> vs hit percentile +0.924, team size vs C<sub>all</sub> +0.311.'),
+  '10': ('Cross-metric correlations', 'Spearman on a 500k sample: C<sub>all</sub> vs times_cited +0.999, C<sub>all</sub> vs hit percentile +0.924, team size vs C<sub>all</sub> +0.31.'),
   '11': ('Sleeping beauties', 'B and awakening time T for publications with n_cite ≥ 50; high-B publications should awaken well after year 0.'),
   '12': ('Atypicality — Z-score CDF and 2×2', 'Uzzi journal-pair Z on the Dimensions journal flag; requires the merged paper_z_score, of which only the 1990–2000 partition exists so far.'),
   '13': ('Authors — team size, resolved authors, countries', 'team_size counts every author slot (mean 3.49), 77.1% of slots resolve to a researcher id, 60.7% of publications have a located author; team size against disruption and impact (Wu et al.).'),
@@ -176,7 +176,7 @@ ORPHANS = {
 # duplicates of the §3 Uzzi 2×2 on other inputs and were removed to keep one 2×2 per family.
 HIDDEN = {
  'paper': {'3b': 'Uzzi 2×2 on SciSciNet\'s own scores (3D bars); SciSciNet is comparison-only and §3c carries the agreement check',
-           '9c': 'Uzzi 2×2 from the earlier restricted run (3D bars); the current run is §3'},
+           '9c': 'the §3 Uzzi 2×2 redrawn as 3D bars on the same merged file (since the 2026-10-08 rerun); §3 carries it'},
 }
 FAMILY_DESC = {'paper': 'Foundation / Extension / Generalization shares in the five-year citation window; shares sum to one.'}
 
@@ -319,7 +319,7 @@ def update_inventory_page(soup, inventory):
  n_pipelines = sum(f['pipeline'] for f in FAMILIES)
  soup.select_one('.railfoot').string = f'Inventory checked {checked} (UTC). Figures from saved validation exports.'
  eyebrow = soup.select_one('.eyebrow')
- eyebrow.contents[0].replace_with('Pipeline reference · OpenAlex 2026-01-16 · Dimensions June 2025 · PATSTAT 2023 Autumn ')
+ eyebrow.contents[0].replace_with('Pipeline reference · OpenAlex 2026-09-23 · Dimensions June 2025 · PATSTAT 2023 Autumn ')
  soup.select_one('.band .lede').string = (f'{["Four","Five","Six","Seven","Eight"][n_pipelines-4]} research pipelines cover papers on two bibliographic indices (OpenAlex and Dimensions), patents on two patent indices (PatentsView and PATSTAT), patent-to-paper citations, paper–patent pairs and court opinions. Explore their inputs, derived tables, metric definitions and validation figures. Coverage and computation choices are stated alongside the results.')
  kpis = soup.select('.kpi')
  for kpi, value, label, subtitle in [
@@ -384,7 +384,7 @@ def update_inventory_page(soup, inventory):
   cells = row.find_all('td', recursive=False)
   text = cells[0].get_text(' ', strip=True)
   if 'OpenAlex author' in text:
-   cells[3].string = 'One row per (work, author, affiliation). Distinct author IDs are aggregated into paper_author.parquet, the native source of team size in the current validation.'
+   cells[3].string = 'One row per author slot of a work (works/authorships, flattened from the 2026-09-23 release), with the slot\'s institutions and countries. Distinct author IDs are aggregated into paper_author.parquet, the native source of team size in the current validation.'
   elif 'SciSciNet (comparison only)' in text:
    cells[3].string = 'External comparison only: metric-specific agreement in paper figure §3c. The current team-size figure uses native OpenAlex author IDs. Earlier restricted-run atypicality comparisons are identified separately in §9d.'
   elif 'Patent–paper pair list' in text:
@@ -400,12 +400,12 @@ def update_inventory_page(soup, inventory):
     '<code>tls212</code> citations with their origin, <code>tls206</code>/<code>tls207</code> persons, <code>tls209</code>/<code>tls224</code> IPC and CPC, <code>tls230</code> WIPO fields. '
     'Supplies the patent citation graph, metadata and inventors three ways: applications on a filing clock and on a grant clock, and DOCDB families dated by priority year.', 'html.parser'))
   elif 'OpenAlex snapshot' in text:
-   cells[3].string = 'Works, references, locations, topics, concepts and IDs: 14 datasets under works/. This snapshot supplies the paper citation graph and metadata.'
+   cells[3].string = 'Official OpenAlex parquet release of 2026-09-23, flattened into 7 partition-aligned tables under works/ (works, works_semantic, topics, primary_locations, locations, referenced_works, authorships; 2,040 parts each) plus topics.csv.gz and sources.csv.gz. Supplies the paper citation graph and metadata. Until 2026-10-08 these outputs came from a 2026-01-16 conversion that had lost 104M of 477M works.'
  outputs = soup.find(id='outputs')
  outputs.select_one('.shead .meta').string = f'{len(files)} Parquet files · {checked} UTC'
  intro = outputs.select_one('.intro')
  intro.clear()
- intro.append('Counts come from current Parquet footers; sizes come from the filesystem. Rows have different meanings across tables and must not be summed as unique documents. The inventory includes the legacy team-size table, the Dimensions 1990–2000 atypicality partition (the only one written so far) and the three PATSTAT sets (output/, output_grant/ and output_family/, same file names), but excludes backups, dated OpenAlex score partitions already represented by merged files, and sharded reference intermediates. Open a table\'s column list for each column\'s type, meaning and one example value from the table\'s first rows; columns that carry people\'s names show no example. ')
+ intro.append('Counts come from current Parquet footers; sizes come from the filesystem. Rows have different meanings across tables and must not be summed as unique documents. The inventory includes the Dimensions 1990–2000 atypicality partition (the only one written so far) and the three PATSTAT sets (output/, output_grant/ and output_family/, same file names), but excludes backups, dated OpenAlex score partitions already represented by merged files, and sharded reference intermediates. Open a table\'s column list for each column\'s type, meaning and one example value from the table\'s first rows; columns that carry people\'s names show no example. ')
  link = soup.new_tag('a', href='https://github.com/Dawoon-Jeong0523/SciSci#refresh-from-saved-research-outputs')
  link.string = 'How this inventory is refreshed.'
  intro.append(link)
@@ -439,7 +439,7 @@ def update_inventory_page(soup, inventory):
   summary = soup.new_tag('summary'); summary.string = f'{len(item["columns"])} columns · meaning and example'; details.append(summary)
   details.append(column_dictionary(soup, item['schema']))
   td.append(details); tr.append(td); table.tbody.append(tr)
- soup.select_one('#val-ppp > .intro').string = ('The 548,315-pair plus list links scientific and technological contributions. These validation figures join the document-level paper and patent citation histories, then apply figure-specific eligibility filters; the average cumulative trajectory in §5b covers 107,260 pairs. The separately inventoried PPP trend files are pair-level outputs. The hypothesis under test is that the paper side is convex and the patent side concave.')
+ soup.select_one('#val-ppp > .intro').string = ('The 548,315-pair plus list links scientific and technological contributions. These validation figures join the document-level paper and patent citation histories, then apply figure-specific eligibility filters; the average cumulative trajectory in §5b covers 119,869 pairs. The separately inventoried PPP trend files are pair-level outputs. The hypothesis under test is that the paper side is convex and the patent side concave.')
  for article in soup.select('#gaps article'):
   if 'pair list' in article.h3.get_text():
    article.p.string = 'The saved validation figures use the 548,315-pair plus list; the adjusted list contains 42,967 pairs. Pair choice and eligibility filters determine the analysis sample. The Raw data section reports separately verified provenance for the current stored trend outputs. Record both when comparing results or rerunning the pipeline.'
@@ -561,7 +561,7 @@ def refresh(source=None, output=None):
   title = article.h3.get_text()
   if 'paper_z_score.parquet' in title or title == 'Atypicality coverage and computation vintage':
    article.h3.string = 'Atypicality coverage and computation vintage'
-   article.p.string = 'The saved figures in sections 3–4 use the corrected merged 1980–2020 run (41,425,041 papers, 14 partitions at export). Section 9 preserves the earlier 2000–2005 run, before the journal-mapping fix; these vintages must not be pooled. Derived tables reports current stored-table counts, while each figure retains its stated analysis window.'
+   article.p.string = 'The saved figures in sections 3–4 and 9 use the corrected merged 1980–2020 run (46,394,048 papers from 18 year-range partitions, rebuilt on the OpenAlex 2026-09-23 release); years before 1980 were never scored, and the earlier restricted 2000–2005 run is no longer shown. Derived tables reports current stored-table counts, while each figure retains its stated analysis window.'
    article.select_one('.flag').string = 'coverage'
   elif 'author_list' in title:
    article.h3.string = 'Native author-based team size'

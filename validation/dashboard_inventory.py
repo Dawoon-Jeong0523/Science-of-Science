@@ -19,8 +19,7 @@ import re
 from dashboard_columns import describe, is_personal
 
 
-# Explicitly inventory final top-level outputs, including the documented legacy
-# team-size table. Dated partitions, backups, and reference intermediates are not
+# Explicitly inventory final top-level outputs. Dated partitions, backups, and reference intermediates are not
 # separate final outputs and must not inflate the displayed totals.
 _PATSTAT_TABLES = (
     "patstat_citation.parquet",
@@ -51,7 +50,6 @@ CANONICAL_TABLES = {
             "paper_hit_probability.parquet",
             "paper_metadata.parquet",
             "paper_sb.parquet",
-            "paper_team_size.parquet",
             "paper_z_score.parquet",
             "z_score_pair.parquet",
         ),
@@ -124,7 +122,6 @@ GRAINS = {
     "paper_author.parquet": (
         "One work_id with ordered, deduplicated author IDs and team_size."
     ),
-    "paper_team_size.parquet": "One paper_id with a legacy team_size value.",
     "paper_author_country.parquet": (
         "One work with the ISO2 countries of its authors' institutions: the sorted "
         "distinct set, the per-country author counts, and the first and last author's "
@@ -203,12 +200,6 @@ GRAINS = {
         "One paper-patent linkage pair per citing year with patent-side counts."
     ),
 }
-
-LEGACY_TEAM_SIZE_NOTE = (
-    "The current project has no producer for this legacy file. Native team-size "
-    "validation uses the reproducible paper_author.parquet output, whose "
-    "team_size counts distinct authors rather than affiliation rows."
-)
 
 _PPP_SOURCES = {
     "plus": "PPP/_patent_paper_pairs_plus.csv",
@@ -353,7 +344,9 @@ def _ppp_provenance(root: Path, files: list[dict]) -> dict:
         r"([\d,]+) distinct patents"
     )
     matches = []
-    for path in (root / "jobs/PPP/logs").glob("*.out"):
+    # PPP was rerun through jobs/OpenAlex/nbsave.sbatch on 2026-10-08, so its log is there.
+    logs = [*(root / "jobs/PPP/logs").glob("*.out"), *(root / "jobs/OpenAlex/logs").glob("ppp_citation_trend-*.out")]
+    for path in logs:
         text = path.read_text(encoding="utf-8", errors="replace")
         found = list(pattern.finditer(text))
         if not found:
@@ -445,13 +438,7 @@ def build_inventory(source_root: Path) -> dict:
             after = path.stat()
             if (before.st_size, before.st_mtime_ns) != (after.st_size, after.st_mtime_ns):
                 raise RuntimeError(f"Output changed while reading its footer: {path}")
-            if name == "paper_team_size.parquet":
-                row.update(
-                    status="legacy",
-                    note=LEGACY_TEAM_SIZE_NOTE,
-                    provenance="OpenAlex/notebook/paper_author.ipynb",
-                )
-            elif name == "paper_author.parquet":
+            if name == "paper_author.parquet":
                 row["provenance"] = "OpenAlex/notebook/paper_author.ipynb"
             if family == "patstat":
                 row["note"] = {
@@ -512,7 +499,8 @@ def build_inventory(source_root: Path) -> dict:
         "exclusions_note": (
             "Explicit canonical top-level outputs only. Old vintages, backups, "
             "dated z-score partitions and sharded reference intermediates are "
-            "excluded. The legacy paper_team_size table remains listed and labeled."
+            "excluded. The legacy paper_team_size table (no producer) was retired with the "
+            "2026-09-23 OpenAlex rebuild; team size lives in paper_author."
         ),
         "paper_z_score_provenance": paper_provenance,
         "ppp_provenance": _ppp_provenance(root, files),

@@ -1,5 +1,5 @@
 {
-  "built": "2026-09-04T09:18:51",
+  "built": "2026-10-09T01:18:23",
   "coverage_years": [
     1980,
     2020
@@ -14,9 +14,13 @@
   "partitions": [
     "paper_z_score_1980_1984.parquet",
     "paper_z_score_1985_1989.parquet",
-    "paper_z_score_1990_2000.parquet",
-    "paper_z_score_2001_2006.parquet",
-    "paper_z_score_2007_2011.parquet",
+    "paper_z_score_1990_1994.parquet",
+    "paper_z_score_1995_1999.parquet",
+    "paper_z_score_2000_2002.parquet",
+    "paper_z_score_2003_2005.parquet",
+    "paper_z_score_2006_2007.parquet",
+    "paper_z_score_2008_2009.parquet",
+    "paper_z_score_2010_2011.parquet",
     "paper_z_score_2012_2012.parquet",
     "paper_z_score_2013_2013.parquet",
     "paper_z_score_2014_2014.parquet",
@@ -28,6 +32,6 @@
     "paper_z_score_2020_2020.parquet"
   ],
   "rows": {
-    "paper_z_score": 41425041
+    "paper_z_score": 46394048
   }
 }

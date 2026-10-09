@@ -45,7 +45,7 @@ PS_OUT_GRANT = f"{PS_BASE}/output_grant"
 PS_OUT_FAMILY = f"{PS_BASE}/output_family"     # DOCDB families, priority year (NB_PS_UNIT=family)
 
 # duckdb spills here when a query exceeds memory_limit. Was 'E:/duckdb_tmp'.
-TMP = f"{BASE}/.duckdb_tmp"
+TMP = os.environ.get("NB_DUCKDB_TMP", f"{BASE}/.duckdb_tmp")   # NB_DUCKDB_TMP: a private spill folder per job
 
 # SciSciNet's own per-paper metrics, for the §2 team size and the §3b / §3c comparisons.
 # 249,803,279 rows; `paperid` is already the 'W…' form, so it joins our paper_id directly.
