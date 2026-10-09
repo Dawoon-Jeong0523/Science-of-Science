@@ -20,7 +20,7 @@ failure with the traceback stored in the cell that raised. Figures are embedded 
 import argparse, io, json, os, sys, time, traceback
 
 STREAM_CAP = 200_000        # bytes of stdout kept per cell when --save-outputs is on
-INLINE_DPI = 100            # resolution of the figures embedded in the .ipynb by --save-outputs
+INLINE_DPI = int(os.environ.get('RUN_NB_INLINE_DPI', 100))   # resolution of the figures embedded in the .ipynb by --save-outputs
 
 
 class _Tee(io.TextIOBase):

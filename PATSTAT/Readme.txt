@@ -204,3 +204,8 @@ unit is the PATSTAT APPLICATION instead of the US granted utility patent.
               30,785,709 cited families, CSR 37,623,677 nodes / 234,940,931 edges, CD_5 defined for
               64.4 % with mean +0.298 (applications +0.302), disruption_trend and uniqueC_trend
               reproduce every window exactly. 15 files, 10.7 GB.
+  2026-10-03  patstat_feg_disruption_trend reads the ni / nj / nk = -1 "nothing in the window" placeholder
+              as NULL (NULLIF) before averaging, in all three sets (jobs 59958116-18). The 3-, 5- and 10-year
+              ni / nj / nk / njfrac means had averaged it in (ni_3_mean exactly -1 for the 1901+ cohorts,
+              njfrac pulled toward 1/3); year, n, CD / F / E / G and every _all mean are unchanged. Previous
+              notebook and outputs in Old/pre_sentinel_2026-10-03/.

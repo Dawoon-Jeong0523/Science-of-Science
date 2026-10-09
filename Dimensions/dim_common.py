@@ -209,7 +209,7 @@ def build_graph(force: bool = False, verbose: bool = True) -> str:
         d = pq.read_table(f, columns=["work_id", "referenced_work_id"]).to_pandas()
         u = to_code(id_to_code(d["work_id"]))
         v = to_code(id_to_code(d["referenced_work_id"]))
-        m = (u >= 0) & (v >= 0)
+        m = (u >= 0) & (v >= 0) & (u != v)     # no self-citations (none in the June 2025 dump)
         if m.any():
             cf.append(u[m]); ct.append(v[m])
         del d, u, v, m
